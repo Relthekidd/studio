@@ -3,15 +3,13 @@
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import React from 'react'; // Added import for React
+import React, { useEffect, useState } from 'react';
 import { PlayerProvider, usePlayer } from '@/contexts/PlayerContext';
 import MiniPlayer from '@/components/player/MiniPlayer';
 import FullScreenPlayer from '@/components/player/FullScreenPlayer';
 import BottomNavigationBar from './BottomNavigationBar';
 import { SonixLogo } from '@/components/icons/SonixLogo';
 import ProfileMenu from './ProfileMenu';
-import { useEffect, useState }
-from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 function LayoutContent({ children }: { children: ReactNode }) {
@@ -22,34 +20,40 @@ function LayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Simulate checking auth status on mount (e.g., from Firebase onAuthStateChanged)
+    // Simulate checking auth status on mount
     const mockAuthStatus = localStorage.getItem('isMockAuthenticated') === 'true';
     setIsAuthenticated(mockAuthStatus);
     setAuthChecked(true);
   }, []);
 
+  // Effect to handle redirection after authentication state changes
+  useEffect(() => {
+    if (isAuthenticated && pathname === '/login') {
+      // If authenticated and on the login page (e.g., after successful login/signup), redirect to home.
+      router.push('/');
+    }
+  }, [isAuthenticated, pathname, router]);
+
+  // Effect to handle redirecting unauthenticated users to login
   useEffect(() => {
     if (authChecked) {
       if (!isAuthenticated && pathname !== '/login') {
+        // If auth has been checked, user is not authenticated, and not on the login page, redirect to login.
         router.push('/login');
       }
-      // Optional: Redirect from /login if already authenticated
-      // else if (isAuthenticated && pathname === '/login') {
-      //   router.push('/');
-      // }
     }
   }, [isAuthenticated, authChecked, pathname, router]);
 
   const handleLogin = () => {
     localStorage.setItem('isMockAuthenticated', 'true');
     setIsAuthenticated(true);
-    router.push('/');
+    // Navigation is now handled by the useEffect hook above
   };
 
   const handleLogout = () => {
     localStorage.removeItem('isMockAuthenticated');
     setIsAuthenticated(false);
-    // No need to push to /login here, the effect above will handle it.
+    // The useEffect for unauthenticated users will handle redirecting to /login
   };
 
   let paddingBottomClass = 'pb-16 md:pb-0'; // Space for BottomNav on mobile
@@ -68,8 +72,14 @@ function LayoutContent({ children }: { children: ReactNode }) {
   }
 
   if (!isAuthenticated && pathname !== '/login') {
-    // This case should be handled by the redirect, but as a fallback:
-    return null; // Or a specific loading/redirecting message
+    // This case should be handled by the redirect effect,
+    // but as a fallback or during the brief moment before effect runs:
+    // You might show a loader here, or nothing, as the redirect should be quick.
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <SonixLogo className="h-12 w-auto animate-pulse" />
+      </div>
+    );
   }
 
 
@@ -85,8 +95,9 @@ function LayoutContent({ children }: { children: ReactNode }) {
       )}
 
       <main className={`flex-grow ${isAuthenticated ? 'pt-20' : ''} ${paddingBottomClass} transition-all duration-300 animate-fadeIn`}>
-        {/* Pass handleLogin to LoginPage if it's rendered as a child, or handle in LoginPage directly */}
-        {pathname === '/login' && !isAuthenticated ? React.cloneElement(children as React.ReactElement, { onLogin: handleLogin }) : children}
+        {pathname === '/login' && !isAuthenticated 
+          ? React.cloneElement(children as React.ReactElement, { onLogin: handleLogin }) 
+          : children}
       </main>
 
       {isAuthenticated && (
