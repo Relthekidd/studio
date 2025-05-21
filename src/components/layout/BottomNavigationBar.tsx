@@ -2,15 +2,15 @@
 "use client";
 
 import Link from 'next/link';
-import { Home, Search, Library, Music2 } from 'lucide-react';
+import { Home, Search, Compass, Library } from 'lucide-react'; // Changed Music2 to Compass for Discover
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
-  { href: '/library', label: 'Library', icon: Library },
-  { href: '/search', label: 'Search', icon: Search },
   { href: '/', label: 'Home', icon: Home },
-  { href: '/new-songs', label: 'New Songs', icon: Music2 },
+  { href: '/search', label: 'Search', icon: Search },
+  { href: '/discover', label: 'Discover', icon: Compass }, // Updated from New Songs
+  { href: '/library', label: 'Library', icon: Library },
 ];
 
 export default function BottomNavigationBar() {
@@ -18,7 +18,6 @@ export default function BottomNavigationBar() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-card/95 backdrop-blur-md border-t border-border shadow-lg z-40 flex items-center justify-around md:hidden">
-      {/* md:hidden makes this bar primarily for mobile/tablet views */}
       {navItems.map((item) => (
         <Button
           asChild
