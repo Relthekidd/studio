@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter } from 'next/navigation'; // useRouter is still needed for other potential uses
 import SectionTitle from '@/components/SectionTitle';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ export default function LoginPage({ onLogin }: { onLogin?: () => void }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
-  const router = useRouter();
+  const router = useRouter(); // Keep useRouter if needed for other logic, but not for auth redirect here
   const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -44,31 +44,20 @@ export default function LoginPage({ onLogin }: { onLogin?: () => void }) {
       // ClientLayout's useEffect will now handle the redirect based on isAuthenticated state change.
       // No router.push('/') or router.refresh() here.
     } else {
-      // Fallback if onLogin is not provided (e.g. direct navigation, less ideal)
-      // This relies on ClientLayout's localStorage check after navigation
-      console.warn("LoginPage handleSubmit: onLogin prop was not provided. Using fallback auth logic.");
-      localStorage.setItem('isMockAuthenticated', 'true');
+      // This fallback path should ideally not be hit if ClientLayout is structured correctly
+      console.warn("LoginPage handleSubmit: onLogin prop was not provided. Using fallback auth logic (not recommended).");
+      localStorage.setItem('isMockAuthenticated', 'true'); // Fallback direct auth
       toast({
         title: isLogin ? "Login Successful (fallback)" : "Sign Up Successful (fallback)",
         description: `Welcome ${email}! Redirecting via fallback...`,
       });
-      router.push('/'); // Fallback pushes to home
-      router.refresh(); // and refreshes to trigger ClientLayout's auth check
+      router.replace('/'); // Fallback pushes to home (use replace)
+      // router.refresh(); // Avoid refresh if possible, let state drive updates
     }
   };
   
-  // Effect to check if already authenticated (e.g. browser back after login, or direct URL nav)
-  // This is a secondary check; ClientLayout is the primary handler.
-  useEffect(() => {
-    if (localStorage.getItem('isMockAuthenticated') === 'true') {
-      // If ClientLayout hasn't redirected yet and this page loads for an auth'd user,
-      // send them to home. ClientLayout will also do this, but this can be quicker.
-      if (window.location.pathname === '/login') { // Only replace if still on /login
-         router.replace('/'); 
-      }
-    }
-  }, [router]);
-
+  // Removed the useEffect hook that previously handled redirection from here.
+  // ClientLayout.tsx is now the sole authority for auth-based redirection.
 
   return (
     <div className="container mx-auto p-4 md:p-6 flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-background via-card to-background">
@@ -137,4 +126,3 @@ export default function LoginPage({ onLogin }: { onLogin?: () => void }) {
     </div>
   );
 }
-

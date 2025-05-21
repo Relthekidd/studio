@@ -15,22 +15,23 @@ import { usePathname, useRouter } from 'next/navigation';
 function LayoutContent({ children }: { children: ReactNode }) {
   const { currentTrack, isExpanded } = usePlayer();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false); // To ensure initial auth check is done
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
+    // Check auth status from localStorage on initial mount
     const mockAuthStatus = localStorage.getItem('isMockAuthenticated') === 'true';
     setIsAuthenticated(mockAuthStatus);
-    setAuthChecked(true);
+    setAuthChecked(true); // Mark that the initial check is complete
   }, []);
 
   useEffect(() => {
-    if (authChecked) {
+    if (authChecked) { // Only perform redirects after the initial auth status has been checked
       if (isAuthenticated && pathname === '/login') {
-        router.push('/');
+        router.replace('/'); // User is authenticated and on login page, redirect to home
       } else if (!isAuthenticated && pathname !== '/login') {
-        router.push('/login');
+        router.replace('/login'); // User is not authenticated and not on login page, redirect to login
       }
     }
   }, [isAuthenticated, authChecked, pathname, router]);
@@ -38,24 +39,26 @@ function LayoutContent({ children }: { children: ReactNode }) {
   const handleLogin = () => {
     localStorage.setItem('isMockAuthenticated', 'true');
     setIsAuthenticated(true);
-    // Redirection is handled by the useEffect above
+    // Redirection to home is now handled by the useEffect above when isAuthenticated and pathname conditions match.
   };
 
   const handleLogout = () => {
     localStorage.removeItem('isMockAuthenticated');
     setIsAuthenticated(false);
-    // Redirection to /login is handled by the useEffect above
+    // Redirection to /login is handled by the useEffect above.
   };
   
   let paddingBottomClass = 'pb-16 md:pb-0'; // Default: space for BottomNav on mobile, none on desktop
   if (currentTrack && !isExpanded) { // MiniPlayer is visible
-    paddingBottomClass = 'pb-[calc(theme(spacing.16)+theme(spacing.20))] md:pb-[theme(spacing.20)]'; // Space for BottomNav + MiniPlayer on mobile, MiniPlayer only on md+
+    // Space for BottomNav + MiniPlayer on mobile, MiniPlayer only on md+
+    paddingBottomClass = 'pb-[calc(theme(spacing.16)+theme(spacing.20))] md:pb-[theme(spacing.20)]'; 
   } else if (currentTrack && isExpanded) { // FullScreenPlayer is visible
     paddingBottomClass = 'pb-0'; // Full screen player takes over all space
   }
 
 
   if (!authChecked) {
+    // Show a global loader or skeleton while checking auth, prevents content flash
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <SonixLogo className="h-12 w-auto animate-pulse" />
@@ -63,10 +66,11 @@ function LayoutContent({ children }: { children: ReactNode }) {
     );
   }
 
-  // If not authenticated and not on the login page, show loader while redirecting
+  // If not authenticated and not on the login page, ClientLayout's useEffect will redirect.
+  // This ensures that during the brief moment of redirection, we don't render child content.
   if (!isAuthenticated && pathname !== '/login') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
+       <div className="flex items-center justify-center min-h-screen bg-background">
         <SonixLogo className="h-12 w-auto animate-pulse" />
       </div>
     );
@@ -85,6 +89,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
       )}
 
       <main className={`flex-grow ${isAuthenticated ? 'pt-20' : ''} ${paddingBottomClass} transition-all duration-300 animate-fadeIn`}>
+        {/* Pass handleLogin to LoginPage if it's rendered as a child */}
         {pathname === '/login' && !isAuthenticated 
           ? React.cloneElement(children as React.ReactElement, { onLogin: handleLogin }) 
           : children}
