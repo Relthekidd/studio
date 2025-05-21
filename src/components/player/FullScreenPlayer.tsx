@@ -3,60 +3,79 @@
 
 import Image from 'next/image';
 import { usePlayer } from '@/contexts/PlayerContext';
-import PlayerControls from './PlayerControls';
+import PlayerControls from './PlayerControls'; // Will be updated
 import { Progress } from '@/components/ui/progress';
-import { ChevronDown } from 'lucide-react'; // Changed from X for consistency with mini player expand/collapse
+import { ChevronDown, ListMusic, Volume2, VolumeX, Shuffle, Repeat, Repeat1 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
+import { Slider } from '@/components/ui/slider'; // For volume control
+import { formatTime } from '@/lib/utils'; // Helper for time display
 
 export default function FullScreenPlayer() {
-  const { currentTrack, isPlaying, closeFullScreenPlayer } = usePlayer();
-  const [progress, setProgress] = useState(30); // Placeholder progress
-
-  useEffect(() => {
-    // TODO: Replace with actual audio progress from HTMLAudioElement
-    if (isPlaying && currentTrack) {
-      const timer = setInterval(() => {
-        setProgress((prev) => (prev >= 100 ? 0 : prev + 5)); // Simulate progress
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [isPlaying, currentTrack]);
+  const { 
+    currentTrack, 
+    isPlaying, 
+    closeFullScreenPlayer, 
+    progress, 
+    currentTime, 
+    duration,
+    volume,
+    setVolume,
+    isMuted,
+    toggleMute,
+    shuffleMode,
+    toggleShuffle,
+    repeatMode,
+    toggleRepeat,
+    seek
+  } = usePlayer();
 
   if (!currentTrack) return null;
 
+  const handleSeek = (value: number[]) => {
+    if (duration > 0) {
+      seek((value[0] / 100) * duration);
+    }
+  };
+  
+  const handleVolumeChange = (value: number[]) => {
+    setVolume(value[0] / 100);
+  };
+
+  const getRepeatIcon = () => {
+    if (repeatMode === 'one') return <Repeat1 size={20} className="text-primary" />;
+    if (repeatMode === 'all') return <Repeat size={20} className="text-primary" />;
+    return <Repeat size={20} />;
+  };
+
   return (
     <div 
-      className="fixed inset-0 bg-background/80 backdrop-blur-2xl z-[100] flex flex-col items-center justify-center p-4 md:p-8 animate-slideInUp"
-      // The animate-slideInUp should be defined in globals.css or tailwind.config.ts
+      className="fixed inset-0 bg-gradient-to-br from-background via-card to-background/90 backdrop-blur-2xl z-[100] flex flex-col items-center justify-between p-4 md:p-6 animate-slideInUp"
     >
-      {/* Dynamic Blurred Background */}
-      <div 
-        className="absolute inset-0 z-[-1] overflow-hidden"
-        aria-hidden="true"
-      >
-        <Image
-          src={currentTrack.imageUrl}
-          alt=""
-          fill
-          className="object-cover filter blur-2xl brightness-50 scale-110"
-          unoptimized
-        />
-         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30"></div>
+      {/* Top Bar: Close button and Queue button */}
+      <div className="w-full flex justify-between items-center">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="text-muted-foreground hover:text-accent z-[110] transition-colors" 
+          onClick={closeFullScreenPlayer}
+          aria-label="Close full screen player"
+        >
+          <ChevronDown size={28} />
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="text-muted-foreground hover:text-accent z-[110] transition-colors" 
+          // onClick={openQueueModal} // TODO: Implement queue modal
+          aria-label="View Queue"
+        >
+          <ListMusic size={22} />
+        </Button>
       </div>
 
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="absolute top-5 right-5 text-muted-foreground hover:text-accent z-[110] transition-colors" 
-        onClick={closeFullScreenPlayer}
-        aria-label="Close full screen player"
-      >
-        <ChevronDown size={32} />
-      </Button>
-
-      <div className="w-full max-w-md md:max-w-lg flex flex-col items-center gap-6 md:gap-8">
-        <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-xl overflow-hidden shadow-2xl shadow-primary/40 group">
+      {/* Album Art & Info */}
+      <div className="flex flex-col items-center gap-4 md:gap-6 mt-auto mb-auto">
+        <div className="relative w-60 h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 rounded-xl overflow-hidden shadow-2xl shadow-primary/30 group">
           <Image
             src={currentTrack.imageUrl}
             alt={currentTrack.title}
@@ -69,22 +88,58 @@ export default function FullScreenPlayer() {
         </div>
 
         <div className="text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground drop-shadow-md">{currentTrack.title}</h2>
-          <p className="text-lg md:text-xl text-muted-foreground mt-1 drop-shadow-sm">{currentTrack.artist}</p>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground drop-shadow-md">{currentTrack.title}</h2>
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mt-1 drop-shadow-sm">{currentTrack.artist}</p>
+          {currentTrack.album && <p className="text-sm text-muted-foreground/70 mt-0.5">{currentTrack.album}</p>}
+        </div>
+      </div>
+      
+      {/* Seek Bar & Time */}
+      <div className="w-full max-w-xl px-2 md:px-4 space-y-2 mb-4">
+        <Slider
+            defaultValue={[0]}
+            value={[progress]}
+            max={100}
+            step={0.1}
+            onValueChange={handleSeek}
+            className="h-2 [&>span:first-child]:h-2 [&>span:first-child>span]:bg-gradient-to-r [&>span:first-child>span]:from-accent [&>span:first-child>span]:to-primary [&>span:last-child]:h-4 [&>span:last-child]:w-4"
+            aria-label="Seek bar"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
+        
+      {/* Main Player Controls */}
+      <PlayerControls variant="full" className="mb-4" />
+
+      {/* Secondary Controls: Shuffle, Repeat, Volume */}
+      <div className="w-full max-w-xl flex justify-between items-center px-2 md:px-4 mb-4">
+        <Button variant="ghost" size="icon" onClick={toggleShuffle} aria-label="Shuffle" className="text-muted-foreground hover:text-primary">
+          <Shuffle size={20} className={shuffleMode ? "text-primary" : ""} />
+        </Button>
+        
+        <div className="flex items-center gap-2 w-1/3 max-w-[150px]">
+           <Button variant="ghost" size="icon" onClick={toggleMute} className="text-muted-foreground hover:text-primary">
+            {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          </Button>
+          <Slider
+            defaultValue={[volume * 100]}
+            value={[isMuted ? 0 : volume * 100]}
+            max={100}
+            step={1}
+            onValueChange={handleVolumeChange}
+            className="h-1.5 [&>span:first-child]:h-1.5 [&>span:first-child>span]:bg-primary [&>span:last-child]:h-3 [&>span:last-child]:w-3 [&>span:last-child]:border-primary/70"
+            aria-label="Volume control"
+          />
         </div>
 
-        <div className="w-full px-4">
-           {/* TODO: Implement actual audio time and duration */}
-          <Progress value={progress} className="h-2 bg-secondary/50 [&>div]:bg-gradient-to-r [&>div]:from-accent [&>div]:to-primary" />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
-            <span>1:23</span> {/* Placeholder current time */}
-            <span>3:45</span> {/* Placeholder total time */}
-          </div>
-        </div>
-        
-        <PlayerControls variant="full" className="mt-4" />
-        {/* TODO: Add volume control, shuffle, repeat, queue buttons */}
+        <Button variant="ghost" size="icon" onClick={toggleRepeat} aria-label="Repeat" className="text-muted-foreground hover:text-primary">
+          {getRepeatIcon()}
+        </Button>
       </div>
     </div>
   );
 }
+

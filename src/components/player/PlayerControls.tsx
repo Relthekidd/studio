@@ -1,6 +1,7 @@
+
 "use client";
 
-import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Maximize2, Minimize2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePlayer } from '@/contexts/PlayerContext';
 
@@ -10,50 +11,63 @@ interface PlayerControlsProps {
 }
 
 export default function PlayerControls({ variant = 'mini', className }: PlayerControlsProps) {
-  const { currentTrack, isPlaying, togglePlayPause, toggleExpand, isExpanded, closeFullScreenPlayer } = usePlayer();
+  const { 
+    currentTrack, 
+    isPlaying, 
+    togglePlayPause, 
+    toggleExpand,
+    playNextTrack, // TODO: implement
+    playPreviousTrack // TODO: implement
+  } = usePlayer();
 
   if (!currentTrack) return null;
 
-  const iconSize = variant === 'mini' ? 18 : 24;
-  const buttonSize = variant === 'mini' ? 'icon' : 'default';
-  const buttonClass = variant === 'mini' ? 'h-8 w-8' : 'h-12 w-12 md:h-14 md:w-14';
+  const iconSize = variant === 'mini' ? 18 : 28; // Larger for full player
+  const mainButtonSize = variant === 'mini' ? 'icon' : 'lg'; // Larger play/pause for full
+  const mainButtonClass = variant === 'mini' ? 'h-9 w-9' : 'h-14 w-14 md:h-16 md:w-16';
+  const skipButtonClass = variant === 'mini' ? 'h-8 w-8' : 'h-12 w-12';
+
 
   return (
-    <div className={`flex items-center gap-2 md:gap-4 ${className}`}>
-      {variant === 'full' && (
-        <Button variant="ghost" size={buttonSize} className={buttonClass} aria-label="Previous Track">
-          <SkipBack size={iconSize} className="text-foreground" />
-        </Button>
-      )}
+    <div className={`flex items-center ${variant === 'mini' ? 'gap-1' : 'gap-3 md:gap-4'} ${className}`}>
       <Button 
         variant="ghost" 
-        size={buttonSize} 
-        className={`${buttonClass} bg-primary hover:bg-primary/90 text-primary-foreground rounded-full`} 
+        size={variant === 'mini' ? 'icon' : mainButtonSize} 
+        className={skipButtonClass} 
+        onClick={playPreviousTrack} 
+        aria-label="Previous Track"
+        disabled // TODO: Enable when implemented
+      >
+        <SkipBack size={iconSize} className="text-foreground" />
+      </Button>
+      
+      <Button 
+        variant="default" // Always default for prominence
+        size={mainButtonSize}
+        className={`${mainButtonClass} bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg hover:shadow-primary/50 transition-all active:scale-90`} 
         onClick={togglePlayPause}
         aria-label={isPlaying ? "Pause" : "Play"}
       >
         {isPlaying ? <Pause size={iconSize} fill="currentColor" /> : <Play size={iconSize} fill="currentColor" />}
       </Button>
-      <Button variant="ghost" size={buttonSize} className={buttonClass} aria-label="Next Track">
+
+      <Button 
+        variant="ghost" 
+        size={variant === 'mini' ? 'icon' : mainButtonSize} 
+        className={skipButtonClass} 
+        onClick={playNextTrack} 
+        aria-label="Next Track"
+        disabled // TODO: Enable when implemented
+      >
         <SkipForward size={iconSize} className="text-foreground" />
       </Button>
       
       {variant === 'mini' && (
-         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleExpand} aria-label="Expand Player">
+         <Button variant="ghost" size="icon" className="h-8 w-8 ml-1" onClick={toggleExpand} aria-label="Expand Player">
            <ChevronUp size={18} className="text-accent" />
          </Button>
       )}
-
-      {variant === 'full' && (
-        <>
-          <Button variant="ghost" size={buttonSize} className={`${buttonClass} ml-auto`} aria-label="Volume">
-            <Volume2 size={iconSize} className="text-foreground" />
-          </Button>
-           <Button variant="ghost" size="icon" className="h-10 w-10" onClick={closeFullScreenPlayer} aria-label="Minimize Player">
-            <ChevronDown size={24} className="text-accent" />
-          </Button>
-        </>
-      )}
+      {/* Full variant specific controls like volume, shuffle, repeat are now in FullScreenPlayer.tsx */}
     </div>
   );
 }

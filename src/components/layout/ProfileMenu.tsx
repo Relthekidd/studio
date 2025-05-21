@@ -11,20 +11,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { UserCircle, Settings, LogOut, UserCog, LogIn } from "lucide-react";
+import { UserCircle, Settings, LogOut, UserCog, LogIn, User as UserIcon } from "lucide-react"; // Added UserIcon
 
 interface ProfileMenuProps {
   isAuthenticated: boolean;
   onLogout: () => void;
+  userId?: string; // To link to the current user's profile
 }
 
-export default function ProfileMenu({ isAuthenticated, onLogout }: ProfileMenuProps) {
-  // const user = { name: "Demo User", email: "demo@example.com" }; // Placeholder for user data, fetch from Firebase
+export default function ProfileMenu({ isAuthenticated, onLogout, userId }: ProfileMenuProps) {
+  // const user = { name: "Demo User", email: "demo@example.com" }; // Placeholder
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="rounded-full hover:bg-accent/20 transition-colors">
+          {/* TODO: Replace with actual user avatar if available, else fallback to icon */}
           <UserCircle size={28} className="text-foreground hover:text-primary" />
           <span className="sr-only">Open user menu</span>
         </Button>
@@ -34,21 +36,27 @@ export default function ProfileMenu({ isAuthenticated, onLogout }: ProfileMenuPr
           <>
             <DropdownMenuLabel>
               My Account
-              {/* <p className="text-xs text-muted-foreground font-normal truncate">{user.email}</p> 
-                 TODO: Fetch and display user email from Firebase
-              */}
+              {/* <p className="text-xs text-muted-foreground font-normal truncate">{user.email}</p> */}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+             {userId && (
+              <DropdownMenuItem asChild>
+                <Link href={`/profile/${userId}`} className="flex items-center cursor-pointer hover:bg-accent/10">
+                  <UserIcon className="mr-2 h-4 w-4 text-primary" />
+                  <span>My Profile</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem asChild>
               <Link href="/account" className="flex items-center cursor-pointer hover:bg-accent/10">
                 <UserCog className="mr-2 h-4 w-4 text-primary" />
-                <span>Manage Account</span>
+                <span>Account Settings</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/settings" className="flex items-center cursor-pointer hover:bg-accent/10">
                 <Settings className="mr-2 h-4 w-4 text-primary" />
-                <span>Settings</span>
+                <span>App Settings</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

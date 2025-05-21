@@ -15,30 +15,21 @@ import { usePathname, useRouter } from 'next/navigation';
 function LayoutContent({ children }: { children: ReactNode }) {
   const { currentTrack, isExpanded } = usePlayer();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authChecked, setAuthChecked] = useState(false); // To prevent flicker
+  const [authChecked, setAuthChecked] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    // Simulate checking auth status on mount
     const mockAuthStatus = localStorage.getItem('isMockAuthenticated') === 'true';
     setIsAuthenticated(mockAuthStatus);
     setAuthChecked(true);
   }, []);
 
-  // Effect to handle redirection after authentication state changes
-  useEffect(() => {
-    if (isAuthenticated && pathname === '/login') {
-      // If authenticated and on the login page (e.g., after successful login/signup), redirect to home.
-      router.push('/');
-    }
-  }, [isAuthenticated, pathname, router]);
-
-  // Effect to handle redirecting unauthenticated users to login
   useEffect(() => {
     if (authChecked) {
-      if (!isAuthenticated && pathname !== '/login') {
-        // If auth has been checked, user is not authenticated, and not on the login page, redirect to login.
+      if (isAuthenticated && pathname === '/login') {
+        router.push('/');
+      } else if (!isAuthenticated && pathname !== '/login') {
         router.push('/login');
       }
     }
@@ -47,34 +38,24 @@ function LayoutContent({ children }: { children: ReactNode }) {
   const handleLogin = () => {
     localStorage.setItem('isMockAuthenticated', 'true');
     setIsAuthenticated(true);
-    // Navigation is now handled by the useEffect hook above
+    // Redirection is handled by the useEffect above
   };
 
   const handleLogout = () => {
     localStorage.removeItem('isMockAuthenticated');
     setIsAuthenticated(false);
-    // The useEffect for unauthenticated users will handle redirecting to /login
+    // Redirection to /login is handled by the useEffect above
   };
-
-  let paddingBottomClass = 'pb-16 md:pb-0'; // Space for BottomNav on mobile
-  if (currentTrack) {
-    paddingBottomClass = isExpanded 
-      ? 'pb-0' // Full screen player takes over
-      : 'pb-[calc(4rem+5rem)] md:pb-[5rem]'; // Space for BottomNav + MiniPlayer on mobile, MiniPlayer only on md+
-  }
   
-  if (!authChecked) {
-    return ( // Or a loading spinner
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <SonixLogo className="h-12 w-auto animate-pulse" />
-      </div>
-    );
+  let paddingBottomClass = 'pb-16 md:pb-0'; // Default: space for BottomNav on mobile, none on desktop
+  if (currentTrack && !isExpanded) { // MiniPlayer is visible
+    paddingBottomClass = 'pb-[calc(theme(spacing.16)+theme(spacing.20))] md:pb-[theme(spacing.20)]'; // Space for BottomNav + MiniPlayer on mobile, MiniPlayer only on md+
+  } else if (currentTrack && isExpanded) { // FullScreenPlayer is visible
+    paddingBottomClass = 'pb-0'; // Full screen player takes over all space
   }
 
-  if (!isAuthenticated && pathname !== '/login') {
-    // This case should be handled by the redirect effect,
-    // but as a fallback or during the brief moment before effect runs:
-    // You might show a loader here, or nothing, as the redirect should be quick.
+
+  if (!authChecked) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <SonixLogo className="h-12 w-auto animate-pulse" />
@@ -82,6 +63,14 @@ function LayoutContent({ children }: { children: ReactNode }) {
     );
   }
 
+  // If not authenticated and not on the login page, show loader while redirecting
+  if (!isAuthenticated && pathname !== '/login') {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <SonixLogo className="h-12 w-auto animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -90,7 +79,8 @@ function LayoutContent({ children }: { children: ReactNode }) {
           <Link href="/" aria-label="Go to homepage">
             <SonixLogo className="h-8 w-auto" />
           </Link>
-          <ProfileMenu isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+          {/* Pass mock userId, replace with actual when auth is implemented */}
+          <ProfileMenu isAuthenticated={isAuthenticated} onLogout={handleLogout} userId="mockUserId123" />
         </header>
       )}
 
