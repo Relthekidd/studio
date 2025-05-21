@@ -1,9 +1,7 @@
+
 import AlbumCard from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
-import { SonixLogo } from '@/components/icons/SonixLogo';
 import type { Track } from '@/contexts/PlayerContext'; // Re-using Track for simplified item structure
-import { Button } from '@/components/ui/button';
-import { Search, Bell } from 'lucide-react';
 
 const mockItems: (Track & { type?: 'track' | 'playlist' | 'album', description?: string, dataAiHint: string })[] = [
   { id: '1', title: 'Cyber Dreams', artist: 'Neon Voyager', imageUrl: 'https://placehold.co/300x300/BE52FF/222222.png?text=CD', type: 'track', dataAiHint: 'synthwave sunset' },
@@ -16,27 +14,6 @@ const mockItems: (Track & { type?: 'track' | 'playlist' | 'album', description?:
   { id: '8', title: 'Lo-Fi Beats to Study', description: 'Focus and chill', imageUrl: 'https://placehold.co/300x300/8A2BE2/222222.png?text=LBS', type: 'playlist', dataAiHint: 'study desk rain' },
 ];
 
-
-const Header = () => (
-  <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border/50">
-    <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-      <SonixLogo className="h-8 w-auto" />
-      <div className="flex items-center gap-2 md:gap-4">
-        <Button variant="ghost" size="icon" aria-label="Search">
-          <Search className="h-5 w-5 text-accent" />
-        </Button>
-        <Button variant="ghost" size="icon" aria-label="Notifications">
-          <Bell className="h-5 w-5 text-accent" />
-        </Button>
-        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
-          U
-        </div>
-      </div>
-    </div>
-  </header>
-);
-
-
 export default function HomePage() {
   const recentlyPlayed = mockItems.slice(0, 5);
   const madeForYou = mockItems.slice(2, 6);
@@ -45,7 +22,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Header />
+      {/* The Header component is removed from here and handled by ClientLayout */}
       <div className="container mx-auto p-4 md:p-6 space-y-8 md:space-y-12">
         <section aria-labelledby="recently-played-title">
           <SectionTitle id="recently-played-title">Recently Played</SectionTitle>
