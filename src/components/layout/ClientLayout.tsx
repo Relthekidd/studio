@@ -3,6 +3,7 @@
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import React from 'react'; // Added import for React
 import { PlayerProvider, usePlayer } from '@/contexts/PlayerContext';
 import MiniPlayer from '@/components/player/MiniPlayer';
 import FullScreenPlayer from '@/components/player/FullScreenPlayer';
