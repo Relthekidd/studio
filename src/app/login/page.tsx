@@ -36,28 +36,36 @@ export default function LoginPage({ onLogin }: { onLogin?: () => void }) {
     console.log(`${isLogin ? 'Login' : 'Sign up'} attempt with: ${email}`);
     
     if (onLogin) {
-      onLogin(); // Call the onLogin prop passed from ClientLayout
+      onLogin(); // Call the onLogin prop passed from ClientLayout (sets auth state)
       toast({
         title: isLogin ? "Login Successful" : "Sign Up Successful",
         description: `Welcome ${email}! Redirecting...`,
       });
+      // ClientLayout's useEffect will now handle the redirect based on isAuthenticated state change.
+      // No router.push('/') or router.refresh() here.
     } else {
-      // Fallback if onLogin is not provided (e.g. direct navigation)
+      // Fallback if onLogin is not provided (e.g. direct navigation, less ideal)
       // This relies on ClientLayout's localStorage check after navigation
+      console.warn("LoginPage handleSubmit: onLogin prop was not provided. Using fallback auth logic.");
       localStorage.setItem('isMockAuthenticated', 'true');
       toast({
-        title: isLogin ? "Login Successful" : "Sign Up Successful",
-        description: `Welcome ${email}! Redirecting...`,
+        title: isLogin ? "Login Successful (fallback)" : "Sign Up Successful (fallback)",
+        description: `Welcome ${email}! Redirecting via fallback...`,
       });
-      router.push('/');
-      router.refresh(); // Force refresh to re-trigger auth check in ClientLayout
+      router.push('/'); // Fallback pushes to home
+      router.refresh(); // and refreshes to trigger ClientLayout's auth check
     }
   };
   
-  // Effect to check if already authenticated (e.g. browser back after login)
+  // Effect to check if already authenticated (e.g. browser back after login, or direct URL nav)
+  // This is a secondary check; ClientLayout is the primary handler.
   useEffect(() => {
     if (localStorage.getItem('isMockAuthenticated') === 'true') {
-      router.replace('/'); // Use replace to avoid adding login to history
+      // If ClientLayout hasn't redirected yet and this page loads for an auth'd user,
+      // send them to home. ClientLayout will also do this, but this can be quicker.
+      if (window.location.pathname === '/login') { // Only replace if still on /login
+         router.replace('/'); 
+      }
     }
   }, [router]);
 
@@ -129,3 +137,4 @@ export default function LoginPage({ onLogin }: { onLogin?: () => void }) {
     </div>
   );
 }
+
