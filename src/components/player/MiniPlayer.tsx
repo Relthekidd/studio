@@ -8,18 +8,19 @@ import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
 
 export default function MiniPlayer() {
-  const { currentTrack, isPlaying, isExpanded, toggleExpand } = usePlayer();
-  const [progress, setProgress] = useState(30); 
+  const { currentTrack, isPlaying, isExpanded, toggleExpand, progress: audioProgress, currentTime, duration } = usePlayer(); // Use progress from context
 
-  useEffect(() => {
-    // TODO: Replace with actual audio progress
-    if (isPlaying && currentTrack) {
-      const timer = setInterval(() => {
-        setProgress((prev) => (prev >= 100 ? 0 : prev + 5));
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [isPlaying, currentTrack]);
+  // Local progress state is no longer needed if context provides it based on actual audio
+  // const [progress, setProgress] = useState(30);
+  // useEffect(() => {
+  //   // TODO: Replace with actual audio progress
+  //   if (isPlaying && currentTrack) {
+  //     const timer = setInterval(() => {
+  //       setProgress((prev) => (prev >= 100 ? 0 : prev + 5));
+  //     }, 1000);
+  //     return () => clearInterval(timer);
+  //   }
+  // }, [isPlaying, currentTrack]);
 
 
   if (!currentTrack) return null;
@@ -28,9 +29,8 @@ export default function MiniPlayer() {
   if (isExpanded) return null;
 
   return (
-    <div 
-      className="fixed bottom-0 left-0 right-0 h-20 bg-card/80 backdrop-blur-lg border-t border-border/70 shadow-2xl z-50 flex items-center px-4 md:px-6 transition-transform duration-300 ease-in-out animate-slideInUpMini"
-      // animate-slideInUpMini should be defined
+    <div
+      className="fixed left-0 right-0 h-20 bg-card/80 backdrop-blur-lg border-t border-border/70 shadow-2xl z-50 flex items-center px-4 md:px-6 transition-transform duration-300 ease-in-out animate-slideInUpMini bottom-16 md:bottom-0"
       role="complementary"
       aria-label="Music Player"
     >
@@ -50,11 +50,10 @@ export default function MiniPlayer() {
           <p className="text-xs md:text-sm text-muted-foreground truncate">{currentTrack.artist}</p>
         </div>
       </div>
-      
+
       <div className="hidden md:flex flex-col items-center w-1/3 mx-4">
         <PlayerControls variant="mini" />
-         {/* TODO: Implement actual audio time and duration for progress */}
-        <Progress value={progress} className="h-1 w-full mt-1 bg-secondary/30 [&>div]:bg-gradient-to-r [&>div]:from-accent/70 [&>div]:to-primary/70" />
+        <Progress value={audioProgress} className="h-1 w-full mt-1 bg-secondary/30 [&>div]:bg-gradient-to-r [&>div]:from-accent/70 [&>div]:to-primary/70" aria-label={`Playback progress: ${Math.round(audioProgress)}%`} />
       </div>
 
       <div className="md:hidden ml-auto">
