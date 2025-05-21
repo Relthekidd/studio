@@ -10,18 +10,18 @@ export interface Track {
   artist: string;
   album?: string; // Optional: For display in queue or elsewhere
   imageUrl: string;
-  audioSrc?: string; 
+  audioSrc?: string;
   dataAiHint?: string;
-  duration?: number; 
+  duration?: number;
 }
 
 interface PlayerContextType {
   currentTrack: Track | null;
   isPlaying: boolean;
   isExpanded: boolean;
-  progress: number; 
-  currentTime: number; 
-  duration: number; 
+  progress: number;
+  currentTime: number;
+  duration: number;
   volume: number; // 0 to 1
   isMuted: boolean;
   shuffleMode: boolean;
@@ -53,7 +53,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [shuffleMode, setShuffleMode] = useState<boolean>(false);
   const [repeatMode, setRepeatMode] = useState<'off' | 'one' | 'all'>('off');
-  
+
   // TODO: Implement actual queue logic
   // const [queue, setQueue] = useState<Track[]>([]);
   // const [history, setHistory] = useState<Track[]>([]);
@@ -64,7 +64,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
         audioRef.current = new Audio();
-        
+
         audioRef.current.addEventListener('loadedmetadata', () => {
             setDuration(audioRef.current?.duration || 0);
         });
@@ -79,13 +79,21 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
             }
         });
         audioRef.current.addEventListener('ended', () => {
-            // TODO: Implement repeat logic and auto-play next track from queue
-            if (repeatMode === 'one' && audioRef.current) {
-              audioRef.current.currentTime = 0;
-              audioRef.current.play();
+            if (audioRef.current && currentTrack?.audioSrc) { // Only handle for tracks with audio
+              if (repeatMode === 'one') {
+                audioRef.current.currentTime = 0;
+                audioRef.current.play().catch(e => console.error("Error restarting track on repeat one:", e));
+              } else if (repeatMode === 'all') {
+                // playNextTrack(); // TODO: Implement this, potentially looping queue
+                // For now, just replay or stop
+                audioRef.current.currentTime = 0;
+                audioRef.current.play().catch(e => console.error("Error restarting track on repeat all:", e));
+              } else {
+                setIsPlaying(false);
+                // playNextTrack(); // TODO: Implement this
+              }
             } else {
-              // playNextTrack(); // Implement this
-              setIsPlaying(false); // Fallback
+               setIsPlaying(false); // For simulated tracks or if no audioSrc
             }
         });
         audioRef.current.addEventListener('volumechange', () => {
@@ -94,6 +102,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
                 setIsMuted(audioRef.current.muted);
             }
         });
+        // Error handling for the audio element itself
+        audioRef.current.addEventListener('error', (e) => {
+            console.error("Audio Element Error:", e);
+            setIsPlaying(false);
+            // Potentially set currentTrack to null or show an error to the user
+        });
     }
     return () => {
         if (audioRef.current) {
@@ -101,9 +115,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
             audioRef.current.removeEventListener('timeupdate', () => {});
             audioRef.current.removeEventListener('ended', () => {});
             audioRef.current.removeEventListener('volumechange', () => {});
+            audioRef.current.removeEventListener('error', () => {});
+            audioRef.current.pause();
+            audioRef.current.src = ""; // Release resources
         }
     };
-  }, [repeatMode]);
+  }, [repeatMode, currentTrack]); // Added currentTrack dependency to re-evaluate ended logic for new tracks
 
   useEffect(() => {
     if (audioRef.current) {
@@ -115,19 +132,27 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
   const playTrack = useCallback((track: Track, playNext?: Track[], playPrevious?: Track[]) => {
     setCurrentTrack(track);
-    if (audioRef.current) {
-      audioRef.current.src = track.audioSrc || ''; 
-      audioRef.current.load(); 
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(error => {
-        console.error("Error playing track:", error);
-        setIsPlaying(false);
-      });
-    }
-    if (!track.audioSrc) {
-      setIsPlaying(true); 
-      setDuration(track.duration || 180); 
+    if (track.audioSrc && audioRef.current) {
+      audioRef.current.src = track.audioSrc;
+      audioRef.current.load(); // Good practice to call load() before play() when changing src
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setIsPlaying(true);
+        }).catch(error => {
+          console.error("Error playing track:", track.title, error);
+          setIsPlaying(false);
+          // Potentially inform the user that playback failed for this track
+        });
+      }
+    } else if (!track.audioSrc) {
+      // Simulate playback for tracks without an audio source
+      // If there was a previously playing track with audio, pause it.
+      if (audioRef.current && !audioRef.current.paused) {
+        audioRef.current.pause();
+      }
+      setIsPlaying(true);
+      setDuration(track.duration || 180); // Use provided duration or default (e.g., 3 minutes)
       setProgress(0);
       setCurrentTime(0);
     }
@@ -136,39 +161,64 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
   const togglePlayPause = useCallback(() => {
     if (!currentTrack) return;
+
     if (isPlaying) {
-      audioRef.current?.pause();
+      // Currently playing, so pause it
+      if (currentTrack.audioSrc && audioRef.current) {
+        audioRef.current.pause();
+      }
+      // For simulated tracks or actual audio, UI should reflect paused state
       setIsPlaying(false);
     } else {
-      audioRef.current?.play().catch(error => console.error("Error resuming playback:", error));
-      setIsPlaying(true);
+      // Currently paused, so play it
+      if (currentTrack.audioSrc && audioRef.current) {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                setIsPlaying(true);
+            }).catch(error => {
+                console.error("Error resuming playback:", error);
+                setIsPlaying(false); // Set to false if play fails
+            });
+        }
+      } else if (!currentTrack.audioSrc) {
+        // If no audioSrc, simulate play for UI purposes
+        setIsPlaying(true);
+      }
     }
   }, [currentTrack, isPlaying]);
 
   const seek = useCallback((time: number) => {
-    if (audioRef.current && duration > 0) {
+    if (currentTrack?.audioSrc && audioRef.current && duration > 0) { // Only seek if there's an audio source
       const newTime = Math.min(Math.max(0, time), duration);
       audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime); // Keep UI in sync
+    } else if (!currentTrack?.audioSrc && duration > 0) {
+      // For simulated tracks, update simulated progress
+      const newTime = Math.min(Math.max(0, time), duration);
       setCurrentTime(newTime);
+      setProgress((newTime / duration) * 100);
     }
-  }, [duration]);
+  }, [currentTrack, duration]);
+
 
   const handleSetVolume = useCallback((newVolume: number) => {
     const clampedVolume = Math.min(Math.max(0, newVolume), 1);
-    setVolume(clampedVolume);
+    setVolume(clampedVolume); // Update React state
     if (audioRef.current) {
-        audioRef.current.volume = clampedVolume;
-        if (clampedVolume > 0 && isMuted) {
+        audioRef.current.volume = clampedVolume; // Update HTMLAudioElement
+        if (clampedVolume > 0 && isMuted) { // If volume is turned up while muted, unmute
             setIsMuted(false);
             audioRef.current.muted = false;
         }
     }
-  }, [isMuted]);
+  }, [isMuted]); // isMuted dependency for unmuting logic
 
   const toggleMute = useCallback(() => {
     setIsMuted(prev => {
-        if(audioRef.current) audioRef.current.muted = !prev;
-        return !prev;
+        const newMutedState = !prev;
+        if(audioRef.current) audioRef.current.muted = newMutedState;
+        return newMutedState;
     });
   }, []);
 
@@ -192,11 +242,11 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const toggleExpand = useCallback(() => {
-    if (currentTrack) {
+    if (currentTrack) { // Only allow expanding if there's a track
       setIsExpanded((prev) => !prev);
     }
   }, [currentTrack]);
-  
+
   const closeFullScreenPlayer = useCallback(() => {
     setIsExpanded(false);
   }, []);
