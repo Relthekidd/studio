@@ -1,10 +1,6 @@
 
 "use client";
 
-// This page can be very similar to AlbumDetailPage for now,
-// as a "single" in our mock data is essentially an album with 1 or few tracks.
-// If you want a different layout or specific "single" metadata, this page can be customized.
-
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -12,13 +8,13 @@ import Link from 'next/link';
 import { mockAlbumsAndSingles, type AlbumFull, mockArtists, type ArtistFull } from '@/lib/mockData';
 import SectionTitle from '@/components/SectionTitle';
 import { Button } from '@/components/ui/button';
-import { PlayCircle, ListMusic, CalendarDays, Info } from 'lucide-react';
+import { PlayCircle, ListMusic, CalendarDays, Info, PauseCircle } from 'lucide-react'; // Added PauseCircle
 import { usePlayer } from '@/contexts/PlayerContext';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card'; // Removed CardHeader, CardTitle as they aren't directly used for structure
 
 // Re-using TrackListItem from AlbumDetailPage for consistency
-const TrackListItem = ({ track, onPlay }: { track: AlbumFull['tracklist'][0], onPlay: (track: AlbumFull['tracklist'][0]) => void }) => {
+const TrackListItem = ({ track, onPlay, albumArtists }: { track: AlbumFull['tracklist'][0], onPlay: (track: AlbumFull['tracklist'][0]) => void, albumArtists: ArtistFull[] }) => {
   const { currentTrack, isPlaying, togglePlayPause } = usePlayer();
   const isCurrent = currentTrack?.id === track.id;
 
@@ -27,14 +23,15 @@ const TrackListItem = ({ track, onPlay }: { track: AlbumFull['tracklist'][0], on
     if (isCurrent) {
       togglePlayPause();
     } else {
-      onPlay(track);
+      // Ensure track has album context for player
+      onPlay({...track, artists: albumArtists.map(a => ({id: a.id, name: a.name})) });
     }
   };
   
   return (
     <div 
       className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors"
-      onClick={handlePlayClick}
+      onClick={handlePlayClick} // Main click on row plays the track
       role="button"
       tabIndex={0}
       aria-label={`Play ${track.title}`}
@@ -43,7 +40,10 @@ const TrackListItem = ({ track, onPlay }: { track: AlbumFull['tracklist'][0], on
         {track.trackNumber && <span className="text-sm text-muted-foreground w-5 text-center">{track.trackNumber}</span>}
         <div className="flex-grow">
           <p className={`font-medium ${isCurrent ? 'text-primary' : 'text-foreground'}`}>{track.title}</p>
-          {track.artist && <p className="text-xs text-muted-foreground">{track.artist}</p>}
+          {/* Display primary artist of the track if different from album artist, or album artist */}
+          <p className="text-xs text-muted-foreground">
+            {track.artist || (albumArtists.length > 0 ? albumArtists.map(a => a.name).join(', ') : 'Various Artists')}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-3">
@@ -68,12 +68,13 @@ export default function SingleDetailPage() {
   useEffect(() => {
     if (singleId) {
       const foundSingle = mockAlbumsAndSingles[singleId];
-      if (foundSingle && (foundSingle.type === 'single' || foundSingle.tracklist?.length <= 2) ) { // check if it is a single or a short album
+      // A single can be an "album" type with few tracks, or explicitly "single" type
+      if (foundSingle && (foundSingle.type === 'single' || (foundSingle.type === 'album' && foundSingle.tracklist?.length <= 3))) { 
         setSingle(foundSingle);
         const foundArtists = foundSingle.artistIds.map(id => mockArtists[id]).filter(Boolean) as ArtistFull[];
         setArtistsDetails(foundArtists);
       } else {
-        console.warn(`Single or short album with ID ${singleId} not found.`);
+        console.warn(`Single with ID ${singleId} not found or is not a single.`);
         // router.push('/404'); 
       }
     }
@@ -86,13 +87,17 @@ export default function SingleDetailPage() {
   const handlePlayTrack = (track: AlbumFull['tracklist'][0]) => {
      playTrack({
         ...track,
-        album: single.title,
+        album: single.title, // Add album title
+        albumId: single.id, // Add albumId
+        // Ensure artists array for the player comes from the album/single context
+        artists: artistsDetails.map(a => ({id: a.id, name: a.name})), 
      });
   };
   
   const handlePlayAll = () => {
     if (single.tracklist && single.tracklist.length > 0) {
       handlePlayTrack(single.tracklist[0]);
+      // TODO: Implement queueing for play all
     }
   };
 
@@ -142,22 +147,23 @@ export default function SingleDetailPage() {
         </div>
       </Card>
 
-      {single.tracklist && single.tracklist.length > 1 && (
+      {/* Display tracklist only if more than one track, or if it's an "album" type single */}
+      {single.tracklist && single.tracklist.length > 0 && (single.tracklist.length > 1 || single.type === 'album') && (
         <>
           <SectionTitle id="tracklist-title">Tracklist</SectionTitle>
           <Card>
             <CardContent className="p-0">
               <div className="space-y-1">
                 {single.tracklist.map((track) => (
-                  <TrackListItem key={track.id} track={track} onPlay={handlePlayTrack} />
+                  <TrackListItem key={track.id} track={track} onPlay={handlePlayTrack} albumArtists={artistsDetails}/>
                 ))}
               </div>
             </CardContent>
           </Card>
         </>
       )}
+       {/* If it's a single with only one track and type 'single', the main play button handles it. */}
     </div>
   );
 }
 
-    

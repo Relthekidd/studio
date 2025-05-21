@@ -8,30 +8,30 @@ import Link from 'next/link';
 import { mockAlbumsAndSingles, type AlbumFull, mockArtists, type ArtistFull } from '@/lib/mockData';
 import SectionTitle from '@/components/SectionTitle';
 import { Button } from '@/components/ui/button';
-import { PlayCircle, ListMusic, Users, CalendarDays, Info } from 'lucide-react';
+import { PlayCircle, ListMusic, Users, CalendarDays, Info, PauseCircle } from 'lucide-react'; // Added PauseCircle
 import { usePlayer } from '@/contexts/PlayerContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card'; // Removed CardHeader, CardTitle
 
-// A new component for displaying a single track in a list
-const TrackListItem = ({ track, onPlay }: { track: AlbumFull['tracklist'][0], onPlay: (track: AlbumFull['tracklist'][0]) => void }) => {
+const TrackListItem = ({ track, onPlay, albumArtists }: { track: AlbumFull['tracklist'][0], onPlay: (track: AlbumFull['tracklist'][0]) => void, albumArtists: ArtistFull[] }) => {
   const { currentTrack, isPlaying, togglePlayPause } = usePlayer();
   const isCurrent = currentTrack?.id === track.id;
 
   const handlePlayClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Important: prevent card navigation if button is clicked
     if (isCurrent) {
       togglePlayPause();
     } else {
-      onPlay(track);
+      // Ensure track has album context for player
+      onPlay({...track, artists: albumArtists.map(a => ({id: a.id, name: a.name})) });
     }
   };
   
   return (
     <div 
       className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors"
-      onClick={handlePlayClick}
+      onClick={handlePlayClick} // Main click on row plays the track
       role="button"
       tabIndex={0}
       aria-label={`Play ${track.title}`}
@@ -40,7 +40,10 @@ const TrackListItem = ({ track, onPlay }: { track: AlbumFull['tracklist'][0], on
         {track.trackNumber && <span className="text-sm text-muted-foreground w-5 text-center">{track.trackNumber}</span>}
         <div className="flex-grow">
           <p className={`font-medium ${isCurrent ? 'text-primary' : 'text-foreground'}`}>{track.title}</p>
-          {track.artist && <p className="text-xs text-muted-foreground">{track.artist}</p>}
+          {/* Display primary artist of the track if different from album artist, or album artist */}
+          <p className="text-xs text-muted-foreground">
+            {track.artist || (albumArtists.length > 0 ? albumArtists.map(a => a.name).join(', ') : 'Various Artists')}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-3">
@@ -66,14 +69,13 @@ export default function AlbumDetailPage() {
   useEffect(() => {
     if (albumId) {
       const foundAlbum = mockAlbumsAndSingles[albumId];
-      if (foundAlbum) {
+      if (foundAlbum && foundAlbum.type === 'album') { // Ensure it's an album
         setAlbum(foundAlbum);
         const foundArtists = foundAlbum.artistIds.map(id => mockArtists[id]).filter(Boolean) as ArtistFull[];
         setArtistsDetails(foundArtists);
       } else {
-        // Handle album not found, e.g., redirect to a 404 page or show a message
-        console.warn(`Album with ID ${albumId} not found.`);
-        // router.push('/404'); // Example redirect
+        console.warn(`Album with ID ${albumId} not found or is not an album.`);
+        // router.push('/404'); 
       }
     }
   }, [albumId, router]);
@@ -83,19 +85,17 @@ export default function AlbumDetailPage() {
   }
 
   const handlePlayTrack = (track: AlbumFull['tracklist'][0]) => {
-    // The track from tracklist might be missing some album-level details if not properly structured
-    // We ensure it has what PlayerContext needs, or use AlbumCard to play if more suitable
      playTrack({
-        ...track, // Spread existing track properties
-        album: album.title, // Add album title
-        // artists: track.artists || album.artists, // Ensure artists array is present
-        // audioSrc will be on the track object from tracklist
+        ...track, 
+        album: album.title, 
+        albumId: album.id,
+        // Ensure artists array for the player comes from the album context
+        artists: artistsDetails.map(a => ({id: a.id, name: a.name})),
      });
   };
   
   const handlePlayAll = () => {
     if (album.tracklist && album.tracklist.length > 0) {
-      // Play the first track, potentially pass the rest of the tracklist as a queue
       handlePlayTrack(album.tracklist[0]);
       // TODO: Implement queueing for play all
     }
@@ -153,7 +153,7 @@ export default function AlbumDetailPage() {
           {album.tracklist && album.tracklist.length > 0 ? (
             <div className="space-y-1">
               {album.tracklist.map((track) => (
-                <TrackListItem key={track.id} track={track} onPlay={handlePlayTrack} />
+                <TrackListItem key={track.id} track={track} onPlay={handlePlayTrack} albumArtists={artistsDetails} />
               ))}
             </div>
           ) : (
@@ -161,10 +161,6 @@ export default function AlbumDetailPage() {
           )}
         </CardContent>
       </Card>
-
-      {/* TODO: Add sections for "More by [Artist]" or "Related Albums" */}
     </div>
   );
 }
-
-    
