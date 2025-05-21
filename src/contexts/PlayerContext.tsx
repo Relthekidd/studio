@@ -4,16 +4,31 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 
+export interface ArtistStub {
+  id: string;
+  name: string;
+}
+
 export interface Track {
   id: string;
   title: string;
-  artist: string;
-  album?: string; // Optional: For display in queue or elsewhere
+  artist?: string; // Primary display artist string
+  artists?: ArtistStub[]; // Array of artist objects for linking
+  album?: string; // Album title display
+  albumId?: string; // For linking to album page
   imageUrl: string;
   audioSrc?: string;
   dataAiHint?: string;
-  duration?: number;
+  duration?: number; // in seconds
+  releaseDate?: string; // For album/single pages
+  credits?: string; // For album/single pages
+  trackNumber?: number; // For tracklists
+  // For album type tracks
+  tracklist?: Track[]; 
+  type?: 'track' | 'playlist' | 'album' | 'artist' | 'user'; // To help AlbumCard differentiate
+  description?: string; // For playlists or other item types
 }
+
 
 interface PlayerContextType {
   currentTrack: Track | null;
@@ -35,9 +50,8 @@ interface PlayerContextType {
   toggleMute: () => void;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
-  playNextTrack: () => void; // Placeholder
-  playPreviousTrack: () => void; // Placeholder
-  // TODO: Add queue management functions
+  playNextTrack: () => void; 
+  playPreviousTrack: () => void; 
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -49,15 +63,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [progress, setProgress] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
-  const [volume, setVolume] = useState<number>(0.75); // Default volume
+  const [volume, setVolume] = useState<number>(0.75); 
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [shuffleMode, setShuffleMode] = useState<boolean>(false);
   const [repeatMode, setRepeatMode] = useState<'off' | 'one' | 'all'>('off');
-
-  // TODO: Implement actual queue logic
-  // const [queue, setQueue] = useState<Track[]>([]);
-  // const [history, setHistory] = useState<Track[]>([]);
-
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -65,66 +74,70 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window !== "undefined") {
         audioRef.current = new Audio();
 
-        audioRef.current.addEventListener('loadedmetadata', () => {
-            setDuration(audioRef.current?.duration || 0);
-        });
-        audioRef.current.addEventListener('timeupdate', () => {
-            const curTime = audioRef.current?.currentTime || 0;
-            const dur = audioRef.current?.duration || 0;
+        const audio = audioRef.current;
+
+        const handleLoadedMetadata = () => setDuration(audio.duration || 0);
+        const handleTimeUpdate = () => {
+            const curTime = audio.currentTime || 0;
+            const dur = audio.duration || 0;
             setCurrentTime(curTime);
             if (dur > 0) {
                 setProgress((curTime / dur) * 100);
             } else {
                 setProgress(0);
             }
-        });
-        audioRef.current.addEventListener('ended', () => {
-            if (audioRef.current && currentTrack?.audioSrc) { // Only handle for tracks with audio
+        };
+        const handleEnded = () => {
+            if (audio && currentTrack?.audioSrc) {
               if (repeatMode === 'one') {
-                audioRef.current.currentTime = 0;
-                audioRef.current.play().catch(e => console.error("Error restarting track on repeat one:", e));
+                audio.currentTime = 0;
+                audio.play().catch(e => console.error("Error restarting track on repeat one:", e));
               } else if (repeatMode === 'all') {
                 // playNextTrack(); // TODO: Implement this, potentially looping queue
-                // For now, just replay or stop
-                audioRef.current.currentTime = 0;
-                audioRef.current.play().catch(e => console.error("Error restarting track on repeat all:", e));
+                audio.currentTime = 0;
+                audio.play().catch(e => console.error("Error restarting track on repeat all:", e));
               } else {
                 setIsPlaying(false);
                 // playNextTrack(); // TODO: Implement this
               }
             } else {
-               setIsPlaying(false); // For simulated tracks or if no audioSrc
+               setIsPlaying(false);
             }
-        });
-        audioRef.current.addEventListener('volumechange', () => {
-            if(audioRef.current) {
-                setVolume(audioRef.current.volume);
-                setIsMuted(audioRef.current.muted);
-            }
-        });
-        // Error handling for the audio element itself
-        audioRef.current.addEventListener('error', (e) => {
+        };
+        const handleVolumeChange = () => {
+            setVolume(audio.volume);
+            setIsMuted(audio.muted);
+        };
+        const handleError = (e: Event) => {
             console.error("Audio Element Error:", e);
+            const errorEvent = e as ErrorEvent;
+            if (errorEvent.error) {
+                console.error("Specific audio error:", errorEvent.error);
+            }
             setIsPlaying(false);
-            // Potentially set currentTrack to null or show an error to the user
-        });
+        };
+
+        audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.addEventListener('timeupdate', handleTimeUpdate);
+        audio.addEventListener('ended', handleEnded);
+        audio.addEventListener('volumechange', handleVolumeChange);
+        audio.addEventListener('error', handleError);
+    
+        return () => {
+            audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+            audio.removeEventListener('timeupdate', handleTimeUpdate);
+            audio.removeEventListener('ended', handleEnded);
+            audio.removeEventListener('volumechange', handleVolumeChange);
+            audio.removeEventListener('error', handleError);
+            if (!audio.paused) audio.pause();
+            audio.src = ""; 
+        };
     }
-    return () => {
-        if (audioRef.current) {
-            audioRef.current.removeEventListener('loadedmetadata', () => {});
-            audioRef.current.removeEventListener('timeupdate', () => {});
-            audioRef.current.removeEventListener('ended', () => {});
-            audioRef.current.removeEventListener('volumechange', () => {});
-            audioRef.current.removeEventListener('error', () => {});
-            audioRef.current.pause();
-            audioRef.current.src = ""; // Release resources
-        }
-    };
-  }, [repeatMode, currentTrack]); // Added currentTrack dependency to re-evaluate ended logic for new tracks
+  }, [repeatMode, currentTrack]); // Added currentTrack dependency
 
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = volume;
+      audioRef.current.volume = isMuted ? 0 : volume; // Reflect mute state in actual volume
       audioRef.current.muted = isMuted;
     }
   }, [volume, isMuted]);
@@ -134,7 +147,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     setCurrentTrack(track);
     if (track.audioSrc && audioRef.current) {
       audioRef.current.src = track.audioSrc;
-      audioRef.current.load(); // Good practice to call load() before play() when changing src
+      audioRef.current.load();
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {
@@ -142,35 +155,28 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         }).catch(error => {
           console.error("Error playing track:", track.title, error);
           setIsPlaying(false);
-          // Potentially inform the user that playback failed for this track
         });
       }
-    } else if (!track.audioSrc) {
-      // Simulate playback for tracks without an audio source
-      // If there was a previously playing track with audio, pause it.
+    } else {
       if (audioRef.current && !audioRef.current.paused) {
         audioRef.current.pause();
       }
-      setIsPlaying(true);
-      setDuration(track.duration || 180); // Use provided duration or default (e.g., 3 minutes)
+      setIsPlaying(true); // Simulate play
+      setDuration(track.duration || 180);
       setProgress(0);
       setCurrentTime(0);
     }
-     // TODO: Set queue and history: setQueue(playNext || []); setHistory(playPrevious || []);
   }, []);
 
   const togglePlayPause = useCallback(() => {
     if (!currentTrack) return;
 
     if (isPlaying) {
-      // Currently playing, so pause it
-      if (currentTrack.audioSrc && audioRef.current) {
+      if (currentTrack.audioSrc && audioRef.current && !audioRef.current.paused) {
         audioRef.current.pause();
       }
-      // For simulated tracks or actual audio, UI should reflect paused state
       setIsPlaying(false);
     } else {
-      // Currently paused, so play it
       if (currentTrack.audioSrc && audioRef.current) {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
@@ -178,49 +184,57 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
                 setIsPlaying(true);
             }).catch(error => {
                 console.error("Error resuming playback:", error);
-                setIsPlaying(false); // Set to false if play fails
+                setIsPlaying(false);
             });
+        } else { // Should not happen with modern browsers if src is set
+           setIsPlaying(false);
         }
       } else if (!currentTrack.audioSrc) {
-        // If no audioSrc, simulate play for UI purposes
-        setIsPlaying(true);
+        setIsPlaying(true); // Simulate play
       }
     }
   }, [currentTrack, isPlaying]);
 
   const seek = useCallback((time: number) => {
-    if (currentTrack?.audioSrc && audioRef.current && duration > 0) { // Only seek if there's an audio source
-      const newTime = Math.min(Math.max(0, time), duration);
+    const targetDuration = currentTrack?.duration || duration; // Use track-specific duration if available
+    if (currentTrack?.audioSrc && audioRef.current && targetDuration > 0) {
+      const newTime = Math.min(Math.max(0, time), targetDuration);
       audioRef.current.currentTime = newTime;
-      setCurrentTime(newTime); // Keep UI in sync
-    } else if (!currentTrack?.audioSrc && duration > 0) {
-      // For simulated tracks, update simulated progress
-      const newTime = Math.min(Math.max(0, time), duration);
       setCurrentTime(newTime);
-      setProgress((newTime / duration) * 100);
+    } else if (!currentTrack?.audioSrc && targetDuration > 0) {
+      const newTime = Math.min(Math.max(0, time), targetDuration);
+      setCurrentTime(newTime);
+      setProgress((newTime / targetDuration) * 100);
     }
   }, [currentTrack, duration]);
 
 
   const handleSetVolume = useCallback((newVolume: number) => {
     const clampedVolume = Math.min(Math.max(0, newVolume), 1);
-    setVolume(clampedVolume); // Update React state
+    setVolume(clampedVolume);
     if (audioRef.current) {
-        audioRef.current.volume = clampedVolume; // Update HTMLAudioElement
-        if (clampedVolume > 0 && isMuted) { // If volume is turned up while muted, unmute
+        audioRef.current.volume = clampedVolume;
+        if (clampedVolume > 0 && isMuted) {
             setIsMuted(false);
             audioRef.current.muted = false;
         }
     }
-  }, [isMuted]); // isMuted dependency for unmuting logic
+  }, [isMuted]);
 
   const toggleMute = useCallback(() => {
     setIsMuted(prev => {
         const newMutedState = !prev;
-        if(audioRef.current) audioRef.current.muted = newMutedState;
+        if(audioRef.current) {
+            audioRef.current.muted = newMutedState;
+        }
+        // If unmuting and volume was 0, set to a default volume (e.g., previous non-zero or 0.5)
+        if (!newMutedState && volume === 0) {
+          setVolume(0.5); // Or restore a previousVolume state
+          if(audioRef.current) audioRef.current.volume = 0.5;
+        }
         return newMutedState;
     });
-  }, []);
+  }, [volume]);
 
   const toggleShuffle = useCallback(() => setShuffleMode(prev => !prev), []);
   const toggleRepeat = useCallback(() => {
@@ -232,17 +246,15 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const playNextTrack = useCallback(() => {
-    // TODO: Implement logic to play the next track from the queue, considering shuffle
     console.log("Play next track (not implemented)");
   }, []);
 
   const playPreviousTrack = useCallback(() => {
-    // TODO: Implement logic to play the previous track from history
     console.log("Play previous track (not implemented)");
   }, []);
 
   const toggleExpand = useCallback(() => {
-    if (currentTrack) { // Only allow expanding if there's a track
+    if (currentTrack) {
       setIsExpanded((prev) => !prev);
     }
   }, [currentTrack]);
@@ -290,3 +302,4 @@ export const usePlayer = (): PlayerContextType => {
   return context;
 };
 
+    

@@ -2,13 +2,14 @@
 "use client";
 
 import Image from 'next/image';
-import { usePlayer } from '@/contexts/PlayerContext';
-import PlayerControls from './PlayerControls'; // Will be updated
+import Link from 'next/link';
+import { usePlayer, type ArtistStub } from '@/contexts/PlayerContext';
+import PlayerControls from './PlayerControls'; 
 import { Progress } from '@/components/ui/progress';
-import { ChevronDown, ListMusic, Volume2, VolumeX, Shuffle, Repeat, Repeat1 } from 'lucide-react';
+import { ChevronDown, ListMusic, Volume2, VolumeX, Shuffle, Repeat, Repeat1, LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider'; // For volume control
-import { formatTime } from '@/lib/utils'; // Helper for time display
+import { Slider } from '@/components/ui/slider'; 
+import { formatTime } from '@/lib/utils'; 
 
 export default function FullScreenPlayer() {
   const { 
@@ -32,8 +33,9 @@ export default function FullScreenPlayer() {
   if (!currentTrack) return null;
 
   const handleSeek = (value: number[]) => {
-    if (duration > 0) {
-      seek((value[0] / 100) * duration);
+    const targetDuration = currentTrack.duration || duration;
+    if (targetDuration > 0) {
+      seek((value[0] / 100) * targetDuration);
     }
   };
   
@@ -46,11 +48,40 @@ export default function FullScreenPlayer() {
     if (repeatMode === 'all') return <Repeat size={20} className="text-primary" />;
     return <Repeat size={20} />;
   };
+  
+  const trackTitleDisplay = (
+    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground drop-shadow-md truncate">
+      {currentTrack.title}
+    </h2>
+  );
+
+  const artistsDisplay = currentTrack.artists && currentTrack.artists.length > 0 
+    ? currentTrack.artists.map((artist: ArtistStub, index: number) => (
+        <React.Fragment key={artist.id}>
+          <Link href={`/artist/${artist.id}`} legacyBehavior>
+            <a className="hover:text-primary hover:underline transition-colors">{artist.name}</a>
+          </Link>
+          {index < currentTrack.artists!.length - 1 && ', '}
+        </React.Fragment>
+      ))
+    : currentTrack.artist; // Fallback to simple artist string if `artists` array is not available
 
   return (
     <div 
       className="fixed inset-0 bg-gradient-to-br from-background via-card to-background/90 backdrop-blur-2xl z-[100] flex flex-col items-center justify-between p-4 md:p-6 animate-slideInUp"
     >
+      {/* Album Art as Background */}
+      {currentTrack.imageUrl && (
+        <Image
+          src={currentTrack.imageUrl}
+          alt={`${currentTrack.title} background`}
+          fill
+          className="object-cover opacity-10 blur-2xl scale-110 z-[-1]"
+          unoptimized
+          data-ai-hint={currentTrack.dataAiHint || "blurred background"}
+        />
+      )}
+
       {/* Top Bar: Close button and Queue button */}
       <div className="w-full flex justify-between items-center">
         <Button 
@@ -66,8 +97,7 @@ export default function FullScreenPlayer() {
           variant="ghost" 
           size="icon" 
           className="text-muted-foreground hover:text-accent z-[110] transition-colors" 
-          // onClick={openQueueModal} // TODO: Implement queue modal
-          aria-label="View Queue"
+          aria-label="View Queue" // TODO: Implement queue modal
         >
           <ListMusic size={22} />
         </Button>
@@ -87,10 +117,26 @@ export default function FullScreenPlayer() {
            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300"></div>
         </div>
 
-        <div className="text-center">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground drop-shadow-md">{currentTrack.title}</h2>
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mt-1 drop-shadow-sm">{currentTrack.artist}</p>
-          {currentTrack.album && <p className="text-sm text-muted-foreground/70 mt-0.5">{currentTrack.album}</p>}
+        <div className="text-center max-w-md">
+          {currentTrack.albumId ? (
+            <Link href={`/album/${currentTrack.albumId}`} legacyBehavior>
+              <a className="hover:underline" title={`View album: ${currentTrack.album || currentTrack.title}`}>
+                {trackTitleDisplay}
+              </a>
+            </Link>
+          ) : (
+            trackTitleDisplay
+          )}
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mt-1 drop-shadow-sm truncate">
+            {artistsDisplay}
+          </p>
+          {currentTrack.album && (
+             <Link href={`/album/${currentTrack.albumId || currentTrack.id}`} legacyBehavior>
+                <a className="text-sm text-muted-foreground/70 mt-0.5 hover:underline" title={`View album: ${currentTrack.album}`}>
+                    {currentTrack.album}
+                </a>
+             </Link>
+          )}
         </div>
       </div>
       
@@ -107,7 +153,7 @@ export default function FullScreenPlayer() {
         />
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(duration)}</span>
+          <span>{formatTime(currentTrack.duration || duration)}</span>
         </div>
       </div>
         
@@ -125,7 +171,6 @@ export default function FullScreenPlayer() {
             {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </Button>
           <Slider
-            defaultValue={[volume * 100]}
             value={[isMuted ? 0 : volume * 100]}
             max={100}
             step={1}
@@ -143,3 +188,4 @@ export default function FullScreenPlayer() {
   );
 }
 
+    
