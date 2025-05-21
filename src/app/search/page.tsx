@@ -10,7 +10,7 @@ import AlbumCard from '@/components/AlbumCard';
 import type { Track as PlayerTrack } from '@/contexts/PlayerContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, ListMusic, DiscAlbum, Users as UsersIcon, Search as SearchIcon } from 'lucide-react';
+import { User, ListMusic, DiscAlbum, Users as UsersIcon, Search as SearchIcon, Music } from 'lucide-react'; // Added Music
 import { mockArtists, mockAlbumsAndSingles, mockTracks, generalMockItems } from '@/lib/mockData';
 
 // Combine all mock data into a searchable array
