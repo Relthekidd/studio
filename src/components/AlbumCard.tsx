@@ -9,6 +9,7 @@ import { usePlayer } from '@/contexts/PlayerContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast"; 
+import { Badge } from '@/components/ui/badge'; // Added import
 
 interface AlbumCardProps {
   item: Track & { type?: 'track' | 'playlist' | 'album' | 'single', description?: string, dataAiHint?: string }; // Added 'single'
