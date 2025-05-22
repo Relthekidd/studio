@@ -12,8 +12,10 @@ import { PlayCircle, ListMusic, Users, CalendarDays, Info, PauseCircle } from 'l
 import { usePlayer } from '@/contexts/PlayerContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import BackButton from '@/components/ui/BackButton';
 import { Card, CardContent } from '@/components/ui/card'; // Removed CardHeader, CardTitle
 
+<BackButton />
 const TrackListItem = ({ track, onPlay, albumArtists }: { track: AlbumFull['tracklist'][0], onPlay: (track: AlbumFull['tracklist'][0]) => void, albumArtists: ArtistFull[] }) => {
   const { currentTrack, isPlaying, togglePlayPause } = usePlayer();
   const isCurrent = currentTrack?.id === track.id;
@@ -87,7 +89,7 @@ export default function AlbumDetailPage() {
   const handlePlayTrack = (track: AlbumFull['tracklist'][0]) => {
      playTrack({
         ...track, 
-        album: album.title, 
+        album: { id: album.id, name: album.title }, 
         albumId: album.id,
         // Ensure artists array for the player comes from the album context
         artists: artistsDetails.map(a => ({id: a.id, name: a.name})),

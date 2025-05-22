@@ -11,8 +11,11 @@ import { Button } from '@/components/ui/button';
 import { PlayCircle, ListMusic, CalendarDays, Info, PauseCircle } from 'lucide-react'; // Added PauseCircle
 import { usePlayer } from '@/contexts/PlayerContext';
 import { Badge } from '@/components/ui/badge';
+import BackButton from '@/components/ui/BackButton';
+import TrackActions from '@/components/music/TrackActions';
 import { Card, CardContent } from '@/components/ui/card'; // Removed CardHeader, CardTitle as they aren't directly used for structure
 
+<BackButton />
 // Re-using TrackListItem from AlbumDetailPage for consistency
 const TrackListItem = ({ track, onPlay, albumArtists }: { track: AlbumFull['tracklist'][0], onPlay: (track: AlbumFull['tracklist'][0]) => void, albumArtists: ArtistFull[] }) => {
   const { currentTrack, isPlaying, togglePlayPause } = usePlayer();
@@ -56,6 +59,8 @@ const TrackListItem = ({ track, onPlay, albumArtists }: { track: AlbumFull['trac
   );
 };
 
+
+
 export default function SingleDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -87,7 +92,7 @@ export default function SingleDetailPage() {
   const handlePlayTrack = (track: AlbumFull['tracklist'][0]) => {
      playTrack({
         ...track,
-        album: single.title, // Add album title
+        album: { id: single.id, name: single.title }, // Add album object
         albumId: single.id, // Add albumId
         // Ensure artists array for the player comes from the album/single context
         artists: artistsDetails.map(a => ({id: a.id, name: a.name})), 

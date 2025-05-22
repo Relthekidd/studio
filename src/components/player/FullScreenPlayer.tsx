@@ -1,23 +1,32 @@
+'use client';
 
-"use client";
-
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePlayer, type ArtistStub } from '@/contexts/PlayerContext';
-import PlayerControls from './PlayerControls'; 
+import { usePlayer } from '@/contexts/PlayerContext';
+import PlayerControls from './PlayerControls';
 import { Progress } from '@/components/ui/progress';
-import { ChevronDown, ListMusic, Volume2, VolumeX, Shuffle, Repeat, Repeat1, LinkIcon } from 'lucide-react';
+import {
+  ChevronDown,
+  ListMusic,
+  Volume2,
+  VolumeX,
+  Shuffle,
+  Repeat,
+  Repeat1
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider'; 
-import { formatTime } from '@/lib/utils'; 
+import { Slider } from '@/components/ui/slider';
+import { formatTime } from '@/lib/utils';
+import TrackInfo from '@/components/music/TrackInfo';
 
 export default function FullScreenPlayer() {
-  const { 
-    currentTrack, 
-    isPlaying, 
-    closeFullScreenPlayer, 
-    progress, 
-    currentTime, 
+  const {
+    currentTrack,
+    isPlaying,
+    closeFullScreenPlayer,
+    progress,
+    currentTime,
     duration,
     volume,
     setVolume,
@@ -38,7 +47,7 @@ export default function FullScreenPlayer() {
       seek((value[0] / 100) * targetDuration);
     }
   };
-  
+
   const handleVolumeChange = (value: number[]) => {
     setVolume(value[0] / 100);
   };
@@ -48,126 +57,100 @@ export default function FullScreenPlayer() {
     if (repeatMode === 'all') return <Repeat size={20} className="text-primary" />;
     return <Repeat size={20} />;
   };
-  
-  const trackTitleDisplay = (
-    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground drop-shadow-md truncate">
-      {currentTrack.title}
-    </h2>
-  );
-
-  const artistsDisplay = currentTrack.artists && currentTrack.artists.length > 0 
-    ? currentTrack.artists.map((artist: ArtistStub, index: number) => (
-        <React.Fragment key={artist.id}>
-          <Link href={`/artist/${artist.id}`} legacyBehavior>
-            <a className="hover:text-primary hover:underline transition-colors">{artist.name}</a>
-          </Link>
-          {index < currentTrack.artists!.length - 1 && ', '}
-        </React.Fragment>
-      ))
-    : currentTrack.artist; // Fallback to simple artist string if `artists` array is not available
 
   return (
-    <div 
-      className="fixed inset-0 bg-gradient-to-br from-background via-card to-background/90 backdrop-blur-2xl z-[100] flex flex-col items-center justify-between p-4 md:p-6 animate-slideInUp"
-    >
-      {/* Album Art as Background */}
+    <div className="fixed inset-0 bg-gradient-to-br from-background via-card to-background/90 backdrop-blur-2xl z-[100] flex flex-col items-center justify-between p-4 md:p-6 animate-slideInUp">
+      {/* Background Image */}
       {currentTrack.imageUrl && (
         <Image
-          src={currentTrack.imageUrl}
-          alt={`${currentTrack.title} background`}
-          fill
-          className="object-cover opacity-10 blur-2xl scale-110 z-[-1]"
-          unoptimized
-          data-ai-hint={currentTrack.dataAiHint || "blurred background"}
-        />
+  src={currentTrack.imageUrl}
+  alt={`${currentTrack.title} background`}
+  fill
+  className="object-cover opacity-10 blur-2xl scale-110 z-[-1]"
+  unoptimized
+  data-ai-hint={currentTrack.dataAiHint ?? ''}
+/>
+
       )}
 
-      {/* Top Bar: Close button and Queue button */}
+      {/* Top Controls */}
       <div className="w-full flex justify-between items-center">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-muted-foreground hover:text-accent z-[110] transition-colors" 
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-accent z-[110] transition-colors"
           onClick={closeFullScreenPlayer}
           aria-label="Close full screen player"
         >
           <ChevronDown size={28} />
         </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-muted-foreground hover:text-accent z-[110] transition-colors" 
-          aria-label="View Queue" // TODO: Implement queue modal
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-accent z-[110] transition-colors"
+          aria-label="View Queue"
         >
           <ListMusic size={22} />
         </Button>
       </div>
 
-      {/* Album Art & Info */}
+      {/* Album Art & Track Info */}
       <div className="flex flex-col items-center gap-4 md:gap-6 mt-auto mb-auto">
         <div className="relative w-60 h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 rounded-xl overflow-hidden shadow-2xl shadow-primary/30 group">
           <Image
-            src={currentTrack.imageUrl}
-            alt={currentTrack.title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            unoptimized
-            data-ai-hint={currentTrack.dataAiHint || "album cover large"}
-          />
-           <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300"></div>
+  src={currentTrack.imageUrl}
+  alt={currentTrack.title}
+  fill
+  className="object-cover group-hover:scale-105 transition-transform duration-500"
+  unoptimized
+  data-ai-hint={currentTrack.dataAiHint ?? ''}
+/>
+
+          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300"></div>
         </div>
 
-        <div className="text-center max-w-md">
-          {currentTrack.albumId ? (
-            <Link href={`/album/${currentTrack.albumId}`} legacyBehavior>
-              <a className="hover:underline" title={`View album: ${currentTrack.album || currentTrack.title}`}>
-                {trackTitleDisplay}
-              </a>
-            </Link>
-          ) : (
-            trackTitleDisplay
-          )}
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mt-1 drop-shadow-sm truncate">
-            {artistsDisplay}
-          </p>
-          {currentTrack.album && (
-             <Link href={`/album/${currentTrack.albumId || currentTrack.id}`} legacyBehavior>
-                <a className="text-sm text-muted-foreground/70 mt-0.5 hover:underline" title={`View album: ${currentTrack.album}`}>
-                    {currentTrack.album}
-                </a>
-             </Link>
-          )}
-        </div>
+        <TrackInfo track={currentTrack} />
       </div>
-      
-      {/* Seek Bar & Time */}
+
+      {/* Progress Bar */}
       <div className="w-full max-w-xl px-2 md:px-4 space-y-2 mb-4">
         <Slider
-            defaultValue={[0]}
-            value={[progress]}
-            max={100}
-            step={0.1}
-            onValueChange={handleSeek}
-            className="h-2 [&>span:first-child]:h-2 [&>span:first-child>span]:bg-gradient-to-r [&>span:first-child>span]:from-accent [&>span:first-child>span]:to-primary [&>span:last-child]:h-4 [&>span:last-child]:w-4"
-            aria-label="Seek bar"
+          defaultValue={[0]}
+          value={[progress]}
+          max={100}
+          step={0.1}
+          onValueChange={handleSeek}
+          className="h-2 [&>span:first-child]:h-2 [&>span:first-child>span]:bg-gradient-to-r [&>span:first-child>span]:from-accent [&>span:first-child>span]:to-primary [&>span:last-child]:h-4 [&>span:last-child]:w-4"
+          aria-label="Seek bar"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(currentTrack.duration || duration)}</span>
         </div>
       </div>
-        
-      {/* Main Player Controls */}
+
+      {/* Controls */}
       <PlayerControls variant="full" className="mb-4" />
 
-      {/* Secondary Controls: Shuffle, Repeat, Volume */}
+      {/* Volume + Repeat */}
       <div className="w-full max-w-xl flex justify-between items-center px-2 md:px-4 mb-4">
-        <Button variant="ghost" size="icon" onClick={toggleShuffle} aria-label="Shuffle" className="text-muted-foreground hover:text-primary">
-          <Shuffle size={20} className={shuffleMode ? "text-primary" : ""} />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleShuffle}
+          aria-label="Shuffle"
+          className="text-muted-foreground hover:text-primary"
+        >
+          <Shuffle size={20} className={shuffleMode ? 'text-primary' : ''} />
         </Button>
-        
+
         <div className="flex items-center gap-2 w-1/3 max-w-[150px]">
-           <Button variant="ghost" size="icon" onClick={toggleMute} className="text-muted-foreground hover:text-primary">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMute}
+            className="text-muted-foreground hover:text-primary"
+          >
             {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </Button>
           <Slider
@@ -180,12 +163,16 @@ export default function FullScreenPlayer() {
           />
         </div>
 
-        <Button variant="ghost" size="icon" onClick={toggleRepeat} aria-label="Repeat" className="text-muted-foreground hover:text-primary">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleRepeat}
+          aria-label="Repeat"
+          className="text-muted-foreground hover:text-primary"
+        >
           {getRepeatIcon()}
         </Button>
       </div>
     </div>
   );
 }
-
-    

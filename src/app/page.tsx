@@ -1,3 +1,4 @@
+'use client';
 
 import AlbumCard from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
@@ -6,11 +7,15 @@ import { generalMockItems } from '@/lib/mockData'; // Using centralized mock dat
 
 export default function HomePage() {
   // TODO: Replace with Firebase calls to fetch personalized data
-  // Using generalMockItems and slicing/filtering for variety
-  const recentlyPlayed = generalMockItems.slice(0, 5).map(item => ({ ...item, type: item.type || (item.tracklist ? 'album' : 'track') as any }));
-  const madeForYou = generalMockItems.slice(1, 6).map(item => ({ ...item, type: item.type || (item.tracklist ? 'album' : 'track') as any }));
-  const trending = generalMockItems.slice(2, 7).map(item => ({ ...item, type: item.type || (item.tracklist ? 'album' : 'track') as any }));
-  const newReleases = [...generalMockItems].reverse().slice(0,5).map(item => ({ ...item, type: item.type || (item.tracklist ? 'album' : 'track') as any }));
+  const normalize = (item: any): Track => ({
+    ...item,
+    type: item.type ?? 'track',
+  });
+
+  const recentlyPlayed = generalMockItems.slice(0, 5).map(normalize);
+  const madeForYou = generalMockItems.slice(1, 6).map(normalize);
+  const trending = generalMockItems.slice(2, 7).map(normalize);
+  const newReleases = [...generalMockItems].reverse().slice(0, 5).map(normalize);
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-8 md:space-y-12">
@@ -34,7 +39,7 @@ export default function HomePage() {
 
       <section aria-labelledby="trending-title">
         <SectionTitle id="trending-title">Trending Now</SectionTitle>
-         <div className="flex overflow-x-auto space-x-4 md:space-x-6 pb-4 -mx-4 px-4 md:-mx-6 md:px-6 scrollbar-thin scrollbar-thumb-muted-foreground/50 scrollbar-track-transparent">
+        <div className="flex overflow-x-auto space-x-4 md:space-x-6 pb-4 -mx-4 px-4 md:-mx-6 md:px-6 scrollbar-thin scrollbar-thumb-muted-foreground/50 scrollbar-track-transparent">
           {trending.map((item) => (
             <AlbumCard key={`trending-${item.id}`} item={item} className="flex-shrink-0 w-36 sm:w-40 md:w-48" />
           ))}
@@ -52,5 +57,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    
