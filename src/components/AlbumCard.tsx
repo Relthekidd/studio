@@ -1,20 +1,21 @@
+'use client';
+
 import Link from 'next/link';
-import Image from 'next/image';
 import { Heart, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { usePlayerStore } from '@/store/player';
+import { usePlayer } from '@/contexts/PlayerContext';
 import { useState } from 'react';
 
 export function AlbumCard({ item, className }: { item: any, className?: string }) {
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
-  const setTrack = usePlayerStore((state: { setTrack: any; }) => state.setTrack);
-  const playlists: any[] = []; // TODO: replace with real user's playlists
-  const isFavorited = false; // TODO: fetch favorite state
-  const handleToggleFavorite = () => {}; // TODO: implement
+  const { setTrack, play } = usePlayer();
+  const playlists: any[] = []; // TODO: real playlists
+  const isFavorited = false; // TODO: real state
+  const handleToggleFavorite = () => {}; // TODO: implement favorite logic
 
   const href = item.type === 'album' ? `/album/${item.id}`
               : item.type === 'single' ? `/single/${item.id}`
@@ -24,15 +25,17 @@ export function AlbumCard({ item, className }: { item: any, className?: string }
               : '#';
 
   const handlePlayClick = () => {
-    if (item.audioURL) {
+    if (item.audioUrl) {
       setTrack({
         id: item.id,
         title: item.title,
         artist: item.artist,
-        coverURL: item.coverURL,
-        audioURL: item.audioURL,
-        type: item.type,
+        audioUrl: item.audioUrl,
+        imageUrl: item.coverUrl,
+        duration: item.duration || 0,
+        type: item.type || 'track',
       });
+      play();
     }
   };
 
@@ -40,23 +43,21 @@ export function AlbumCard({ item, className }: { item: any, className?: string }
     <div
       className={`group relative bg-card/70 hover:bg-card/90 transition-all rounded-xl ${className || 'w-full'} cursor-pointer`}
       role="button"
+      onClick={handlePlayClick}
     >
       <div className="relative aspect-square">
         <img
-          src={item.coverURL || '/placeholder.png'}
+          src={item.coverUrl || '/placeholder.png'}
           alt={item.title}
           className="object-cover w-full h-full rounded-t-xl"
         />
-        {(item.type === 'track' || item.type === 'single') && (
-          <div className="absolute inset-0 z-10" onClick={handlePlayClick} />
-        )}
         <div className="absolute top-2 right-2 z-20 flex flex-col gap-1">
-          <Button onClick={handleToggleFavorite} size="icon" className="bg-muted">
+          <Button onClick={(e) => { e.stopPropagation(); handleToggleFavorite(); }} size="icon" className="bg-muted">
             <Heart size={16} className={isFavorited ? 'fill-primary text-primary' : ''} />
           </Button>
           <Dialog open={isAddToPlaylistModalOpen} onOpenChange={setIsAddToPlaylistModalOpen}>
             <DialogTrigger asChild>
-              <Button size="icon" className="bg-muted">
+              <Button size="icon" className="bg-muted" onClick={(e) => e.stopPropagation()}>
                 <PlusCircle size={16} />
               </Button>
             </DialogTrigger>
