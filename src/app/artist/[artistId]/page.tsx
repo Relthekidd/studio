@@ -11,7 +11,7 @@ import {
 
 import { db } from '@/lib/firebase';
 import SectionTitle from '@/components/SectionTitle';
-import AlbumCard from '@/components/AlbumCard';
+import { AlbumCard } from '@/components/AlbumCard';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DiscAlbum, Music, MicVocal } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

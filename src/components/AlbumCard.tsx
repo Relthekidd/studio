@@ -11,8 +11,8 @@ import { useState } from 'react';
 export function AlbumCard({ item, className }: { item: any, className?: string }) {
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
-  const setTrack = usePlayerStore((state) => state.setTrack);
-  const playlists = []; // TODO: replace with real user's playlists
+  const setTrack = usePlayerStore((state: { setTrack: any; }) => state.setTrack);
+  const playlists: any[] = []; // TODO: replace with real user's playlists
   const isFavorited = false; // TODO: fetch favorite state
   const handleToggleFavorite = () => {}; // TODO: implement
 

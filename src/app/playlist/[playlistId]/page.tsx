@@ -15,7 +15,7 @@ import { db } from '@/lib/firebase';
 import { usePlayer } from '@/contexts/PlayerContext';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import AlbumCard from '@/components/AlbumCard';
+import { AlbumCard } from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
 import type { Track } from '@/contexts/PlayerContext';
 import { PlayCircle, MoreVertical, ArrowLeft } from 'lucide-react';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Track } from '@/contexts/PlayerContext';
-import TrackCard from '@/components/AlbumCard'; // or however you're displaying each track
+import { AlbumCard as TrackCard } from '@/components/AlbumCard'; // or however you're displaying each track
 
 interface SectionProps {
   title: string;

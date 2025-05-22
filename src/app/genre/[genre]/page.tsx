@@ -8,7 +8,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { PlayCircle } from "lucide-react";
 import SectionTitle from "@/components/SectionTitle";
-import AlbumCard from "@/components/AlbumCard";
+import { AlbumCard } from "@/components/AlbumCard";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { Track } from "@/contexts/PlayerContext";

@@ -1,6 +1,6 @@
 'use client';
 
-import AlbumCard from '@/components/AlbumCard';
+import { AlbumCard } from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
 import type { Track } from '@/contexts/PlayerContext';
 import { Button } from '@/components/ui/button';

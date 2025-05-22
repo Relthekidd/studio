@@ -2,7 +2,7 @@
 "use client";
 
 import { Track } from "@/contexts/PlayerContext";
-import AlbumCard from "@/components/AlbumCard";
+import { AlbumCard } from "@/components/AlbumCard";
 
 interface Top5ShowcaseProps {
   title: string;
