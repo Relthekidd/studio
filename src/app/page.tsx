@@ -1,59 +1,65 @@
 'use client';
 
-import AlbumCard from '@/components/AlbumCard';
-import SectionTitle from '@/components/SectionTitle';
+import { useEffect, useState } from 'react';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import type { Track } from '@/contexts/PlayerContext';
-import { generalMockItems } from '@/lib/mockData'; // Using centralized mock data
+import Section from '@/components/section';
+import Loader from '@/components/loader';
 
-export default function HomePage() {
-  // TODO: Replace with Firebase calls to fetch personalized data
-  const normalize = (item: any): Track => ({
-    ...item,
-    type: item.type ?? 'track',
-  });
+export default function Home() {
+  const [recentSongs, setRecentSongs] = useState<Track[]>([]);
+  const [trendingSongs, setTrendingSongs] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const recentlyPlayed = generalMockItems.slice(0, 5).map(normalize);
-  const madeForYou = generalMockItems.slice(1, 6).map(normalize);
-  const trending = generalMockItems.slice(2, 7).map(normalize);
-  const newReleases = [...generalMockItems].reverse().slice(0, 5).map(normalize);
+  useEffect(() => {
+    async function fetchSongs() {
+      try {
+        const songsRef = collection(db, 'songs');
+        const q = query(songsRef, orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+
+        const tracks: Track[] = snapshot.docs.map((doc) => {
+          const data = doc.data();
+
+          return {
+            id: doc.id,
+            title: data.title,
+            artist: data.artist,
+            audioUrl: data.audioUrl,
+            imageUrl: data.coverUrl, // required by Track interface
+            duration: data.duration || 0,
+            type: 'track',
+          };
+        });
+
+        setRecentSongs(tracks.slice(0, 10));
+        setTrendingSongs(tracks.slice(0, 5));
+      } catch (error) {
+        console.error('[Home] Error fetching songs:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSongs();
+  }, []);
+
+  if (loading) return <Loader />;
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-8 md:space-y-12">
-      <section aria-labelledby="recently-played-title">
-        <SectionTitle id="recently-played-title">Recently Played</SectionTitle>
-        <div className="flex overflow-x-auto space-x-4 md:space-x-6 pb-4 -mx-4 px-4 md:-mx-6 md:px-6 scrollbar-thin scrollbar-thumb-muted-foreground/50 scrollbar-track-transparent">
-          {recentlyPlayed.map((item) => (
-            <AlbumCard key={`recent-${item.id}`} item={item} className="flex-shrink-0 w-36 sm:w-40 md:w-48" />
-          ))}
-        </div>
-      </section>
+    <div className="p-6 space-y-12">
+      <h1 className="text-3xl font-bold text-white">Welcome back</h1>
 
-      <section aria-labelledby="made-for-you-title">
-        <SectionTitle id="made-for-you-title">Made For You</SectionTitle>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-          {madeForYou.map((item) => (
-            <AlbumCard key={`foryou-${item.id}`} item={item} />
-          ))}
-        </div>
-      </section>
+      <Section
+        title="Recently Added"
+        items={recentSongs}
+      />
 
-      <section aria-labelledby="trending-title">
-        <SectionTitle id="trending-title">Trending Now</SectionTitle>
-        <div className="flex overflow-x-auto space-x-4 md:space-x-6 pb-4 -mx-4 px-4 md:-mx-6 md:px-6 scrollbar-thin scrollbar-thumb-muted-foreground/50 scrollbar-track-transparent">
-          {trending.map((item) => (
-            <AlbumCard key={`trending-${item.id}`} item={item} className="flex-shrink-0 w-36 sm:w-40 md:w-48" />
-          ))}
-        </div>
-      </section>
-
-      <section aria-labelledby="new-releases-title">
-        <SectionTitle id="new-releases-title">New Releases</SectionTitle>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-          {newReleases.map((item) => (
-            <AlbumCard key={`new-${item.id}`} item={item} />
-          ))}
-        </div>
-      </section>
+      <Section
+        title="Trending"
+        items={trendingSongs}
+      />
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthProvider';
@@ -52,12 +52,25 @@ export default function AdminUploadPage() {
       const coverURL = await getDownloadURL(coverRef);
       const audioURL = await getDownloadURL(audioRef);
 
-      await addDoc(collection(db, type === 'album' ? 'albums' : 'songs'), {
+      // Calculate audio duration
+      const audioElement = new Audio(audioURL);
+      const duration = await new Promise<number>((resolve) => {
+        audioElement.addEventListener('loadedmetadata', () => {
+          resolve(audioElement.duration);
+        });
+      });
+
+      // Generate custom ID for track
+      const newDocRef = doc(collection(db, type === 'album' ? 'albums' : 'songs'));
+
+      await setDoc(newDocRef, {
+        id: newDocRef.id,
         title,
         artist,
         genre,
         audioURL,
         coverURL,
+        duration,
         type,
         createdAt: serverTimestamp(),
       });
@@ -79,32 +92,38 @@ export default function AdminUploadPage() {
   return (
     <div className="container max-w-xl py-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Admin Upload</h1>
+        <h1 className="text-2xl font-bold">Upload New Track</h1>
         <Link href="/profile" className="text-sm text-muted-foreground hover:underline flex items-center gap-1">
           <ArrowLeft size={16} /> Back
         </Link>
       </div>
 
       <div className="space-y-4">
-        <Label>Type</Label>
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value as 'single' | 'album')}
-          className="border px-3 py-2 rounded w-full"
-        >
-          <option value="single">Single</option>
-          <option value="album">Album</option>
-        </select>
+        <div className="space-y-2">
+          <Label>Type</Label>
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as 'single' | 'album')}
+            className="border px-3 py-2 rounded w-full"
+          >
+            <option value="single">Single</option>
+            <option value="album">Album</option>
+          </select>
+        </div>
 
         <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input placeholder="Artist" value={artist} onChange={(e) => setArtist(e.target.value)} />
         <Input placeholder="Genre" value={genre} onChange={(e) => setGenre(e.target.value)} />
 
-        <Label>Cover Image</Label>
-        <Input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
+        <div className="space-y-2">
+          <Label>Cover Image</Label>
+          <Input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
+        </div>
 
-        <Label>Audio File</Label>
-        <Input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} />
+        <div className="space-y-2">
+          <Label>Audio File</Label>
+          <Input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} />
+        </div>
 
         <Button disabled={uploading} onClick={handleUpload} className="w-full">
           {uploading ? 'Uploading...' : 'Upload'}

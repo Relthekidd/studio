@@ -1,51 +1,81 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
 import {
   onAuthStateChanged,
   signOut,
-  type User,
+  type User as FirebaseUser,
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+
+type Role = 'admin' | 'user';
+
+export interface ExtendedUser extends FirebaseUser {
+  displayName: string | null;
+  username?: string;
+  role?: Role;
+}
 
 interface AuthContextType {
-  user: (User & { role?: string }) | null;
-  isAdmin: boolean;
+  user: ExtendedUser | null;
   loading: boolean;
+  isAdmin: boolean;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  isAdmin: false,
   loading: true,
+  isAdmin: false,
   logout: async () => {},
 });
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<(User & { role?: string }) | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userRef = doc(db, 'users', firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
-        let profileData: any = {};
-        if (userSnap.exists()) {
-          profileData = userSnap.data();
-        }
-        console.log('[AuthProvider] Firestore profileData:', profileData); // <-- Add this line
-        const role = profileData.role || 'user';
-        setUser({ ...firebaseUser, ...profileData, role });
-      } else {
+      if (!firebaseUser) {
         setUser(null);
+        setIsAdmin(false);
+        setLoading(false);
+        return;
       }
+
+      const userRef = doc(db, 'users', firebaseUser.uid);
+      const userSnap = await getDoc(userRef);
+
+      let profileData: any = {};
+      if (userSnap.exists()) {
+        profileData = userSnap.data();
+        console.log('[AuthProvider] Firestore profileData:', profileData);
+      } else {
+        console.warn('[AuthProvider] No profile document found for UID:', firebaseUser.uid);
+      }
+
+      const extendedUser: ExtendedUser = {
+        ...firebaseUser,
+        displayName: profileData.displayName ?? firebaseUser.displayName ?? '',
+        username: profileData.username ?? '',
+        role: profileData.role as Role ?? 'user',
+      };
+
+      setUser(extendedUser);
+      setIsAdmin(extendedUser.role === 'admin');
       setLoading(false);
     });
 
@@ -55,13 +85,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     await signOut(auth);
     setUser(null);
+    setIsAdmin(false);
   };
 
-  const isAdmin = user?.role === 'admin';
-
   return (
-    <AuthContext.Provider value={{ user, isAdmin, loading, logout }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
+
+export const useAuth = () => useContext(AuthContext);

@@ -167,6 +167,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  type Playlist = { id: string; name: string };
+const playlists: Playlist[] = []; // empty for now
+
+
   useEffect(() => {
     if (!audioRef.current) return;
 

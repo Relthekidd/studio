@@ -1,17 +1,16 @@
-"use client";
+'use client';
 
 import Link from 'next/link';
 import { Home, Search, Compass, Library, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
-import { useUser } from '@/hooks/useUser';
-// import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthProvider';
 
 const BottomNavigationBar = () => {
   const pathname = usePathname();
-  const { user } = useUser();
-  // const { isAdmin } = useAuth();
-  const isAdmin = false; // TODO: Replace with actual admin check when useAuth is available
+  const { user } = useAuth();
+
+  const isAdmin = user?.role === 'admin';
 
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
@@ -20,10 +19,8 @@ const BottomNavigationBar = () => {
     { href: '/library', label: 'Library', icon: Library },
   ];
 
-  // Admin-specific navigation items
   const adminNavItems = [
     { href: '/admin/upload', label: 'Upload', icon: Upload },
-    // Add more admin links here if needed
   ];
 
   return (
@@ -47,7 +44,6 @@ const BottomNavigationBar = () => {
         </Button>
       ))}
 
-      {/* Render admin nav items only if user is admin */}
       {isAdmin &&
         adminNavItems.map((item) => (
           <Button
@@ -69,8 +65,6 @@ const BottomNavigationBar = () => {
         ))}
     </nav>
   );
-  // Debug: log user info
-  console.log('[BottomNavigationBar] user:', user);
 };
 
 export default BottomNavigationBar;

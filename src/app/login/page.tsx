@@ -51,8 +51,8 @@ export default function LoginPage() {
         // Determine role
         const role = email === 'angladea16@gmail.com' ? 'admin' : 'listener';
 
-        // Create Firestore profile
-        await setDoc(doc(db, 'profiles', newUser.uid), {
+        // Create Firestore profile in the /users collection
+        await setDoc(doc(db, 'users', newUser.uid), {
           email: newUser.email,
           displayName: 'Barry Allen',
           role,

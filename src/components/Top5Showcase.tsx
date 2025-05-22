@@ -10,14 +10,15 @@ interface Top5ShowcaseProps {
   type: 'artist' | 'track';
 }
 
-export default function Top5Showcase({ title, items, type }: Top5ShowcaseProps) {
+export default function Top5Showcase({ title, items = [], type }: Top5ShowcaseProps) {
+  // Handle empty or undefined items
   if (!items || items.length === 0) return null;
 
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">{title}</h3>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {items.slice(0, 5).map((item, index) => (
+        {items.slice(0, 5).map((item) => (
           <AlbumCard key={item.id} item={{ ...item, type }} />
         ))}
       </div>
