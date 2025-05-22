@@ -17,7 +17,7 @@ import Link from 'next/link';
 
 export default function AdminUploadPage() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
   const { toast } = useToast();
 
   const [title, setTitle] = useState('');
@@ -29,7 +29,7 @@ export default function AdminUploadPage() {
   const [type, setType] = useState<'single' | 'album'>('single');
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) {
+    if (!loading && (!user || !isAdmin)) {
       toast({ title: 'Access Denied', description: 'Admin access only.' });
       router.replace('/');
     }

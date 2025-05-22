@@ -3,10 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
   onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut,
-  updateProfile,
   type User,
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -14,11 +11,17 @@ import { auth, db } from '@/lib/firebase';
 
 interface AuthContextType {
   user: (User & { role?: string }) | null;
+  isAdmin: boolean;
   loading: boolean;
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true, logout: async () => {} });
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isAdmin: false,
+  loading: true,
+  logout: async () => {},
+});
 
 export function useAuth() {
   return useContext(AuthContext);
@@ -33,9 +36,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (firebaseUser) {
         const userRef = doc(db, 'users', firebaseUser.uid);
         const userSnap = await getDoc(userRef);
-        const role = userSnap.exists() ? userSnap.data().role : undefined;
-
-        setUser({ ...firebaseUser, role });
+        let profileData: any = {};
+        if (userSnap.exists()) {
+          profileData = userSnap.data();
+        }
+        console.log('[AuthProvider] Firestore profileData:', profileData); // <-- Add this line
+        const role = profileData.role || 'user';
+        setUser({ ...firebaseUser, ...profileData, role });
       } else {
         setUser(null);
       }
@@ -50,5 +57,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
-  return <AuthContext.Provider value={{ user, loading, logout }}>{children}</AuthContext.Provider>;
+  const isAdmin = user?.role === 'admin';
+
+  return (
+    <AuthContext.Provider value={{ user, isAdmin, loading, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }

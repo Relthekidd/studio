@@ -35,13 +35,23 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     );
   }
 
+  const isAdmin = user?.role === 'admin';
+
   return (
     <div className="relative min-h-screen pb-28">
       {user && (
         <header className="fixed top-0 inset-x-0 z-50 border-b border-border bg-background/75 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <SonixLogo className="h-8 w-auto" />
-            <ProfileMenu isAuthenticated={!!user} userId={user.uid} onLogout={logout} />
+            <div className="flex items-center gap-4">
+              {/* Admin badge or link */}
+              {isAdmin && (
+                <span className="px-2 py-1 text-xs bg-yellow-200 text-yellow-900 rounded font-semibold">
+                  Admin
+                </span>
+              )}
+              <ProfileMenu isAuthenticated={!!user} userId={user.uid} onLogout={logout} />
+            </div>
           </div>
         </header>
       )}
