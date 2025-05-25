@@ -85,9 +85,9 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col justify-center items-center px-4">
+    <main className="flex min-h-screen flex-col items-center justify-center px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold text-center">
+        <h1 className="text-center text-2xl font-bold">
           {mode === 'login' ? 'Login' : 'Create Account'}
         </h1>
 
@@ -114,26 +114,18 @@ export default function LoginPage() {
           Continue with Google
         </Button>
 
-        <p className="text-sm text-center">
+        <p className="text-center text-sm">
           {mode === 'login' ? (
             <>
               Don't have an account?{' '}
-              <button
-                type="button"
-                onClick={() => setMode('signup')}
-                className="underline"
-              >
+              <button type="button" onClick={() => setMode('signup')} className="underline">
                 Sign up
               </button>
             </>
           ) : (
             <>
               Already have an account?{' '}
-              <button
-                type="button"
-                onClick={() => setMode('login')}
-                className="underline"
-              >
+              <button type="button" onClick={() => setMode('login')} className="underline">
                 Log in
               </button>
             </>

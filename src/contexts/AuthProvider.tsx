@@ -1,91 +1,66 @@
 'use client';
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from 'react';
-import {
-  onAuthStateChanged,
-  signOut,
-  type User as FirebaseUser,
-} from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { onAuthStateChanged, getAuth, signOut, User } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { firebaseApp, db } from '@/lib/firebase';
 
-type Role = 'admin' | 'user';
-
-export interface ExtendedUser extends FirebaseUser {
-  displayName: string | null;
-  username?: string;
-  role?: Role;
+interface ExtendedUser extends User {
+  role?: 'admin' | 'user' | 'moderator'; // Add the role property
 }
 
 interface AuthContextType {
   user: ExtendedUser | null;
   loading: boolean;
   isAdmin: boolean;
-  logout: () => Promise<void>;
+  logout: () => Promise<void>; // Add the logout function
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  isAdmin: false,
-  logout: async () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const auth = getAuth(firebaseApp);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
+      if (firebaseUser) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUser({ ...firebaseUser, role: userData.role }); // Merge role into user object
+            setIsAdmin(userData.role === 'admin'); // Check if the user is an admin
+          } else {
+            setUser({ ...firebaseUser, role: 'user' }); // Default role to 'user'
+            setIsAdmin(false);
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+          setUser({ ...firebaseUser, role: 'user' }); // Default role to 'user' on error
+          setIsAdmin(false);
+        }
+      } else {
         setUser(null);
         setIsAdmin(false);
-        setLoading(false);
-        return;
       }
-
-      const userRef = doc(db, 'users', firebaseUser.uid);
-      const userSnap = await getDoc(userRef);
-
-      let profileData: any = {};
-      if (userSnap.exists()) {
-        profileData = userSnap.data();
-        console.log('[AuthProvider] Firestore profileData:', profileData);
-      } else {
-        console.warn('[AuthProvider] No profile document found for UID:', firebaseUser.uid);
-      }
-
-      const extendedUser: ExtendedUser = {
-        ...firebaseUser,
-        displayName: profileData.displayName ?? firebaseUser.displayName ?? '',
-        username: profileData.username ?? '',
-        role: profileData.role as Role ?? 'user',
-      };
-
-      setUser(extendedUser);
-      setIsAdmin(extendedUser.role === 'admin');
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth]);
 
+  // Implement the logout function
   const logout = async () => {
-    await signOut(auth);
-    setUser(null);
-    setIsAdmin(false);
+    try {
+      await signOut(auth); // Sign out the user using Firebase Auth
+      setUser(null); // Clear the user state
+      setIsAdmin(false); // Reset admin status
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   return (
@@ -95,4 +70,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  return context;
+};

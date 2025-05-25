@@ -50,8 +50,8 @@ export default function AccountSetupPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 p-6 bg-card border rounded-lg shadow">
-      <h1 className="text-xl font-semibold mb-4">Finish Setting Up Your Account</h1>
+    <div className="mx-auto mt-12 max-w-md rounded-lg border bg-card p-6 shadow">
+      <h1 className="mb-4 text-xl font-semibold">Finish Setting Up Your Account</h1>
 
       <div className="space-y-4">
         <Input

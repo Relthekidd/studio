@@ -4,17 +4,16 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useParams, useRouter } from 'next/navigation';
 import { getAuth } from 'firebase/auth';
-import {
-  getDoc,
-  getDocs,
-  collection,
-  deleteDoc,
-  doc
-} from 'firebase/firestore';
+import { getDoc, getDocs, collection, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { usePlayer } from '@/contexts/PlayerContext';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import { AlbumCard } from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
 import type { Track } from '@/contexts/PlayerContext';
@@ -74,8 +73,8 @@ export default function PlaylistDetailPage() {
   };
 
   return (
-    <div className="container py-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="container space-y-6 py-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => router.back()} size="icon">
             <ArrowLeft />
@@ -104,13 +103,13 @@ export default function PlaylistDetailPage() {
       </div>
 
       {tracks.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {tracks.map((track) => (
             <AlbumCard key={track.id} item={{ ...track, type: 'track' }} />
           ))}
         </div>
       ) : (
-        <div className="text-muted-foreground text-center py-12">
+        <div className="py-12 text-center text-muted-foreground">
           No tracks in this playlist yet.
         </div>
       )}

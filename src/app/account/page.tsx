@@ -72,7 +72,7 @@ export default function AccountPage() {
         title: 'Profile Updated',
         description: 'Your settings have been saved successfully.',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to update profile.',
@@ -93,15 +93,18 @@ export default function AccountPage() {
   if (loading || !user) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="container mx-auto space-y-6 px-4 py-6">
       <div className="flex items-center justify-between">
         <SectionTitle>Account</SectionTitle>
-        <Link href="/library" className="text-sm text-muted-foreground hover:underline flex items-center gap-1">
+        <Link
+          href="/library"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:underline"
+        >
           <ArrowLeft size={16} /> Back
         </Link>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid gap-6 md:grid-cols-3">
         {/* Profile Card */}
         <Card className="md:col-span-2">
           <CardHeader>
@@ -111,8 +114,8 @@ export default function AccountPage() {
           <CardContent>
             <form onSubmit={handleUpdateProfile} className="space-y-6">
               <div className="flex items-center gap-6">
-                <div className="relative group">
-                  <Avatar className="h-24 w-24">
+                <div className="group relative">
+                  <Avatar className="size-24">
                     <AvatarImage src={user.photoURL || undefined} />
                     <AvatarFallback>{displayName?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
                   </Avatar>
@@ -120,7 +123,7 @@ export default function AccountPage() {
                     size="icon"
                     variant="outline"
                     onClick={handleAvatarChange}
-                    className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-white"
+                    className="absolute bottom-0 right-0 size-8 rounded-full bg-white"
                   >
                     <Camera size={16} />
                   </Button>
@@ -138,34 +141,58 @@ export default function AccountPage() {
 
               <div>
                 <Label>Bio</Label>
-                <Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell us about you..." />
+                <Textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Tell us about you..."
+                />
               </div>
 
               <div className="space-y-3 pt-4">
-                <div className="flex items-center justify-between border p-3 rounded">
+                <div className="flex items-center justify-between rounded border p-3">
                   <Label htmlFor="isProfilePublic" className="flex flex-col">
                     Public Profile
-                    <span className="text-xs text-muted-foreground">Let others view your profile.</span>
+                    <span className="text-xs text-muted-foreground">
+                      Let others view your profile.
+                    </span>
                   </Label>
-                  <Switch id="isProfilePublic" checked={isProfilePublic} onCheckedChange={setIsProfilePublic} />
+                  <Switch
+                    id="isProfilePublic"
+                    checked={isProfilePublic}
+                    onCheckedChange={setIsProfilePublic}
+                  />
                 </div>
-                <div className="flex items-center justify-between border p-3 rounded">
+                <div className="flex items-center justify-between rounded border p-3">
                   <Label htmlFor="showFavoritesPublicly" className="flex flex-col">
                     Show Favorites
-                    <span className="text-xs text-muted-foreground">Display liked music on your profile.</span>
+                    <span className="text-xs text-muted-foreground">
+                      Display liked music on your profile.
+                    </span>
                   </Label>
-                  <Switch id="showFavoritesPublicly" checked={showFavoritesPublicly} onCheckedChange={setShowFavoritesPublicly} />
+                  <Switch
+                    id="showFavoritesPublicly"
+                    checked={showFavoritesPublicly}
+                    onCheckedChange={setShowFavoritesPublicly}
+                  />
                 </div>
-                <div className="flex items-center justify-between border p-3 rounded">
+                <div className="flex items-center justify-between rounded border p-3">
                   <Label htmlFor="showTopStatsPublicly" className="flex flex-col">
                     Show Top Stats
-                    <span className="text-xs text-muted-foreground">Display top artists and tracks.</span>
+                    <span className="text-xs text-muted-foreground">
+                      Display top artists and tracks.
+                    </span>
                   </Label>
-                  <Switch id="showTopStatsPublicly" checked={showTopStatsPublicly} onCheckedChange={setShowTopStatsPublicly} />
+                  <Switch
+                    id="showTopStatsPublicly"
+                    checked={showTopStatsPublicly}
+                    onCheckedChange={setShowTopStatsPublicly}
+                  />
                 </div>
               </div>
 
-              <Button type="submit" className="mt-6 w-full md:w-auto">Update Profile</Button>
+              <Button type="submit" className="mt-6 w-full md:w-auto">
+                Update Profile
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -178,7 +205,9 @@ export default function AccountPage() {
               <CardDescription>Manage your password</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">Change Password</Button>
+              <Button variant="outline" className="w-full">
+                Change Password
+              </Button>
             </CardContent>
           </Card>
           <Card>
@@ -187,8 +216,12 @@ export default function AccountPage() {
               <CardDescription>Current Plan: Free Tier</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="link" className="text-sm p-0">Upgrade to Premium</Button>
-              <Button onClick={handleLogout} className="w-full mt-4">Log Out</Button>
+              <Button variant="link" className="p-0 text-sm">
+                Upgrade to Premium
+              </Button>
+              <Button onClick={handleLogout} className="mt-4 w-full">
+                Log Out
+              </Button>
             </CardContent>
           </Card>
         </div>

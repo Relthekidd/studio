@@ -5,19 +5,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { useUser } from '@/hooks/useUser';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import {
-  collection,
-  addDoc,
-  getDocs,
-  doc
-} from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc } from 'firebase/firestore';
 import type { Track } from '@/contexts/PlayerContext';
 
 interface Props {
@@ -33,7 +28,7 @@ export default function AddToPlaylistModal({ trigger, track }: Props) {
     const fetchPlaylists = async () => {
       if (!user?.uid) return;
       const snap = await getDocs(collection(db, 'users', user.uid, 'playlists'));
-      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setPlaylists(list);
     };
     fetchPlaylists();
@@ -59,8 +54,13 @@ export default function AddToPlaylistModal({ trigger, track }: Props) {
         </DialogHeader>
         <div className="space-y-2">
           {playlists.length > 0 ? (
-            playlists.map(pl => (
-              <Button key={pl.id} variant="outline" className="w-full justify-start" onClick={() => addToPlaylist(pl.id)}>
+            playlists.map((pl) => (
+              <Button
+                key={pl.id}
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => addToPlaylist(pl.id)}
+              >
                 {pl.title}
               </Button>
             ))

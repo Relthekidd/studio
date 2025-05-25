@@ -10,7 +10,7 @@ export default function SectionTitle({ children, className = '', id }: SectionTi
   return (
     <h2
       id={id}
-      className={`text-2xl md:text-3xl font-bold text-foreground mb-4 md:mb-6 ${className}`}
+      className={`mb-4 text-2xl font-bold text-foreground md:mb-6 md:text-3xl ${className}`}
     >
       {children}
     </h2>

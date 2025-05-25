@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,13 @@ import { db } from '@/lib/firebase';
 import { useUser } from '@/hooks/useUser';
 import { toast } from '@/hooks/use-toast';
 
-export default function EditPlaylistModal({ playlistId, currentTitle }: { playlistId: string; currentTitle: string }) {
+export default function EditPlaylistModal({
+  playlistId,
+  currentTitle,
+}: {
+  playlistId: string;
+  currentTitle: string;
+}) {
   const { user } = useUser();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(currentTitle);
@@ -41,7 +47,9 @@ export default function EditPlaylistModal({ playlistId, currentTitle }: { playli
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full text-left">Edit Playlist</Button>
+        <Button variant="ghost" className="w-full text-left">
+          Edit Playlist
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

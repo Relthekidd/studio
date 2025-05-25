@@ -2,12 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import {
-  collection,
-  query,
-  where,
-  getDocs
-} from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
 import SectionTitle from '@/components/SectionTitle';
@@ -40,68 +35,69 @@ export default function ArtistPage() {
       const albumSnap = await getDocs(
         query(collection(db, 'albums'), where('artist', '==', decodedId))
       );
-      setAlbums(albumSnap.docs.map(doc => ({
-        id: doc.id,
-        title: doc.data().title || 'Untitled',
-        imageUrl: doc.data().imageUrl || '',
-        artist: doc.data().artist || decodedId,
-        genre: doc.data().genre || '',
-        type: 'album' as const,
-      })));
+      setAlbums(
+        albumSnap.docs.map((doc) => ({
+          id: doc.id,
+          title: doc.data().title || 'Untitled',
+          artist: doc.data().artist || decodedId,
+          genre: doc.data().genre || '',
+          type: 'album' as const,
+          audioURL: '', // Provide default value for required Track property
+          coverURL: doc.data().coverURL || '', // Use imageUrl as coverURL
+        }))
+      );
 
       const singleSnap = await getDocs(
         query(collection(db, 'tracks'), where('artist', '==', decodedId))
       );
-      setSingles(singleSnap.docs.map(doc => ({
-        id: doc.id,
-        title: doc.data().title || 'Untitled',
-        imageUrl: doc.data().imageUrl || '',
-        artist: doc.data().artist || decodedId,
-        audioSrc: doc.data().audioSrc || '',
-        genre: doc.data().genre || '',
-        type: 'track' as const,
-      })));
+      setSingles(
+        singleSnap.docs.map((doc) => ({
+          id: doc.id,
+          title: doc.data().title || 'Untitled',
+          artist: doc.data().artist || decodedId,
+          genre: doc.data().genre || '',
+          type: 'track' as const,
+          audioURL: doc.data().audioURL || doc.data().audioSrc || '', // fallback to audioSrc if audioURL is missing
+          coverURL: doc.data().coverURL || doc.data().imageUrl || '', // fallback to imageUrl if coverURL is missing
+        }))
+      );
 
       const featuredSnap = await getDocs(
         query(collection(db, 'tracks'), where('artists', 'array-contains', decodedId))
       );
       const filtered = featuredSnap.docs
-        .map(doc => {
+        .map((doc) => {
           const data = doc.data();
           return {
             id: doc.id,
             title: data.title || 'Untitled',
-            imageUrl: data.imageUrl || '',
             artist: data.artist || '',
-            audioSrc: data.audioSrc || '',
             genre: data.genre || '',
             type: 'track' as const,
+            audioURL: data.audioURL || data.audioSrc || '',
+            coverURL: data.coverURL || data.imageUrl || '',
           };
         })
-        .filter(track => track.artist !== decodedId);
+        .filter((track) => track.artist !== decodedId);
       setFeaturedTracks(filtered);
     };
 
     if (artistId) fetchData();
-  }, [artistId]);
+}, [artistId, decodedId]);
 
-  const renderSection = (
-    items: Track[],
-    emptyMessage: string,
-    icon: React.ReactNode
-  ) => {
+  const renderSection = (items: Track[], emptyMessage: string, icon: React.ReactNode) => {
     if (items.length === 0) {
       return (
-        <div className="text-center py-8 text-muted-foreground">
-          <div className="inline-block bg-muted p-3 rounded-full mb-2">{icon}</div>
+        <div className="py-8 text-center text-muted-foreground">
+          <div className="mb-2 inline-block rounded-full bg-muted p-3">{icon}</div>
           <p>{emptyMessage}</p>
         </div>
       );
     }
 
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-        {items.map(item => (
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
+        {items.map((item) => (
           <AlbumCard key={item.id} item={item} />
         ))}
       </div>
@@ -109,32 +105,23 @@ export default function ArtistPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-10 space-y-6 md:space-y-8">
+    <div className="container mx-auto space-y-6 px-4 py-6 md:space-y-8 md:py-10">
       <BackButton />
 
       <Card className="overflow-hidden shadow-xl">
-        <div className="relative h-40 md:h-56 bg-gradient-to-r from-primary/20 to-accent/20" />
+        <div className="relative h-40 bg-gradient-to-r from-primary/20 to-accent/20 md:h-56" />
 
-        <CardContent className="p-4 md:p-6 -mt-20 relative z-10">
-          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4">
-            <Avatar className="h-28 w-28 md:h-36 md:w-36 border-4 border-background shadow-lg">
-              <AvatarImage
-                src={artistProfile?.imageUrl || ''}
-                alt={artistProfile?.name}
-              />
-              <AvatarFallback>
-                {artistProfile?.name?.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
+        <CardContent className="relative z-10 -mt-20 p-4 md:p-6">
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-end">
+            <Avatar className="size-28 border-4 border-background shadow-lg md:size-36">
+              <AvatarImage src={artistProfile?.imageUrl || ''} alt={artistProfile?.name} />
+              <AvatarFallback>{artistProfile?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
 
             <div className="text-center sm:text-left">
-              <h1 className="text-3xl md:text-4xl font-bold">
-                {artistProfile?.name || decodedId}
-              </h1>
+              <h1 className="text-3xl font-bold md:text-4xl">{artistProfile?.name || decodedId}</h1>
               {artistProfile?.bio && (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {artistProfile.bio}
-                </p>
+                <p className="mt-2 text-sm text-muted-foreground">{artistProfile.bio}</p>
               )}
             </div>
           </div>
@@ -142,17 +129,17 @@ export default function ArtistPage() {
       </Card>
 
       <Tabs defaultValue="albums">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 mb-6 bg-card border border-border">
+        <TabsList className="mb-6 grid w-full grid-cols-2 border border-border bg-card md:grid-cols-3">
           <TabsTrigger value="albums">
-            <DiscAlbum className="mr-2 h-4 w-4" />
+            <DiscAlbum className="mr-2 size-4" />
             Albums
           </TabsTrigger>
           <TabsTrigger value="singles">
-            <Music className="mr-2 h-4 w-4" />
+            <Music className="mr-2 size-4" />
             Singles
           </TabsTrigger>
           <TabsTrigger value="featured">
-            <MicVocal className="mr-2 h-4 w-4" />
+            <MicVocal className="mr-2 size-4" />
             Appears On
           </TabsTrigger>
         </TabsList>

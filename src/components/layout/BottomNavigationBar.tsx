@@ -19,27 +19,23 @@ const BottomNavigationBar = () => {
     { href: '/library', label: 'Library', icon: Library },
   ];
 
-  const adminNavItems = [
-    { href: '/admin/upload', label: 'Upload', icon: Upload },
-  ];
+  const adminNavItems = [{ href: '/admin/upload', label: 'Upload', icon: Upload }];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-card/95 backdrop-blur-md border-t border-border shadow-lg z-40 flex items-center justify-around md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-center justify-around border-t border-border bg-card/95 shadow-lg backdrop-blur-md md:hidden">
       {navItems.map((item) => (
         <Button
           asChild
           key={item.label}
           variant="ghost"
-          className={`flex flex-col items-center justify-center h-full p-2 rounded-none flex-1 ${
-            pathname === item.href
-              ? 'text-primary'
-              : 'text-muted-foreground hover:text-foreground'
+          className={`flex h-full flex-1 flex-col items-center justify-center rounded-none p-2 ${
+            pathname === item.href ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
           }`}
           aria-current={pathname === item.href ? 'page' : undefined}
         >
           <Link href={item.href}>
             <item.icon size={22} />
-            <span className="text-xs mt-0.5">{item.label}</span>
+            <span className="mt-0.5 text-xs">{item.label}</span>
           </Link>
         </Button>
       ))}
@@ -50,7 +46,7 @@ const BottomNavigationBar = () => {
             asChild
             key={item.label}
             variant="ghost"
-            className={`flex flex-col items-center justify-center h-full p-2 rounded-none flex-1 ${
+            className={`flex h-full flex-1 flex-col items-center justify-center rounded-none p-2 ${
               pathname === item.href
                 ? 'text-primary'
                 : 'text-muted-foreground hover:text-foreground'
@@ -59,7 +55,7 @@ const BottomNavigationBar = () => {
           >
             <Link href={item.href}>
               <item.icon size={22} />
-              <span className="text-xs mt-0.5">{item.label}</span>
+              <span className="mt-0.5 text-xs">{item.label}</span>
             </Link>
           </Button>
         ))}

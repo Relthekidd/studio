@@ -23,8 +23,8 @@ export default function DiscoverPage() {
           id: doc.id,
           title: data.title,
           artist: data.artist,
-          audioUrl: data.audioUrl,
-          imageUrl: data.coverUrl, // Required by <AlbumCard />
+          audioURL: data.audioURL,
+          coverURL: data.coverURL, // Required by <AlbumCard />
           duration: data.duration,
           type: 'track',
         };
@@ -41,21 +41,21 @@ export default function DiscoverPage() {
   const suggestions = tracks.slice(10, 15); // Placeholder – personalized logic later
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-10 md:space-y-14">
+    <div className="container mx-auto space-y-10 p-4 md:space-y-14 md:p-6">
       <SectionTitle className="text-3xl font-bold text-foreground">Discover New Music</SectionTitle>
 
       <section>
         <SectionTitle className="text-2xl">Newest Releases</SectionTitle>
-        <div className="flex overflow-x-auto space-x-4 pb-4 -mx-4 px-4 scrollbar-thin scrollbar-thumb-muted-foreground/50 scrollbar-track-transparent">
+<div className="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent -mx-4 flex space-x-4 overflow-x-auto px-4 pb-4">
           {newestReleases.map((track) => (
-            <AlbumCard key={track.id} item={track} className="flex-shrink-0 w-36 sm:w-40 md:w-48" />
+            <AlbumCard key={track.id} item={track} className="w-36 shrink-0 sm:w-40 md:w-48" />
           ))}
         </div>
       </section>
 
       <section>
         <SectionTitle className="text-2xl">Trending</SectionTitle>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6">
           {trending.map((track) => (
             <AlbumCard key={track.id} item={track} />
           ))}
@@ -64,7 +64,7 @@ export default function DiscoverPage() {
 
       <section>
         <SectionTitle className="text-2xl">Suggested For You</SectionTitle>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6">
           {suggestions.map((track) => (
             <AlbumCard key={track.id} item={track} />
           ))}

@@ -1,60 +1,95 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Heart, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { RadioGroup } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { usePlayer } from '@/contexts/PlayerContext';
-import { useState } from 'react';
+import type { Track } from '@/contexts/PlayerContext';
+import { useState, useEffect } from 'react';
+import { formatArtists } from '@/utils/formatArtists';
+import { saveLikedSong, isSongLiked } from '@/utils/saveLibraryData'; // Import utility functions
+import { useUser } from '@/hooks/useUser';
 
-export function AlbumCard({ item, className }: { item: any, className?: string }) {
+export function AlbumCard({ item, className }: { item: Track; className?: string }) {
+  const router = useRouter();
+  const { user } = useUser();
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
-  const { setTrack, play } = usePlayer();
-  const playlists: any[] = []; // TODO: real playlists
-  const isFavorited = false; // TODO: real state
-  const handleToggleFavorite = () => {}; // TODO: implement favorite logic
+  const [isFavorited, setIsFavorited] = useState(false);
 
-  const href = item.type === 'album' ? `/album/${item.id}`
-              : item.type === 'single' ? `/single/${item.id}`
-              : item.type === 'track' && item.albumId ? `/album/${item.albumId}`
-              : item.type === 'artist' ? `/artist/${item.id}`
-              : item.type === 'playlist' ? `/playlist/${item.id}`
-              : '#';
+  // Determine type dynamically: "album" if albumId exists, otherwise "single"
+  const type = item.albumId ? 'album' : 'single';
+  const id = item.id;
 
-  const handlePlayClick = () => {
-    if (item.audioUrl) {
-      setTrack({
-        id: item.id,
-        title: item.title,
-        artist: item.artist,
-        audioUrl: item.audioUrl,
-        imageUrl: item.coverUrl,
-        duration: item.duration || 0,
-        type: item.type || 'track',
-      });
-      play();
+  // Generate the href dynamically based on type and id
+  const href = `/${type}/${id}`;
+
+  // Fetch whether the song is liked
+  useEffect(() => {
+    if (user?.uid) {
+      isSongLiked(user.uid, item.id).then(setIsFavorited);
+    }
+  }, [user?.uid, item.id]);
+
+  const handleCardClick = () => {
+    if (!type || !id) {
+      console.error('Invalid type or id:', { type, id });
+      return;
+    }
+    router.push(href); // Navigate to the details page
+  };
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent click propagation
+    if (!user?.uid) {
+      console.error('User not logged in');
+      return;
+    }
+
+    try {
+      const newFavoritedState = !isFavorited;
+      setIsFavorited(newFavoritedState); // Optimistically update the UI
+      await saveLikedSong(user.uid, item, newFavoritedState, item.id); // Save the liked state in Firestore
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+      setIsFavorited(!isFavorited); // Revert the UI state if an error occurs
     }
   };
 
-  const card = (
+  return (
     <div
-      className={`group relative bg-card/70 hover:bg-card/90 transition-all rounded-xl ${className || 'w-full'} cursor-pointer`}
-      role="button"
-      onClick={handlePlayClick}
+      className={`group relative block rounded-xl bg-card/70 transition-all hover:bg-card/90 ${className || 'w-full'}`}
+      onClick={handleCardClick} // Use router.push for navigation
     >
       <div className="relative aspect-square">
-        <img
-          src={item.coverUrl || '/placeholder.png'}
+        <Image
+          src={item.coverURL && item.coverURL !== '' ? item.coverURL : '/placeholder.png'}
           alt={item.title}
-          className="object-cover w-full h-full rounded-t-xl"
+          width={500}
+          height={500}
+          className="size-full rounded-t-xl object-cover"
         />
-        <div className="absolute top-2 right-2 z-20 flex flex-col gap-1">
-          <Button onClick={(e) => { e.stopPropagation(); handleToggleFavorite(); }} size="icon" className="bg-muted">
+        <div className="absolute right-2 top-2 z-20 flex flex-col gap-1">
+          {/* Like Button */}
+          <Button
+            onClick={handleToggleFavorite}
+            size="icon"
+            className={`bg-muted ${isFavorited ? 'text-primary' : ''}`}
+          >
             <Heart size={16} className={isFavorited ? 'fill-primary text-primary' : ''} />
           </Button>
+
+          {/* Add to Playlist Button */}
           <Dialog open={isAddToPlaylistModalOpen} onOpenChange={setIsAddToPlaylistModalOpen}>
             <DialogTrigger asChild>
               <Button size="icon" className="bg-muted" onClick={(e) => e.stopPropagation()}>
@@ -68,13 +103,11 @@ export function AlbumCard({ item, className }: { item: any, className?: string }
               </DialogHeader>
               <div className="space-y-4">
                 <Label>Existing Playlists</Label>
-                <RadioGroup onValueChange={setSelectedPlaylistId} value={selectedPlaylistId || undefined}>
-                  {playlists.map((pl) => (
-                    <div key={pl.id} className="flex items-center space-x-2">
-                      <RadioGroupItem value={pl.id} id={pl.id} />
-                      <Label htmlFor={pl.id}>{pl.name}</Label>
-                    </div>
-                  ))}
+                <RadioGroup
+                  onValueChange={setSelectedPlaylistId}
+                  value={selectedPlaylistId || undefined}
+                >
+                  {/* playlists.map(pl => (...) ) */}
                 </RadioGroup>
               </div>
             </DialogContent>
@@ -82,17 +115,9 @@ export function AlbumCard({ item, className }: { item: any, className?: string }
         </div>
       </div>
       <div className="p-3">
-        <h3 className="text-sm font-semibold truncate">{item.title}</h3>
-        <p className="text-xs text-muted-foreground truncate">{item.artist || item.description}</p>
+        <h3 className="truncate text-sm font-semibold">{item.title}</h3>
+        <p className="truncate text-xs text-muted-foreground">{formatArtists(item.artist)}</p>
       </div>
     </div>
-  );
-
-  return (
-    <Link href={href} legacyBehavior>
-      <a className="block h-full group/link" aria-label={`View ${item.title}`}>
-        {card}
-      </a>
-    </Link>
   );
 }

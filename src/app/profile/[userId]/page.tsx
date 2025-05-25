@@ -12,6 +12,13 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import SectionTitle from '@/components/SectionTitle';
 
+interface Artist {
+  id: string;
+  title: string;
+  imageUrl: string;
+  type: 'artist';
+}
+
 export default function ProfilePage() {
   const { userId } = useParams();
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -34,11 +41,11 @@ export default function ProfilePage() {
         limit(5)
       );
       const snapshot = await getDocs(top5TracksQuery);
-      const tracks = snapshot.docs.map(doc => doc.data() as Track);
+      const tracks = snapshot.docs.map((doc) => doc.data() as Track);
       setTopTracks(tracks);
 
       const artistsMap = new Map();
-      tracks.forEach(t => {
+      tracks.forEach((t) => {
         if (t.artist) {
           artistsMap.set(t.artist, (artistsMap.get(t.artist) || 0) + 1);
         }
@@ -50,21 +57,26 @@ export default function ProfilePage() {
         .map(([artistName], index) => ({
           id: `artist-${index}`,
           title: artistName,
-          imageUrl: 'https://placehold.co/300x300/333/fff?text=' + encodeURIComponent(artistName),
+          artist: artistName, // Use the artist's name
+          audioURL: '', // Add a placeholder or default audio URL
+          coverURL: 'https://placehold.co/300x300/333/fff?text=' + encodeURIComponent(artistName), // Use as coverUrl
           type: 'artist' as const,
         }));
 
-      setTopArtists(top5Artists);
+      setTopArtists(top5Artists as Track[]);
     };
 
     if (showTop5) fetchProfileAndTop5();
   }, [userId, showTop5]);
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="container mx-auto space-y-6 px-4 py-6">
       <div className="flex items-center justify-between">
         <SectionTitle>{userProfile?.displayName || 'User'}’s Profile</SectionTitle>
-        <Link href="/library" className="text-sm text-muted-foreground hover:underline flex items-center gap-1">
+        <Link
+          href="/library"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:underline"
+        >
           <ArrowLeft size={16} /> Back
         </Link>
       </div>

@@ -26,8 +26,8 @@ export default function Home() {
             id: doc.id,
             title: data.title,
             artist: data.artist,
-            audioUrl: data.audioUrl,
-            imageUrl: data.coverUrl, // required by Track interface
+            audioURL: data.audioURL,
+            coverURL: data.coverURL, // required by Track interface
             duration: data.duration || 0,
             type: 'track',
           };
@@ -48,18 +48,12 @@ export default function Home() {
   if (loading) return <Loader />;
 
   return (
-    <div className="p-6 space-y-12">
+    <div className="space-y-12 p-6">
       <h1 className="text-3xl font-bold text-white">Welcome back</h1>
 
-      <Section
-        title="Recently Added"
-        items={recentSongs}
-      />
+      <Section title="Recently Added" items={recentSongs} />
 
-      <Section
-        title="Trending"
-        items={trendingSongs}
-      />
+      <Section title="Trending" items={trendingSongs} />
     </div>
   );
 }

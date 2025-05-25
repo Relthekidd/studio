@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { Play, Pause, SkipForward, SkipBack, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,13 +10,13 @@ interface PlayerControlsProps {
 }
 
 export default function PlayerControls({ variant = 'mini', className }: PlayerControlsProps) {
-  const { 
-    currentTrack, 
-    isPlaying, 
-    togglePlayPause, 
+  const {
+    currentTrack,
+    isPlaying,
+    togglePlayPause,
     toggleExpand,
     playNextTrack, // TODO: implement
-    playPreviousTrack // TODO: implement
+    playPreviousTrack, // TODO: implement
   } = usePlayer();
 
   if (!currentTrack) return null;
@@ -27,45 +26,56 @@ export default function PlayerControls({ variant = 'mini', className }: PlayerCo
   const mainButtonClass = variant === 'mini' ? 'h-9 w-9' : 'h-14 w-14 md:h-16 md:w-16';
   const skipButtonClass = variant === 'mini' ? 'h-8 w-8' : 'h-12 w-12';
 
-
   return (
-    <div className={`flex items-center ${variant === 'mini' ? 'gap-1' : 'gap-3 md:gap-4'} ${className}`}>
-      <Button 
-        variant="ghost" 
-        size={variant === 'mini' ? 'icon' : mainButtonSize} 
-        className={skipButtonClass} 
-        onClick={playPreviousTrack} 
+    <div
+      className={`flex items-center ${variant === 'mini' ? 'gap-1' : 'gap-3 md:gap-4'} ${className}`}
+    >
+      <Button
+        variant="ghost"
+        size={variant === 'mini' ? 'icon' : mainButtonSize}
+        className={skipButtonClass}
+        onClick={() => playPreviousTrack()} // Updated to arrow function
         aria-label="Previous Track"
         disabled // TODO: Enable when implemented
       >
         <SkipBack size={iconSize} className="text-foreground" />
       </Button>
-      
-      <Button 
+
+      <Button
         variant="default" // Always default for prominence
         size={mainButtonSize}
-        className={`${mainButtonClass} bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg hover:shadow-primary/50 transition-all active:scale-90`} 
-        onClick={togglePlayPause}
-        aria-label={isPlaying ? "Pause" : "Play"}
+        className={`${mainButtonClass} rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-primary/50 active:scale-90`}
+        onClick={() => togglePlayPause()} // Updated to arrow function
+        aria-label={isPlaying ? 'Pause' : 'Play'}
       >
-        {isPlaying ? <Pause size={iconSize} fill="currentColor" /> : <Play size={iconSize} fill="currentColor" />}
+        {isPlaying ? (
+          <Pause size={iconSize} fill="currentColor" />
+        ) : (
+          <Play size={iconSize} fill="currentColor" />
+        )}
       </Button>
 
-      <Button 
-        variant="ghost" 
-        size={variant === 'mini' ? 'icon' : mainButtonSize} 
-        className={skipButtonClass} 
-        onClick={playNextTrack} 
+      <Button
+        variant="ghost"
+        size={variant === 'mini' ? 'icon' : mainButtonSize}
+        className={skipButtonClass}
+        onClick={() => playNextTrack()} // Updated to arrow function
         aria-label="Next Track"
         disabled // TODO: Enable when implemented
       >
         <SkipForward size={iconSize} className="text-foreground" />
       </Button>
-      
+
       {variant === 'mini' && (
-         <Button variant="ghost" size="icon" className="h-8 w-8 ml-1" onClick={toggleExpand} aria-label="Expand Player">
-           <ChevronUp size={18} className="text-accent" />
-         </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="ml-1 size-8"
+          onClick={() => toggleExpand()}
+          aria-label="Expand Player"
+        >
+          <ChevronUp size={18} className="text-accent" />
+        </Button>
       )}
       {/* Full variant specific controls like volume, shuffle, repeat are now in FullScreenPlayer.tsx */}
     </div>

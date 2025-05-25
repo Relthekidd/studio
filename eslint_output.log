@@ -1,0 +1,358 @@
+Running ESLint fix on .ts and .tsx files...
+-------------------------------------------
+Checking ./src/contexts/PlayerContext.tsx
+
+/Users/khalafrancois/Downloads/studio/src/contexts/PlayerContext.tsx
+  176:15  error  Expected an assignment or function call and instead saw an express
+ion        @typescript-eslint/no-unused-expressions                                  179:13  error  Expected an assignment or function call and instead saw an express
+ion        @typescript-eslint/no-unused-expressions                                  225:34  error  Media elements such as <audio> and <video> must have a <track> for
+ captions  jsx-a11y/media-has-caption                                              
+✖ 3 problems (3 errors, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/contexts/PlayerContext.tsx
+  176:15  error  Expected an assignment or function call and instead saw an express
+ion        @typescript-eslint/no-unused-expressions                                  179:13  error  Expected an assignment or function call and instead saw an express
+ion        @typescript-eslint/no-unused-expressions                                  225:34  error  Media elements such as <audio> and <video> must have a <track> for
+ captions  jsx-a11y/media-has-caption                                              
+✖ 3 problems (3 errors, 0 warnings)
+
+Checking ./src/contexts/AuthProvider.tsx
+Checking ./src/app/settings/page.tsx
+
+/Users/khalafrancois/Downloads/studio/src/app/settings/page.tsx
+    4:38  error  'where' is defined but never used                                @
+typescript-eslint/no-unused-vars                                                     129:34  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  r
+eact/no-unescaped-entities                                                           129:47  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  r
+eact/no-unescaped-entities                                                         
+✖ 3 problems (3 errors, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/app/settings/page.tsx
+    4:38  error  'where' is defined but never used                                @
+typescript-eslint/no-unused-vars                                                     129:34  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  r
+eact/no-unescaped-entities                                                           129:47  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  r
+eact/no-unescaped-entities                                                         
+✖ 3 problems (3 errors, 0 warnings)
+
+Checking ./src/app/playlist/[playlistId]/page.tsx
+Checking ./src/app/discover/page.tsx
+ESLint found too many warnings (maximum: 0).
+Checking ./src/app/admin/upload/page.tsx
+ESLint found too many warnings (maximum: 0).
+Checking ./src/app/library/page.tsx
+
+/Users/khalafrancois/Downloads/studio/src/app/library/page.tsx
+   6:10  error  'Button' is defined but never used               @typescript-eslint
+/no-unused-vars                                                                       8:3   error  'PlusCircle' is defined but never used           @typescript-eslint
+/no-unused-vars                                                                      11:14  error  'HistoryIcon' is defined but never used          @typescript-eslint
+/no-unused-vars                                                                      25:11  error  'toast' is assigned a value but never used       @typescript-eslint
+/no-unused-vars                                                                      31:10  error  'history' is assigned a value but never used     @typescript-eslint
+/no-unused-vars                                                                      31:19  error  'setHistory' is assigned a value but never used  @typescript-eslint
+/no-unused-vars                                                                    
+✖ 6 problems (6 errors, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/app/library/page.tsx
+   6:10  error  'Button' is defined but never used               @typescript-eslint
+/no-unused-vars                                                                       8:3   error  'PlusCircle' is defined but never used           @typescript-eslint
+/no-unused-vars                                                                      11:14  error  'HistoryIcon' is defined but never used          @typescript-eslint
+/no-unused-vars                                                                      25:11  error  'toast' is assigned a value but never used       @typescript-eslint
+/no-unused-vars                                                                      31:10  error  'history' is assigned a value but never used     @typescript-eslint
+/no-unused-vars                                                                      31:19  error  'setHistory' is assigned a value but never used  @typescript-eslint
+/no-unused-vars                                                                    
+✖ 6 problems (6 errors, 0 warnings)
+
+Checking ./src/app/single/[singleId]/page.tsx
+
+/Users/khalafrancois/Downloads/studio/src/app/single/[singleId]/page.tsx
+  148:21  error  The href attribute is required for an anchor to be keyboard access
+ible. Provide a valid, navigable address as the href value. If you cannot provide an href, but still need the element to resemble a link, use a button and change it with appropriate styles. Learn more: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/HEAD/docs/rules/anchor-is-valid.md  jsx-a11y/anchor-is-valid              238:41  error  'albumArtists' is defined but never used                          
+                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars   
+✖ 2 problems (2 errors, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/app/single/[singleId]/page.tsx
+  148:21  error  The href attribute is required for an anchor to be keyboard access
+ible. Provide a valid, navigable address as the href value. If you cannot provide an href, but still need the element to resemble a link, use a button and change it with appropriate styles. Learn more: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/HEAD/docs/rules/anchor-is-valid.md  jsx-a11y/anchor-is-valid              238:41  error  'albumArtists' is defined but never used                          
+                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars   
+✖ 2 problems (2 errors, 0 warnings)
+
+Checking ./src/app/search/page.tsx
+
+/Users/khalafrancois/Downloads/studio/src/app/search/page.tsx
+  133:36  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  r
+eact/no-unescaped-entities                                                           133:49  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  r
+eact/no-unescaped-entities                                                         
+✖ 2 problems (2 errors, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/app/search/page.tsx
+  133:36  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  r
+eact/no-unescaped-entities                                                           133:49  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  r
+eact/no-unescaped-entities                                                         
+✖ 2 problems (2 errors, 0 warnings)
+
+Checking ./src/app/genre/[genre]/page.tsx
+Checking ./src/app/profile/[userId]/page.tsx
+
+/Users/khalafrancois/Downloads/studio/src/app/profile/[userId]/page.tsx
+  15:11  error  'Artist' is defined but never used                @typescript-eslin
+t/no-unused-vars                                                                     27:20  error  'setShowTop5' is assigned a value but never used  @typescript-eslin
+t/no-unused-vars                                                                   
+✖ 2 problems (2 errors, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/app/profile/[userId]/page.tsx
+  15:11  error  'Artist' is defined but never used                @typescript-eslin
+t/no-unused-vars                                                                     27:20  error  'setShowTop5' is assigned a value but never used  @typescript-eslin
+t/no-unused-vars                                                                   
+✖ 2 problems (2 errors, 0 warnings)
+
+Checking ./src/app/layout.tsx
+Checking ./src/app/account/setup/page.tsx
+Checking ./src/app/account/page.tsx
+
+/Users/khalafrancois/Downloads/studio/src/app/account/page.tsx
+  75:14  error  'error' is defined but never used  @typescript-eslint/no-unused-var
+s                                                                                  
+✖ 1 problem (1 error, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/app/account/page.tsx
+  75:14  error  'error' is defined but never used  @typescript-eslint/no-unused-var
+s                                                                                  
+✖ 1 problem (1 error, 0 warnings)
+
+Checking ./src/app/page.tsx
+Checking ./src/app/album/[albumId]/page.tsx
+ESLint found too many warnings (maximum: 0).
+Checking ./src/app/artist/[artistId]/page.tsx
+ESLint found too many warnings (maximum: 0).
+Checking ./src/app/login/page.tsx
+
+/Users/khalafrancois/Downloads/studio/src/app/login/page.tsx
+  120:18  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  r
+eact/no-unescaped-entities                                                         
+✖ 1 problem (1 error, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/app/login/page.tsx
+  120:18  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  r
+eact/no-unescaped-entities                                                         
+✖ 1 problem (1 error, 0 warnings)
+
+Checking ./src/utils/helpers.ts
+Checking ./src/utils/formatArtists.ts
+Checking ./src/utils/normalizeTrack.ts
+Checking ./src/tailwind.config.ts
+
+/Users/khalafrancois/Downloads/studio/src/tailwind.config.ts
+  115:13  error  A `require()` style import is forbidden  @typescript-eslint/no-req
+uire-imports                                                                       
+✖ 1 problem (1 error, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/tailwind.config.ts
+  115:13  error  A `require()` style import is forbidden  @typescript-eslint/no-req
+uire-imports                                                                       
+✖ 1 problem (1 error, 0 warnings)
+
+Checking ./src/components/music/TrackInfo.tsx
+
+/Users/khalafrancois/Downloads/studio/src/components/music/TrackInfo.tsx
+  28:7  error  The href attribute is required for an anchor to be keyboard accessib
+le. Provide a valid, navigable address as the href value. If you cannot provide an href, but still need the element to resemble a link, use a button and change it with appropriate styles. Learn more: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/HEAD/docs/rules/anchor-is-valid.md  jsx-a11y/anchor-is-valid              
+✖ 1 problem (1 error, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/components/music/TrackInfo.tsx
+  28:7  error  The href attribute is required for an anchor to be keyboard accessib
+le. Provide a valid, navigable address as the href value. If you cannot provide an href, but still need the element to resemble a link, use a button and change it with appropriate styles. Learn more: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/HEAD/docs/rules/anchor-is-valid.md  jsx-a11y/anchor-is-valid              
+✖ 1 problem (1 error, 0 warnings)
+
+Checking ./src/components/music/TrackActions.tsx
+
+/Users/khalafrancois/Downloads/studio/src/components/music/TrackActions.tsx
+  24:18  error  React Hook "usePlayer" is called in function "handleAddToQueue" tha
+t is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks                                         
+✖ 1 problem (1 error, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/components/music/TrackActions.tsx
+  24:18  error  React Hook "usePlayer" is called in function "handleAddToQueue" tha
+t is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks                                         
+✖ 1 problem (1 error, 0 warnings)
+
+Checking ./src/components/ui/BackButton.tsx
+Checking ./src/components/ui/alert-dialog.tsx
+Checking ./src/components/ui/tabs.tsx
+Checking ./src/components/ui/card.tsx
+Checking ./src/components/ui/slider.tsx
+Checking ./src/components/ui/popover.tsx
+Checking ./src/components/ui/progress.tsx
+Checking ./src/components/ui/toaster.tsx
+Checking ./src/components/ui/chart.tsx
+Checking ./src/components/ui/sheet.tsx
+Checking ./src/components/ui/scroll-area.tsx
+Checking ./src/components/ui/label.tsx
+Checking ./src/components/ui/accordion.tsx
+Checking ./src/components/ui/tooltip.tsx
+Checking ./src/components/ui/alert.tsx
+
+/Users/khalafrancois/Downloads/studio/src/components/ui/alert.tsx
+  32:5  error  Headings must have content and the content must be accessible by a s
+creen reader  jsx-a11y/heading-has-content                                         
+✖ 1 problem (1 error, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/components/ui/alert.tsx
+  32:5  error  Headings must have content and the content must be accessible by a s
+creen reader  jsx-a11y/heading-has-content                                         
+✖ 1 problem (1 error, 0 warnings)
+
+Checking ./src/components/ui/switch.tsx
+Checking ./src/components/ui/calendar.tsx
+Checking ./src/components/ui/radio-group.tsx
+Checking ./src/components/ui/avatar.tsx
+Checking ./src/components/ui/menubar.tsx
+Checking ./src/components/ui/dialog.tsx
+Checking ./src/components/ui/badge.tsx
+Checking ./src/components/ui/sidebar.tsx
+Checking ./src/components/ui/table.tsx
+Checking ./src/components/ui/separator.tsx
+Checking ./src/components/ui/button.tsx
+Checking ./src/components/ui/toast.tsx
+ESLint found too many warnings (maximum: 0).
+Checking ./src/components/ui/checkbox.tsx
+Checking ./src/components/ui/dropdown-menu.tsx
+Checking ./src/components/ui/select.tsx
+Checking ./src/components/ui/textarea.tsx
+Checking ./src/components/ui/input.tsx
+Checking ./src/components/ui/skeleton.tsx
+Checking ./src/components/ui/form.tsx
+Checking ./src/components/playlists/AddToPlaylistModal.tsx
+
+/Users/khalafrancois/Downloads/studio/src/components/playlists/AddToPlaylistModal.t
+sx                                                                                   15:39  error  'doc' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 1 problem (1 error, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/components/playlists/AddToPlaylistModal.t
+sx                                                                                   15:39  error  'doc' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 1 problem (1 error, 0 warnings)
+
+Checking ./src/components/playlists/CreatePlaylistModal.tsx
+Checking ./src/components/loader.tsx
+Checking ./src/components/EditPlaylistModal.tsx
+Checking ./src/components/layout/ProfileMenu.tsx
+Checking ./src/components/layout/BottomNavigationBar.tsx
+Checking ./src/components/layout/ClientLayout.tsx
+Checking ./src/components/section.tsx
+Checking ./src/components/SearchBar.tsx
+Checking ./src/components/AlbumCard.tsx
+
+/Users/khalafrancois/Downloads/studio/src/components/AlbumCard.tsx
+  47:9  error  'handleToggleFavorite' is assigned a value but never used           
+                                                                                                                               @typescript-eslint/no-unused-vars        52:5  error  Visible, non-interactive elements with click handlers must have at l
+east one keyboard listener                                                                                                     jsx-a11y/click-events-have-key-events    52:5  error  Avoid non-native interactive elements. If using native HTML is not p
+ossible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element  jsx-a11y/no-static-element-interactions
+✖ 3 problems (3 errors, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/components/AlbumCard.tsx
+  47:9  error  'handleToggleFavorite' is assigned a value but never used           
+                                                                                                                               @typescript-eslint/no-unused-vars        52:5  error  Visible, non-interactive elements with click handlers must have at l
+east one keyboard listener                                                                                                     jsx-a11y/click-events-have-key-events    52:5  error  Avoid non-native interactive elements. If using native HTML is not p
+ossible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element  jsx-a11y/no-static-element-interactions
+✖ 3 problems (3 errors, 0 warnings)
+
+Checking ./src/components/icons/SonixLogo.tsx
+Checking ./src/components/SectionTitle.tsx
+Checking ./src/components/FilterChip.tsx
+Checking ./src/components/Top5Showcase.tsx
+Checking ./src/components/player/FullScreenPlayer.tsx
+
+/Users/khalafrancois/Downloads/studio/src/components/player/FullScreenPlayer.tsx
+  12:10  error  'formatArtists' is defined but never used                   @typesc
+ript-eslint/no-unused-vars                                                           15:10  error  'isExpanded' is assigned a value but never used             @typesc
+ript-eslint/no-unused-vars                                                           17:9   error  'closeFullScreenPlayer' is assigned a value but never used  @typesc
+ript-eslint/no-unused-vars                                                           34:5   error  'setMuted' is assigned a value but never used               @typesc
+ript-eslint/no-unused-vars                                                           51:9   error  'handleSeek' is assigned a value but never used             @typesc
+ript-eslint/no-unused-vars                                                         
+✖ 5 problems (5 errors, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/components/player/FullScreenPlayer.tsx
+  12:10  error  'formatArtists' is defined but never used                   @typesc
+ript-eslint/no-unused-vars                                                           15:10  error  'isExpanded' is assigned a value but never used             @typesc
+ript-eslint/no-unused-vars                                                           17:9   error  'closeFullScreenPlayer' is assigned a value but never used  @typesc
+ript-eslint/no-unused-vars                                                           34:5   error  'setMuted' is assigned a value but never used               @typesc
+ript-eslint/no-unused-vars                                                           51:9   error  'handleSeek' is assigned a value but never used             @typesc
+ript-eslint/no-unused-vars                                                         
+✖ 5 problems (5 errors, 0 warnings)
+
+Checking ./src/components/player/MiniPlayer.tsx
+
+/Users/khalafrancois/Downloads/studio/src/components/player/MiniPlayer.tsx
+  10:25  error  'isPlaying' is assigned a value but never used                     
+                                                                                                                                @typescript-eslint/no-unused-vars       27:7   error  Visible, non-interactive elements with click handlers must have at 
+least one keyboard listener                                                                                                     jsx-a11y/click-events-have-key-events   27:7   error  Avoid non-native interactive elements. If using native HTML is not 
+possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element  jsx-a11y/no-static-element-interactions                                                                                  
+✖ 3 problems (3 errors, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/components/player/MiniPlayer.tsx
+  10:25  error  'isPlaying' is assigned a value but never used                     
+                                                                                                                                @typescript-eslint/no-unused-vars       27:7   error  Visible, non-interactive elements with click handlers must have at 
+least one keyboard listener                                                                                                     jsx-a11y/click-events-have-key-events   27:7   error  Avoid non-native interactive elements. If using native HTML is not 
+possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element  jsx-a11y/no-static-element-interactions                                                                                  
+✖ 3 problems (3 errors, 0 warnings)
+
+Checking ./src/components/player/PlayerControls.tsx
+Checking ./src/ai/genkit.ts
+Checking ./src/ai/dev.ts
+Checking ./src/hooks/use-mobile.tsx
+Checking ./src/hooks/use-toast.ts
+
+/Users/khalafrancois/Downloads/studio/src/hooks/use-toast.ts
+  18:7  error  'actionTypes' is assigned a value but only used as a type  @typescri
+pt-eslint/no-unused-vars                                                           
+✖ 1 problem (1 error, 0 warnings)
+
+
+/Users/khalafrancois/Downloads/studio/src/hooks/use-toast.ts
+  18:7  error  'actionTypes' is assigned a value but only used as a type  @typescri
+pt-eslint/no-unused-vars                                                           
+✖ 1 problem (1 error, 0 warnings)
+
+Checking ./src/hooks/useUser.ts
+Checking ./src/hooks/useUserPreferences.ts
+Checking ./src/lib/firebase.ts
+Checking ./src/lib/utils.ts
+-------------------------------------------
+⚠️ The following files still have unresolved ESLint issues:
+./src/contexts/PlayerContext.tsx
+./src/app/settings/page.tsx
+./src/app/discover/page.tsx
+./src/app/admin/upload/page.tsx
+./src/app/library/page.tsx
+./src/app/single/[singleId]/page.tsx
+./src/app/search/page.tsx
+./src/app/profile/[userId]/page.tsx
+./src/app/account/page.tsx
+./src/app/album/[albumId]/page.tsx
+./src/app/artist/[artistId]/page.tsx
+./src/app/login/page.tsx
+./src/tailwind.config.ts
+./src/components/music/TrackInfo.tsx
+./src/components/music/TrackActions.tsx
+./src/components/ui/alert.tsx
+./src/components/ui/toast.tsx
+./src/components/playlists/AddToPlaylistModal.tsx
+./src/components/AlbumCard.tsx
+./src/components/player/FullScreenPlayer.tsx
+./src/components/player/MiniPlayer.tsx
+./src/hooks/use-toast.ts

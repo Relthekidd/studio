@@ -23,6 +23,7 @@ export default function AdminUploadPage() {
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
   const [genre, setGenre] = useState('');
+  const [albumName, setAlbumName] = useState(''); // Add albumName state
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -33,10 +34,10 @@ export default function AdminUploadPage() {
       toast({ title: 'Access Denied', description: 'Admin access only.' });
       router.replace('/');
     }
-  }, [user, loading]);
+  }, [user, loading, isAdmin, router, toast]);
 
   const handleUpload = async () => {
-    if (!title || !artist || !audioFile || !coverFile) {
+    if (!title || !artist || !audioFile || !coverFile || (type === 'album' && !albumName)) {
       toast({ title: 'Missing Fields', description: 'Please fill all fields.' });
       return;
     }
@@ -66,12 +67,14 @@ export default function AdminUploadPage() {
       await setDoc(newDocRef, {
         id: newDocRef.id,
         title,
-        artist,
+        artist: [{ id: 'artist-id', name: artist }], // Example artist structure
         genre,
+        albumName: type === 'album' ? albumName : undefined, // Include albumName if type is album
         audioURL,
         coverURL,
         duration,
         type,
+        description: '', // Add description field
         createdAt: serverTimestamp(),
       });
 
@@ -79,6 +82,7 @@ export default function AdminUploadPage() {
       setTitle('');
       setArtist('');
       setGenre('');
+      setAlbumName(''); // Reset albumName
       setCoverFile(null);
       setAudioFile(null);
     } catch (err) {
@@ -90,10 +94,13 @@ export default function AdminUploadPage() {
   };
 
   return (
-    <div className="container max-w-xl py-8 space-y-6">
+    <div className="container max-w-xl space-y-6 py-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Upload New Track</h1>
-        <Link href="/profile" className="text-sm text-muted-foreground hover:underline flex items-center gap-1">
+        <Link
+          href="/profile"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:underline"
+        >
           <ArrowLeft size={16} /> Back
         </Link>
       </div>
@@ -104,12 +111,20 @@ export default function AdminUploadPage() {
           <select
             value={type}
             onChange={(e) => setType(e.target.value as 'single' | 'album')}
-            className="border px-3 py-2 rounded w-full"
+            className="w-full rounded border px-3 py-2"
           >
             <option value="single">Single</option>
             <option value="album">Album</option>
           </select>
         </div>
+
+        {type === 'album' && ( // Show albumName field only if type is album
+          <Input
+            placeholder="Album Name"
+            value={albumName}
+            onChange={(e) => setAlbumName(e.target.value)}
+          />
+        )}
 
         <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input placeholder="Artist" value={artist} onChange={(e) => setArtist(e.target.value)} />
@@ -117,12 +132,20 @@ export default function AdminUploadPage() {
 
         <div className="space-y-2">
           <Label>Cover Image</Label>
-          <Input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+          />
         </div>
 
         <div className="space-y-2">
           <Label>Audio File</Label>
-          <Input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} />
+          <Input
+            type="file"
+            accept="audio/*"
+            onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+          />
         </div>
 
         <Button disabled={uploading} onClick={handleUpload} className="w-full">

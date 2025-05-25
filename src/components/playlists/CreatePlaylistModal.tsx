@@ -5,23 +5,27 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { PlusCircle } from 'lucide-react';
-import { db } from '@/lib/firebase';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useUser } from '@/hooks/useUser';
 import { toast } from '@/hooks/use-toast';
+import { savePlaylist } from '@/utils/saveLibraryData';
 
-export default function CreatePlaylistModal() {
+interface CreatePlaylistModalProps {
+  onPlaylistCreated?: () => void;
+}
+
+export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylistModalProps) {
   const { user } = useUser();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [coverImage, setCoverImage] = useState('');
 
   const handleCreate = async () => {
     if (!title.trim() || !user?.uid) {
@@ -30,15 +34,25 @@ export default function CreatePlaylistModal() {
     }
 
     try {
-      await addDoc(collection(db, 'users', user.uid, 'playlists'), {
-        title,
+      // Call savePlaylist utility to save the playlist in Firestore
+      await savePlaylist(user.uid, {
+        name: title,
         description,
-        createdAt: serverTimestamp(),
+        imageUrl: coverImage || '/placeholder.png',
+        songs: [],
+        createdAt: new Date().toISOString(),
       });
+
       toast({ title: 'Playlist created!' });
       setTitle('');
       setDescription('');
+      setCoverImage('');
       setOpen(false);
+
+      // Call the onPlaylistCreated callback
+      if (onPlaylistCreated) {
+        onPlaylistCreated();
+      }
     } catch (err) {
       console.error(err);
       toast({ title: 'Error', description: 'Could not create playlist.' });
@@ -68,6 +82,11 @@ export default function CreatePlaylistModal() {
             placeholder="Description (optional)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+          />
+          <Input
+            placeholder="Cover image URL (optional)"
+            value={coverImage}
+            onChange={(e) => setCoverImage(e.target.value)}
           />
           <Button onClick={handleCreate} className="w-full">
             Create

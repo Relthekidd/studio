@@ -2,56 +2,55 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Track } from '@/contexts/PlayerContext';
+import { formatArtists } from '@/utils/formatArtists';
 
 export default function TrackInfo({ track }: { track: Track }) {
-  const titleDisplay = (
-    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground drop-shadow-md truncate">
-      {track.title}
-    </h2>
+  return (
+    <div className="text-center">
+      <h2 className="text-lg font-bold">{track.title}</h2>
+      <p className="text-sm text-muted-foreground">{formatArtists(track.artist)}</p>
+    </div>
   );
+}
 
-  const artistsDisplay =
-    track.artists?.length ? (
-      track.artists.map((artist, index) => (
-        <React.Fragment key={artist.id}>
-          <Link href={`/artist/${artist.id}`} legacyBehavior>
-            <a className="hover:text-primary hover:underline transition-colors">
-              {artist.name}
-            </a>
-          </Link>
-        </React.Fragment>
-      ))
-    ) : (
-      <span>{track.artist || 'Unknown Artist'}</span>
-    );
+export function AlbumCard({ item, className }: { item: Track; className?: string }) {
+  const href =
+    item.type === 'album'
+      ? `/album/${item.id}`
+      : item.type === 'single'
+        ? `/single/${item.id}`
+        : '#'; // Fallback to '#' if type is invalid
 
   return (
-    <div className="text-center max-w-md">
-      {track.albumId ? (
-        <Link href={`/album/${track.albumId}`} legacyBehavior>
-          <a className="hover:underline" title={`View album: ${track.albumName || track.title}`}>
-            {titleDisplay}
-          </a>
-        </Link>
-      ) : (
-        titleDisplay
-      )}
-
-      <p className="text-base sm:text-lg md:text-xl text-muted-foreground mt-1 drop-shadow-sm truncate">
-        {artistsDisplay}
-      </p>
-
-      {track.albumName && (
-        <Link href={`/album/${track.albumId || track.id}`} legacyBehavior>
-          <a
-            className="text-sm text-muted-foreground/70 mt-0.5 hover:underline"
-            title={`View album: ${track.albumName}`}
-          >
-            {track.albumName}
-          </a>
-        </Link>
-      )}
-    </div>
+    <Link href={href} legacyBehavior>
+      <a
+        className={`group relative block rounded-xl bg-card/70 transition-all hover:bg-card/90 ${className || 'w-full'}`}
+      >
+        <div className="relative aspect-square">
+          <Image
+            src={item.coverURL || '/placeholder.png'}
+            alt={item.title}
+            width={500}
+            height={500}
+            className="size-full rounded-t-xl object-cover"
+          />
+        </div>
+        <div className="p-3">
+          <h3 className="truncate text-sm font-semibold">{item.title}</h3>
+          <p className="truncate text-xs text-muted-foreground">
+            {Array.isArray(item.artist)
+              ? item.artist.map((artist: { id: string; name: string }, idx: number) => (
+                  <span key={artist.id}>
+                    {artist.name}
+                    {idx < item.artist.length - 1 ? ', ' : ''}
+                  </span>
+                ))
+              : item.artist || 'Unknown Artist'}
+          </p>
+        </div>
+      </a>
+    </Link>
   );
 }
