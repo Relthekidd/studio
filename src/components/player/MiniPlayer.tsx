@@ -5,6 +5,7 @@ import { usePlayer } from '@/contexts/PlayerContext';
 import PlayerControls from './PlayerControls';
 import { Progress } from '@/components/ui/progress';
 import { formatArtists } from '@/utils/formatArtists';
+import { Play, Pause } from 'lucide-react';
 
 export default function MiniPlayer() {
   const { currentTrack, isPlaying, isExpanded, toggleExpand, progress } = usePlayer();
@@ -24,11 +25,16 @@ export default function MiniPlayer() {
       role="complementary"
       aria-label="Music Player"
     >
-      <div
+      <button
         className="group flex min-w-0 flex-1 cursor-pointer items-center gap-3 md:gap-4"
         onClick={() => toggleExpand()}
+        aria-label="Expand player"
       >
-        <div className="relative size-12 overflow-hidden rounded-md shadow-md transition-shadow group-hover:shadow-primary/30 md:size-14">
+        <div
+          className={`relative size-12 overflow-hidden rounded-md shadow-md transition-shadow group-hover:shadow-primary/30 md:size-14 ${
+            isPlaying ? 'animate-pulse' : ''
+          }`}
+        >
           <Image
             src={currentTrack.coverURL || '/placeholder.png'}
             alt={currentTrack.title || 'Unknown Track'}
@@ -36,6 +42,13 @@ export default function MiniPlayer() {
             className="object-cover"
             unoptimized
           />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
+            {isPlaying ? (
+              <Pause size={24} className="text-white" />
+            ) : (
+              <Play size={24} className="text-white" />
+            )}
+          </div>
         </div>
         <div className="flex min-w-0 flex-col">
           <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-primary md:text-base">
@@ -45,7 +58,7 @@ export default function MiniPlayer() {
             {formatArtists(currentTrack.artist)}
           </p>
         </div>
-      </div>
+      </button>
 
       <div className="mx-4 hidden w-1/3 flex-col items-center md:flex">
         <PlayerControls variant="mini" />

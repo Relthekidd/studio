@@ -6,6 +6,8 @@ import { db } from '@/lib/firebase';
 import type { Track } from '@/contexts/PlayerContext';
 import Section from '@/components/section';
 import Loader from '@/components/loader';
+import Link from 'next/link';
+import { AlbumCard } from '@/components/AlbumCard';
 
 export default function Home() {
   const [recentSongs, setRecentSongs] = useState<Track[]>([]);
@@ -54,6 +56,11 @@ export default function Home() {
       <Section title="Recently Added" items={recentSongs} />
 
       <Section title="Trending" items={trendingSongs} />
+      {trendingSongs.map((track) => (
+        <Link href={`/single/${track.id}`} key={track.id}>
+          <AlbumCard item={track} />
+        </Link>
+      ))}
     </div>
   );
 }

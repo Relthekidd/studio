@@ -17,11 +17,12 @@ interface Props {
 }
 
 export default function TrackActions({ track }: Props) {
-  const { setQueue } = usePlayer(); // Fallback since addToQueue isn't defined
+  const { queue, setQueue } = usePlayer(); // Access queue and setQueue from usePlayer
   const router = useRouter();
 
   const handleAddToQueue = () => {
-    setQueue([...usePlayer().queue, track]);
+    // Add the track to the queue
+    setQueue([...queue, track]);
   };
 
   return (

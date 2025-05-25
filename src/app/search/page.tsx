@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { normalizeTrack } from "@/utils/normalizeTrack";
 import { formatArtists } from "@/utils/formatArtists";
+import { searchLibrary } from "@/utils/searchLibrary";
 
 const resultTypes = [
   "All",
@@ -36,36 +37,59 @@ export default function SearchPage() {
   const [searchResults, setSearchResults] = useState<PlayerTrack[]>([]);
 
   useEffect(() => {
-    setSearchResults([]); // Clear results until real search is implemented
+    const fetchResults = async () => {
+      if (!searchTerm.trim()) {
+        setSearchResults([]);
+        return;
+      }
 
-    // TODO: Replace this mock data with real fetched results from your API
-    const fetchedResults: PlayerTrack[] = []; // Example: []
+      const results = await searchLibrary(searchTerm);
 
-    // Define Artist type (replace with import if available elsewhere)
-    type Artist = {
-      id: string;
-      name: string;
+      // Combine results based on activeType
+      let combinedResults: PlayerTrack[] = [];
+      if (activeType === 'All' || activeType === 'Tracks') {
+        combinedResults = combinedResults.concat(
+          results.songs.map((song: any) => normalizeTrack(song))
+        );
+      }
+      if (activeType === 'All' || activeType === 'Albums') {
+        combinedResults = combinedResults.concat(
+          results.albums.map((album: any) => ({
+            id: album.id,
+            type: "album",
+            title: album.title || "",
+            artist: album.artist || "",
+            audioURL: album.audioURL || "",
+            coverURL: album.coverURL || "",
+          }))
+        );
+      }
+      if (activeType === 'All' || activeType === 'Artists') {
+        combinedResults = combinedResults.concat(
+          results.artists.map((artist: any) => ({
+            id: artist.id,
+            type: "artist",
+            title: artist.title || artist.name || "",
+            artist: artist.artist || artist.name || "",
+            audioURL: "",
+            coverURL: artist.coverURL || "",
+          }))
+        );
+      }
+
+      setSearchResults(combinedResults);
     };
 
-    // Fetch artist details (mock example)
-    const fetchedArtists: Artist[] = [
-      { id: "artist1", name: "Artist One" },
-      { id: "artist2", name: "Artist Two" },
-    ];
-
-    const results: PlayerTrack[] = fetchedResults.map((item) =>
-      normalizeTrack(item, fetchedArtists)
-    );
-    setSearchResults(results);
+    fetchResults();
   }, [searchTerm, activeType]);
 
   const renderItem = (item: PlayerTrack) => {
     if (item.type === "user") {
       return (
         <Link href={`/profile/${item.id}`} key={item.id} legacyBehavior>
-          <Card className="bg-card hover:bg-card/80 transition-colors cursor-pointer h-full">
-            <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-              <Avatar className="w-20 h-20 border-2 border-primary">
+          <Card className="h-full cursor-pointer bg-card transition-colors hover:bg-card/80">
+            <CardContent className="flex flex-col items-center gap-3 p-4 text-center">
+              <Avatar className="size-20 border-2 border-primary">
                 <AvatarImage src={item.coverURL} alt={item.title} />
                 <AvatarFallback>
                   {item.title?.[0]?.toUpperCase()}
@@ -73,7 +97,7 @@ export default function SearchPage() {
               </Avatar>
               <div>
                 <h3 className="font-semibold text-foreground">{item.title}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-2">
+                <p className="line-clamp-2 text-xs text-muted-foreground">
                   {formatArtists(item.artist)}
                 </p>
               </div>
@@ -86,9 +110,9 @@ export default function SearchPage() {
     if (item.type === "artist") {
       return (
         <Link href={`/artist/${item.id}`} key={item.id} legacyBehavior>
-          <Card className="bg-card hover:bg-card/80 transition-colors cursor-pointer h-full">
-            <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-              <Avatar className="w-20 h-20 border-2 border-primary">
+          <Card className="h-full cursor-pointer bg-card transition-colors hover:bg-card/80">
+            <CardContent className="flex flex-col items-center gap-3 p-4 text-center">
+              <Avatar className="size-20 border-2 border-primary">
                 <AvatarImage src={item.coverURL} alt={item.title} />
                 <AvatarFallback>
                   {item.title?.[0]?.toUpperCase()}
@@ -118,14 +142,14 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-6 md:space-y-8">
+    <div className="container mx-auto space-y-6 p-4 md:space-y-8 md:p-6">
       <SearchBar
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
       <section>
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="mb-4 flex flex-wrap gap-2">
           {resultTypes.map((type) => (
             <FilterChip
               key={type}
@@ -147,15 +171,14 @@ export default function SearchPage() {
             : "Start Searching or Select Filters"}
         </SectionTitle>
         {searchResults.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-5">
             {searchResults.map(renderItem)}
           </div>
         ) : (
           (searchTerm || activeType !== "All") && (
-            <p className="text-muted-foreground text-center py-8">
-              No results found for "{searchTerm}"{" "}
-              {activeType !== "All" ? `in ${activeType}` : ""}. Try a different
-              search or broaden your filters.
+            <p className="py-8 text-center text-muted-foreground">
+              No results found for &quot;{searchTerm}&quot;{' '}
+              {activeType !== 'All' ? `in ${activeType}` : ''}. Try a different search or broaden your filters.
             </p>
           )
         )}

@@ -7,6 +7,7 @@ import {
   useEffect,
   useRef,
   ReactNode,
+  useCallback,
 } from 'react';
 
 export interface Track {
@@ -115,6 +116,22 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const playNextTrack = useCallback(() => {
+    setCurrentTrack((prevTrack) => {
+      const currentIndex = queue.findIndex((track) => track.id === prevTrack?.id);
+      const nextIndex = (currentIndex + 1) % queue.length;
+      return queue[nextIndex] || null;
+    });
+  }, [queue]);
+
+  const playPreviousTrack = useCallback(() => {
+    setCurrentTrack((prevTrack) => {
+      const currentIndex = queue.findIndex((track) => track.id === prevTrack?.id);
+      const previousIndex = (currentIndex - 1 + queue.length) % queue.length;
+      return queue[previousIndex] || null;
+    });
+  }, [queue]);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -135,19 +152,21 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
     const onEnded = () => {
       setIsPlaying(false);
-      playNextTrack(); // Automatically play the next track
+      playNextTrack(); // Use the refactored playNextTrack
     };
 
+    // Add event listeners
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
     audio.addEventListener('ended', onEnded);
 
     return () => {
+      // Remove event listeners
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       audio.removeEventListener('ended', onEnded);
     };
-  }, []);
+  }, [playNextTrack]); // Add playNextTrack to the dependency array
 
   useEffect(() => {
     if (audioRef.current) {
@@ -173,10 +192,18 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
               setCurrentTrack(safe);
               setTimeout(() => play(), 50);
             } else {
-              isPlaying ? pause() : play();
+              if (isPlaying) {
+                pause();
+              } else {
+                play();
+              }
             }
           } else {
-            isPlaying ? pause() : play();
+            if (isPlaying) {
+              pause();
+            } else {
+              play();
+            }
           }
         },
         pause,
@@ -196,33 +223,26 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         setMuted,
         repeatMode,
         toggleRepeat: () => {
-          setRepeatMode((prev) =>
-            prev === 'off' ? 'one' : prev === 'one' ? 'all' : 'off'
-          );
-        },
+  setRepeatMode((prev) =>
+    prev === 'off' ? 'one' : prev === 'one' ? 'all' : 'off'
+  );
+},
+
         shuffleMode,
         toggleShuffleMode: () => setShuffleMode((prev) => !prev),
         isExpanded,
         toggleExpand: () => setIsExpanded((prev) => !prev),
         closeFullScreenPlayer: () => setIsExpanded(false),
-        playNextTrack: () => {
-          setCurrentTrack((prevTrack) => {
-            const currentIndex = queue.findIndex((track) => track.id === prevTrack?.id);
-            const nextIndex = (currentIndex + 1) % queue.length;
-            return queue[nextIndex] || null;
-          });
-        },
-        playPreviousTrack: () => {
-          setCurrentTrack((prevTrack) => {
-            const currentIndex = queue.findIndex((track) => track.id === prevTrack?.id);
-            const previousIndex = (currentIndex - 1 + queue.length) % queue.length;
-            return queue[previousIndex] || null;
-          });
-        },
+        playNextTrack,
+        playPreviousTrack,
       }}
     >
       {children}
-      {currentTrack?.audioURL && <audio ref={audioRef} src={currentTrack.audioURL} />}
+      {currentTrack?.audioURL && (
+        <audio ref={audioRef} src={currentTrack.audioURL} controls>
+          <track kind="captions" label="English captions" srcLang="en" src="/path/to/captions.vtt" />
+        </audio>
+      )}
     </PlayerContext.Provider>
   );
 };
@@ -232,8 +252,4 @@ export const usePlayer = (): PlayerContextType => {
   if (!context) throw new Error('usePlayer must be used within PlayerProvider');
   return context;
 };
-
-function playNextTrack() {
-  throw new Error('Function not implemented.');
-}
 

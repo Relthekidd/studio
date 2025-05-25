@@ -8,14 +8,7 @@ import FilterChip from '@/components/FilterChip';
 import SectionTitle from '@/components/SectionTitle';
 import { AlbumCard } from '@/components/AlbumCard';
 import type { Track } from '@/contexts/PlayerContext';
-import {
-  Music,
-  DiscAlbum,
-  ListMusic,
-  User,
-  Users as UsersIcon,
-  Search as SearchIcon,
-} from 'lucide-react';
+import { Music, DiscAlbum, ListMusic, User, Users as UsersIcon, Search as SearchIcon } from 'lucide-react';
 
 const resultTypes = ['All', 'Tracks', 'Albums', 'Singles'];
 
@@ -26,58 +19,65 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchSongs = async () => {
+    const fetchResults = async () => {
       setLoading(true);
 
       try {
-        const q = query(collection(db, 'tracks'));
+        const lowerTerm = searchTerm.toLowerCase();
+
+        // Firestore query based on activeType
+        let q;
+        if (activeType === 'Tracks' || activeType === 'All') {
+          q = query(
+            collection(db, 'tracks'),
+            where('keywords', 'array-contains', lowerTerm)
+          );
+        } else if (activeType === 'Albums') {
+          q = query(
+            collection(db, 'albums'),
+            where('keywords', 'array-contains', lowerTerm)
+          );
+        } else if (activeType === 'Singles') {
+          q = query(
+            collection(db, 'singles'),
+            where('keywords', 'array-contains', lowerTerm)
+          );
+        } else {
+          // If no valid type, return empty results
+          setSearchResults([]);
+          setLoading(false);
+          return;
+        }
+
         const querySnapshot = await getDocs(q);
-        const allSongs = querySnapshot.docs.map((doc) => {
+        const results = querySnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
             id: doc.id,
-            title: data.title,
-            artist: data.artist,
-            imageURL: data.coverURL, // required field
-            coverURL: data.coverURL,
-            audioURL: data.audioURL,
-            duration: data.duration,
-            type: 'track',
+            title: data.title || 'Untitled',
+            artist: data.artist || 'Unknown Artist',
+            imageURL: data.coverURL || '/placeholder.png',
+            coverURL: data.coverURL || '/placeholder.png',
+            audioURL: data.audioURL || '',
+            duration: data.duration || 0,
+            type: activeType.toLowerCase(),
           } as Track;
         });
 
-        // Filter
-        const lowerTerm = searchTerm.toLowerCase();
-        const filtered = allSongs.filter((song) => {
-          const matchesType =
-            activeType === 'All' ||
-            (activeType === 'Tracks' && song.type === 'track') ||
-            (activeType === 'Albums' && song.type === 'album') ||
-            (activeType === 'Singles' && song.type === 'single');
-
-          const matchesSearch =
-            song.title?.toLowerCase().includes(lowerTerm) ||
-            (Array.isArray(song.artist)
-              ? song.artist
-                  .map((a: { name: string }) => a.name)
-                  .join(' ')
-                  .toLowerCase()
-                  .includes(lowerTerm)
-              : song.artist?.toLowerCase().includes(lowerTerm));
-
-          return matchesType && matchesSearch;
-        });
-
-        setSearchResults(filtered);
+        setSearchResults(results);
       } catch (err) {
-        console.error('Search fetch error:', err);
+        console.error('Error fetching search results:', err);
         setSearchResults([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSongs();
+    if (searchTerm.trim()) {
+      fetchResults();
+    } else {
+      setSearchResults([]);
+    }
   }, [searchTerm, activeType]);
 
   const getIconForType = (type: string) => {
@@ -126,7 +126,7 @@ export default function SearchPage() {
       ) : (
         (searchTerm || activeType !== 'All') && (
           <p className="py-8 text-center text-muted-foreground">
-            No results found for "{searchTerm}" in {activeType}.
+            No results found for &quot;{searchTerm}&quot; in {activeType}.
           </p>
         )
       )}

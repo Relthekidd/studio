@@ -35,12 +35,16 @@ export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylis
 
     try {
       // Call savePlaylist utility to save the playlist in Firestore
-      await savePlaylist(user.uid, {
-        name: title,
-        description,
-        imageUrl: coverImage || '/placeholder.png',
-        songs: [],
-        createdAt: new Date().toISOString(),
+      await savePlaylist({
+        userId: user.uid, // Pass the current user's ID
+        playlistData: {
+          name: title,
+          description,
+          imageUrl: coverImage || '/placeholder.png', // Default cover image
+          songs: [], // Initialize with an empty songs array
+          createdAt: new Date().toISOString(),
+          ownerId: ''
+        },
       });
 
       toast({ title: 'Playlist created!' });

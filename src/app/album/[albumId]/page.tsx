@@ -76,7 +76,7 @@ export default function AlbumPage() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center space-x-4">
-        <div className="relative size-36 rounded-lg overflow-hidden">
+        <div className="relative size-36 overflow-hidden rounded-lg">
           <Image
             src={album.coverURL}
             alt={album.title}

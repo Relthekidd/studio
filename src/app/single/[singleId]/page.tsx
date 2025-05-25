@@ -122,7 +122,7 @@ export default function SingleDetailPage() {
             <div className="aspect-square w-full">
               <Image
                 src={single.coverURL}
-                alt={single.title}
+                alt={`Cover art for ${single.title}`}
                 fill
                 className="object-cover"
                 unoptimized
@@ -144,10 +144,13 @@ export default function SingleDetailPage() {
               {/* Artist Names */}
               <div className="mb-4 mt-2">
                 {artistsDetails.map((artist) => (
-                  <Link key={artist.id} href={`/artist/${artist.id}`} legacyBehavior>
-                    <a className="mr-2 text-lg text-muted-foreground transition-colors hover:text-primary">
-                      {artist.name}
-                    </a>
+                  <Link
+                    key={artist.id}
+                    href={`/artist/${artist.id}`}
+                    className="mr-2 text-lg text-muted-foreground transition-colors hover:text-primary"
+                    aria-label={`View artist profile for ${artist.name}`}
+                  >
+                    {artist.name}
                   </Link>
                 ))}
               </div>
@@ -190,13 +193,19 @@ export default function SingleDetailPage() {
             <Button
               onClick={() => {
                 if (single.tracklist && single.tracklist.length > 0) {
-                  handlePlayTrack(single.tracklist[0]);
+                  const firstTrack = single.tracklist[0];
+                  if (firstTrack.audioURL) {
+                    handlePlayTrack(firstTrack);
+                  } else {
+                    console.error('Track has no audioURL');
+                  }
                 } else {
                   console.error('No tracks available to play');
                 }
               }}
               size="lg"
               className="mt-4 w-full bg-primary text-primary-foreground hover:bg-primary/90 md:w-auto"
+              aria-label={`Play the first track from ${single.title}`}
             >
               <PlayCircle size={20} className="mr-2" /> Play Track
             </Button>
@@ -215,7 +224,6 @@ export default function SingleDetailPage() {
                     key={track.id}
                     track={track}
                     onPlay={handlePlayTrack}
-                    albumArtists={artistsDetails}
                     singleCoverURL={single.coverURL}
                   />
                 ))}
@@ -231,11 +239,10 @@ export default function SingleDetailPage() {
 type TrackListItemProps = {
   track: Track;
   onPlay: (track: Track) => void;
-  albumArtists: Artist[];
   singleCoverURL: string;
 };
 
-const TrackListItem = ({ track, onPlay, albumArtists, singleCoverURL }: TrackListItemProps) => {
+const TrackListItem = ({ track, onPlay, singleCoverURL }: TrackListItemProps) => {
   const { currentTrack, isPlaying, togglePlayPause } = usePlayer();
   const isCurrent = currentTrack?.id === track.id;
 
@@ -249,7 +256,18 @@ const TrackListItem = ({ track, onPlay, albumArtists, singleCoverURL }: TrackLis
   };
 
   return (
-    <div className="flex items-center justify-between rounded px-4 py-2 transition hover:bg-muted">
+    <div
+      className="group flex min-w-0 flex-1 cursor-pointer items-center gap-3 md:gap-4"
+      role="button"
+      tabIndex={0}
+      onClick={() => onPlay(track)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onPlay(track);
+        }
+      }}
+      aria-label={`Play ${track.title}`}
+    >
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"

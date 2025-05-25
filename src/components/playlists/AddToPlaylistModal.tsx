@@ -12,7 +12,7 @@ import { db } from '@/lib/firebase';
 import { useUser } from '@/hooks/useUser';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { collection, addDoc, getDocs, doc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import type { Track } from '@/contexts/PlayerContext';
 
 interface Props {
@@ -27,12 +27,24 @@ export default function AddToPlaylistModal({ trigger, track }: Props) {
   useEffect(() => {
     const fetchPlaylists = async () => {
       if (!user?.uid) return;
-      const snap = await getDocs(collection(db, 'users', user.uid, 'playlists'));
-      const list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setPlaylists(list);
+
+      try {
+        // Query playlists where ownerId === user.uid
+        const playlistsQuery = query(
+          collection(db, 'playlists'),
+          where('ownerId', '==', user.uid)
+        );
+        const snap = await getDocs(playlistsQuery);
+        const list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setPlaylists(list);
+      } catch (err) {
+        console.error('Error fetching playlists:', err);
+        toast({ title: 'Error', description: 'Failed to fetch playlists.' });
+      }
     };
+
     fetchPlaylists();
-  }, [user]);
+  }, [user, toast]);
 
   const addToPlaylist = async (playlistId: string) => {
     if (!user?.uid) return;

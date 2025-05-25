@@ -9,13 +9,15 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint --ext .ts,.tsx src",
-    "lint:fix": "eslint --ext .ts,.tsx src --fix",
-    "lint:fixme": "node scripts/generate-fixme.js",
-    "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
-    "prepare": "husky install",
-    "test": "echo \"No tests yet\" && exit 0"
+  "lint:fix": "eslint --ext .ts,.tsx src --fix",
+  "lint:fixme": "node scripts/generate-fixme.js",
+  "format": "prettier --write .",
+  "prepare": "husky install",
+  "test": "echo \"No tests yet\" && exit 0",
+   "check:all": "npm run lint && npm run typecheck && npm run format:check",
+  "lint": "eslint . --ext .ts,.tsx",
+  "typecheck": "tsc --noEmit",
+  "format:check": "prettier . --check"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.8.0",

@@ -117,7 +117,7 @@ export default function LoginPage() {
         <p className="text-center text-sm">
           {mode === 'login' ? (
             <>
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <button type="button" onClick={() => setMode('signup')} className="underline">
                 Sign up
               </button>
