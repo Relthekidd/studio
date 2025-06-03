@@ -252,7 +252,7 @@ const TrackListItem = ({ track, onPlay, singleCoverURL }: TrackListItemProps) =>
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isCurrent) {
-      togglePlayPause(currentTrack);
+      togglePlayPause();
     } else {
       onPlay(track);
     }
