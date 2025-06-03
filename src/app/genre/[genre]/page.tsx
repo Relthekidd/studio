@@ -11,12 +11,13 @@ import SectionTitle from '@/components/SectionTitle';
 import { AlbumCard } from '@/components/AlbumCard';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 
 export default function GenrePage() {
   const { genre } = useParams();
   const [tracks, setTracks] = useState<Track[]>([]);
-  const { playTrack, setQueue } = usePlayer();
+  const setQueue = usePlayerStore((s) => s.setQueue);
+  const setTrack = usePlayerStore((s) => s.setTrack);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function GenrePage() {
   const handlePlayAll = () => {
     if (tracks.length > 0) {
       setQueue(tracks);
-      playTrack(tracks[0]);
+      setTrack(tracks[0]);
       toast({ title: 'Now Playing', description: `Genre: ${genre}` });
     }
   };

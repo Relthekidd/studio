@@ -6,7 +6,7 @@ import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
 import { AlbumCard } from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 
 export default function DiscoverPage() {
   const [tracks, setTracks] = useState<Track[]>([]);

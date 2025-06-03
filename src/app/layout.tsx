@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import ClientLayout from '@/components/layout/ClientLayout';
 import { AuthProvider } from '@/contexts/AuthProvider';
-import { PlayerProvider } from '@/contexts/PlayerContext';
 
 const fontSans = Inter({
   subsets: ['latin'],
@@ -33,10 +32,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         )}
       >
         <AuthProvider>
-          <PlayerProvider>
-            <ClientLayout>{children}</ClientLayout>
-            <Toaster />
-          </PlayerProvider>
+          <ClientLayout>{children}</ClientLayout>
+          <Toaster />
         </AuthProvider>
       </body>
     </html>

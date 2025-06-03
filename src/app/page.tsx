@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import Section from '@/components/section';
 import Loader from '@/components/loader';
 import Link from 'next/link';

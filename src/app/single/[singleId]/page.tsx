@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CalendarDays, ListMusic, Info, PlayCircle } from 'lucide-react';
+import { usePlayerStore } from '@/features/player/store';
 import type { Track } from '@/types/music';
 import SectionTitle from '@/components/SectionTitle';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +38,7 @@ type Single = {
 
 export default function SingleDetailPage() {
   const params = useParams();
-  const { playTrack } = usePlayer();
+  const setTrack = usePlayerStore((s) => s.setTrack);
   const [single, setSingle] = useState<Single | null>(null);
   const [artistsDetails, setArtistsDetails] = useState<Artist[]>([]);
 
@@ -105,7 +106,7 @@ export default function SingleDetailPage() {
       return;
     }
 
-    playTrack(track);
+    setTrack(track);
   };
 
   if (!single) {
@@ -243,7 +244,9 @@ type TrackListItemProps = {
 };
 
 const TrackListItem = ({ track, onPlay, singleCoverURL }: TrackListItemProps) => {
-  const { currentTrack, isPlaying, togglePlayPause } = usePlayer();
+  const currentTrack = usePlayerStore((s) => s.currentTrack);
+  const isPlaying = usePlayerStore((s) => s.isPlaying);
+  const togglePlayPause = usePlayerStore((s) => s.togglePlayPause);
   const isCurrent = currentTrack?.id === track.id;
 
   const handlePlayClick = (e: React.MouseEvent) => {
@@ -296,19 +299,4 @@ const TrackListItem = ({ track, onPlay, singleCoverURL }: TrackListItemProps) =>
     </div>
   );
 };
-function usePlayer(): {
-  playTrack: (track: Track) => void;
-  currentTrack: Track | null;
-  isPlaying: boolean;
-  togglePlayPause: (track: Track | null) => void;
-} {
-  // Replace this with your actual player store logic
-  // This is a placeholder implementation to avoid TypeScript errors
-  return {
-    playTrack: () => {},
-    currentTrack: null,
-    isPlaying: false,
-    togglePlayPause: () => {},
-  };
-}
 

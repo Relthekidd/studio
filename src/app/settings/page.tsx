@@ -7,7 +7,7 @@ import SearchBar from '@/components/SearchBar';
 import FilterChip from '@/components/FilterChip';
 import SectionTitle from '@/components/SectionTitle';
 import { AlbumCard } from '@/components/AlbumCard';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import {
   Music,
   DiscAlbum,

@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AlbumCard } from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import { PlayCircle, MoreVertical, ArrowLeft } from 'lucide-react';
 import EditPlaylistModal from '@/components/EditPlaylistModal';
 
@@ -24,7 +24,8 @@ export default function PlaylistDetailPage() {
   const { playlistId } = useParams();
   const { toast } = useToast();
   const router = useRouter();
-  const { setQueue, playTrack } = usePlayer();
+  const setQueue = usePlayerStore((s) => s.setQueue);
+  const setTrack = usePlayerStore((s) => s.setTrack);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [playlistName, setPlaylistName] = useState('My Playlist');
 
@@ -54,7 +55,7 @@ export default function PlaylistDetailPage() {
   const handlePlayAll = () => {
     if (tracks.length === 0) return;
     setQueue(tracks);
-    playTrack(tracks[0]);
+    setTrack(tracks[0]);
     toast({ title: 'Now Playing', description: `Playlist: ${playlistName}` });
   };
 

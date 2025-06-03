@@ -1,7 +1,7 @@
 // src/components/Top5Showcase.tsx
 'use client';
 
-import { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import { AlbumCard } from '@/components/AlbumCard';
 
 interface Artist {
