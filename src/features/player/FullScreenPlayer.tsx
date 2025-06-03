@@ -2,12 +2,20 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { usePlayer } from '@/contexts/PlayerContext';
-import PlayerControls from './PlayerControls';
+import { usePlayerStore } from './store';
+import PlayerControls from './controls/PlayerControls';
 import { Slider } from '@/components/ui/slider';
 import { formatTime } from '@/lib/utils';
 import TrackInfo from '@/components/music/TrackInfo';
-import { Repeat1, Repeat, ChevronDown, ListMusic, Shuffle, VolumeX, Volume2 } from 'lucide-react';
+import {
+  Repeat1,
+  Repeat,
+  ChevronDown,
+  ListMusic,
+  Shuffle,
+  VolumeX,
+  Volume2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function FullScreenPlayer() {
@@ -17,17 +25,16 @@ export default function FullScreenPlayer() {
     currentTime,
     duration,
     seek,
-    shuffleMode = false,
+    shuffleMode,
     isMuted,
     setMuted,
-    volume = 1,
+    volume,
     setVolume,
-    repeatMode = 'off',
+    repeatMode,
     toggleRepeat,
-    closeFullScreenPlayer,
-  } = usePlayer();
+    toggleExpand,
+  } = usePlayerStore();
 
-  // Handle cases where currentTrack or audioURL is missing
   if (!currentTrack || !currentTrack.audioURL) {
     console.warn('FullScreenPlayer: No current track or missing audioURL.');
     return (
@@ -46,19 +53,14 @@ export default function FullScreenPlayer() {
     setMuted(!isMuted);
   };
 
-  function getRepeatIcon(): React.ReactNode {
-    if (repeatMode === 'one') {
-      return <Repeat1 size={20} className="text-primary" />;
-    }
-    if (repeatMode === 'all') {
-      return <Repeat size={20} className="text-primary" />;
-    }
+  const getRepeatIcon = () => {
+    if (repeatMode === 'one') return <Repeat1 size={20} className="text-primary" />;
+    if (repeatMode === 'all') return <Repeat size={20} className="text-primary" />;
     return <Repeat size={20} />;
-  }
+  };
 
   return (
     <div className="animate-slideInUp fixed inset-0 z-[100] flex flex-col items-center justify-between bg-gradient-to-br from-background via-card to-background/90 p-4 backdrop-blur-2xl md:p-6">
-      {/* Background Image */}
       {currentTrack.coverURL && (
         <Image
           src={currentTrack.coverURL}
@@ -66,7 +68,6 @@ export default function FullScreenPlayer() {
           fill
           className="z-[-1] scale-110 object-cover opacity-10 blur-2xl"
           unoptimized
-          data-ai-hint={currentTrack.dataAiHint ?? ''}
         />
       )}
 
@@ -76,7 +77,7 @@ export default function FullScreenPlayer() {
           variant="ghost"
           size="icon"
           className="z-[110] text-muted-foreground transition-colors hover:text-accent"
-          onClick={closeFullScreenPlayer}
+          onClick={toggleExpand}
           aria-label="Close full screen player"
         >
           <ChevronDown size={28} />
@@ -100,11 +101,9 @@ export default function FullScreenPlayer() {
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             unoptimized
-            data-ai-hint={currentTrack.dataAiHint ?? ''}
           />
           <div className="absolute inset-0 bg-black/10 transition-colors duration-300 group-hover:bg-black/0"></div>
         </div>
-
         <TrackInfo track={currentTrack} />
       </div>
 
@@ -114,7 +113,7 @@ export default function FullScreenPlayer() {
           value={[progress]}
           max={100}
           step={0.1}
-          onValueChange={handleSeek} // Use handleSeek here
+          onValueChange={handleSeek}
           className="h-2 [&>span:first-child>span]:bg-gradient-to-r [&>span:first-child>span]:from-accent [&>span:first-child>span]:to-primary [&>span:first-child]:h-2 [&>span:last-child]:size-4"
           aria-label="Seek bar"
         />
@@ -124,7 +123,6 @@ export default function FullScreenPlayer() {
         </div>
       </div>
 
-      {/* Controls */}
       <PlayerControls variant="full" className="mb-4" />
 
       {/* Volume + Repeat */}
@@ -143,7 +141,7 @@ export default function FullScreenPlayer() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={toggleMute} // Use toggleMute here
+            onClick={toggleMute}
             aria-label={isMuted ? 'Unmute' : 'Mute'}
           >
             {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
@@ -161,7 +159,7 @@ export default function FullScreenPlayer() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => toggleRepeat()}
+          onClick={toggleRepeat}
           aria-label="Repeat"
           className="text-muted-foreground hover:text-primary"
         >

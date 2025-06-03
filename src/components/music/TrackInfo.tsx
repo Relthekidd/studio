@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Track } from '@/contexts/PlayerContext';
+import { Track } from '@/types/music';
 import { formatArtists } from '@/utils/formatArtists';
 
 export default function TrackInfo({ track }: { track: Track }) {

@@ -1,14 +1,14 @@
 'use client';
 
 import Image from 'next/image';
-import { usePlayer } from '@/contexts/PlayerContext';
-import PlayerControls from './PlayerControls';
+import { usePlayerStore } from './store';
+import PlayerControls from './controls/PlayerControls';
 import { Progress } from '@/components/ui/progress';
 import { formatArtists } from '@/utils/formatArtists';
 import { Play, Pause } from 'lucide-react';
 
 export default function MiniPlayer() {
-  const { currentTrack, isPlaying, isExpanded, toggleExpand, progress } = usePlayer();
+ const { currentTrack, isPlaying, isExpanded, toggleExpand, progress } = usePlayerStore();
 
   // Handle cases where currentTrack or audioURL is missing
   if (!currentTrack || !currentTrack.audioURL) {
