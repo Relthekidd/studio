@@ -48,18 +48,24 @@ export default function SearchPage() {
         }
 
         const querySnapshot = await getDocs(q);
-        const results = querySnapshot.docs.map((doc) => {
+        const results: Track[] = querySnapshot.docs.map((doc) => {
           const data = doc.data();
+
+          const artists = Array.isArray(data.artists)
+            ? data.artists
+            : data.artist
+              ? [{ id: data.artistId ?? '', name: data.artist }]
+              : [];
+
           return {
             id: doc.id,
             title: data.title || 'Untitled',
-            artist: data.artist || 'Unknown Artist',
-            imageURL: data.coverURL || '/placeholder.png',
-            coverURL: data.coverURL || '/placeholder.png',
             audioURL: data.audioURL || '',
-            duration: data.duration || 0,
+            coverURL: data.coverURL || '/placeholder.png',
+            artists,
+            album: data.album || null,
             type: activeType.toLowerCase(),
-          } as Track;
+          };
         });
 
         setSearchResults(results);
