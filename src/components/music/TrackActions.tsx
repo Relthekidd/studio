@@ -21,6 +21,12 @@ export default function TrackActions({ track }: Props) {
   const setQueue = usePlayerStore((s) => s.setQueue);
   const router = useRouter();
 
+  const artists = Array.isArray(track.artists)
+    ? track.artists
+    : typeof (track as any).artist === 'string'
+      ? [{ id: '', name: (track as any).artist }]
+      : [];
+
   const handleAddToQueue = () => {
     // Add the track to the queue
     setQueue([...queue, track]);
@@ -55,12 +61,16 @@ export default function TrackActions({ track }: Props) {
           <Plus className="mr-2 size-4" />
           Add to Queue
         </DropdownMenuItem>
-        {track.artists && track.artists.length > 0 && (
-          <DropdownMenuItem onClick={() => router.push(`/artist/${track.artists[0].id}`)}>
+        {artists.map((artist) => (
+          <DropdownMenuItem
+            key={artist.id || artist.name}
+            onClick={() => artist.id && router.push(`/artist/${artist.id}`)}
+            disabled={!artist.id}
+          >
             <User className="mr-2 size-4" />
-            Go to Artist
+            {artist.name || 'Artist'}
           </DropdownMenuItem>
-        )}
+        ))}
         {track.albumId && (
           <DropdownMenuItem onClick={() => router.push(`/album/${track.albumId}`)}>
             <Disc className="mr-2 size-4" />
