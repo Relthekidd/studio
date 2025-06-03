@@ -38,10 +38,6 @@ export default function TrackActions({ track }: Props) {
           <Heart className="mr-2 size-4" />
           Favorite
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => console.log('Add to playlist', track.id)}>
-          <ListPlus className="mr-2 size-4" />
-          Add to Playlist
-        </DropdownMenuItem>
         <AddToPlaylistModal
           track={track}
           trigger={
