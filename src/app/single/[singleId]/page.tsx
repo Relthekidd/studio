@@ -292,13 +292,7 @@ const TrackListItem = ({ track, onPlay, singleCoverURL }: TrackListItemProps) =>
           <div className="text-xs text-muted-foreground">{formatArtists(track.artists)}</div>
         </div>
       </div>
-      <TrackActions
-        track={{
-          ...track,
-          artist: track.artists,
-          coverURL: track.album?.coverURL || singleCoverURL || '/placeholder.png',
-        }}
-      />
+      <TrackActions track={track} />
     </div>
   );
 };
