@@ -12,6 +12,10 @@ This file is auto-generated.
 - [32:6] React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
 
 ---
+### `src/app/single/[singleId]/page.tsx`
+- [42:26] 'setArtistsDetails' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+
+---
 ### `src/components/playlists/AddToPlaylistModal.tsx`
 - [47:6] React Hook useEffect has an unnecessary dependency: 'toast'. Either exclude it or remove the dependency array. Outer scope values like 'toast' aren't valid dependencies because mutating them doesn't re-render the component. – `react-hooks/exhaustive-deps`
 
