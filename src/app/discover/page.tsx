@@ -22,9 +22,9 @@ export default function DiscoverPage() {
         return {
           id: doc.id,
           title: data.title,
-          artist: data.artist,
+          artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
           audioURL: data.audioURL,
-          coverURL: data.coverURL, // Required by <AlbumCard />
+          coverURL: data.coverURL,
           duration: data.duration,
           type: 'track',
         };

@@ -53,7 +53,7 @@ export default function SearchPage() {
           return {
             id: doc.id,
             title: data.title || 'Untitled',
-            artist: data.artist || 'Unknown Artist',
+            artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
             imageURL: data.coverURL || '/placeholder.png',
             coverURL: data.coverURL || '/placeholder.png',
             audioURL: data.audioURL || '',

@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
-import { Track } from '@/utils/helpers';
+import type { Track } from '@/types/music';
 
 export interface Album {
   id: string;
@@ -40,12 +40,16 @@ export function useLibrary() {
         return {
           id: doc.id,
           title: data.title || 'Untitled',
-          artist: data.artist || [{ id: '', name: 'Unknown Artist' }],
+          artists: data.artists || [{ id: '', name: 'Unknown Artist' }],
           audioURL: data.audioURL || '',
           coverURL: data.coverURL || '/placeholder.png',
           type: data.type || 'track',
           albumId: data.albumId || '',
-          album: data.album || { id: '', name: 'Unknown Album', coverURL: '/placeholder.png' },
+          album:
+            data.album ||
+            (data.albumId
+              ? { id: data.albumId, name: 'Unknown Album', coverURL: '/placeholder.png' }
+              : undefined),
           duration: data.duration || 0,
           trackNumber: data.trackNumber || 1,
           description: data.description || '',

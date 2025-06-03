@@ -1,4 +1,5 @@
 // src/utils/helpers.ts
+import type { Track } from '@/types/music';
 
 export function formatArtists(input: any): string {
   if (Array.isArray(input)) {
@@ -17,16 +18,18 @@ export function safeImageSrc(src: string | undefined | null): string {
 }
 
 export function normalizeTrack(raw: any): Track {
+  const artists = Array.isArray(raw.artists)
+    ? raw.artists.map((a: any) =>
+        typeof a === 'object' ? { id: a.id ?? '', name: a.name ?? '' } : { id: '', name: a ?? '' }
+      )
+    : raw.artist
+      ? [{ id: raw.artist.id ?? '', name: raw.artist.name ?? raw.artist }]
+      : [];
+
   return {
     id: raw.id,
     title: raw.title || 'Untitled',
-    artist: Array.isArray(raw.artists)
-      ? raw.artists.map((a: any) =>
-          typeof a === 'object' ? { id: a.id ?? '', name: a.name ?? '' } : { id: '', name: a ?? '' }
-        )
-      : raw.artist
-        ? [{ id: raw.artist.id ?? '', name: raw.artist.name ?? raw.artist }]
-        : [],
+    artists,
     audioURL: raw.audioURL || raw.audioUrl || '',
     coverURL: raw.coverURL || raw.coverUrl || '',
     duration: raw.duration || 0,
@@ -57,20 +60,4 @@ export function capitalize(str: string): string {
 export function getTrackRoute(item: { type: string; id: string }): string {
   const type = item.type?.toLowerCase();
   return type === 'album' ? `/album/${item.id}` : `/single/${item.id}`;
-}
-
-// Extend this if needed
-export interface Track {
-  id: string;
-  title: string;
-  artist: { id: string; name: string }[];
-  audioURL: string;
-  coverURL: string;
-  type: string;
-  albumId: string;
-  album: { id: string; name: string; coverURL: string };
-  duration: number;
-  trackNumber: number;
-  description?: string;
-  dataAiHint?: string;
 }
