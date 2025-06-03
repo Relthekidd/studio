@@ -8,7 +8,14 @@ import FilterChip from '@/components/FilterChip';
 import SectionTitle from '@/components/SectionTitle';
 import { AlbumCard } from '@/components/AlbumCard';
 import type { Track } from '@/contexts/PlayerContext';
-import { Music, DiscAlbum, ListMusic, User, Users as UsersIcon, Search as SearchIcon } from 'lucide-react';
+import {
+  Music,
+  DiscAlbum,
+  ListMusic,
+  User,
+  Users as UsersIcon,
+  Search as SearchIcon,
+} from 'lucide-react';
 
 const resultTypes = ['All', 'Tracks', 'Albums', 'Singles'];
 
@@ -28,20 +35,11 @@ export default function SearchPage() {
         // Firestore query based on activeType
         let q;
         if (activeType === 'Tracks' || activeType === 'All') {
-          q = query(
-            collection(db, 'tracks'),
-            where('keywords', 'array-contains', lowerTerm)
-          );
+          q = query(collection(db, 'tracks'), where('keywords', 'array-contains', lowerTerm));
         } else if (activeType === 'Albums') {
-          q = query(
-            collection(db, 'albums'),
-            where('keywords', 'array-contains', lowerTerm)
-          );
+          q = query(collection(db, 'albums'), where('keywords', 'array-contains', lowerTerm));
         } else if (activeType === 'Singles') {
-          q = query(
-            collection(db, 'singles'),
-            where('keywords', 'array-contains', lowerTerm)
-          );
+          q = query(collection(db, 'singles'), where('keywords', 'array-contains', lowerTerm));
         } else {
           // If no valid type, return empty results
           setSearchResults([]);

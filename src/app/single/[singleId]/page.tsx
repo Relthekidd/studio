@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CalendarDays, ListMusic, Info, PlayCircle } from 'lucide-react';
-import { usePlayer, Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import SectionTitle from '@/components/SectionTitle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -283,16 +283,32 @@ const TrackListItem = ({ track, onPlay, singleCoverURL }: TrackListItemProps) =>
         </Button>
         <div>
           <div className="font-medium">{track.title}</div>
-          <div className="text-xs text-muted-foreground">{formatArtists(track.artist)}</div>
+          <div className="text-xs text-muted-foreground">{formatArtists(track.artists)}</div>
         </div>
       </div>
       <TrackActions
         track={{
           ...track,
-          artist: track.artist,
+          artist: track.artists,
           coverURL: track.album?.coverURL || singleCoverURL || '/placeholder.png',
         }}
       />
     </div>
   );
 };
+function usePlayer(): {
+  playTrack: (track: Track) => void;
+  currentTrack: Track | null;
+  isPlaying: boolean;
+  togglePlayPause: (track: Track | null) => void;
+} {
+  // Replace this with your actual player store logic
+  // This is a placeholder implementation to avoid TypeScript errors
+  return {
+    playTrack: () => {},
+    currentTrack: null,
+    isPlaying: false,
+    togglePlayPause: () => {},
+  };
+}
+

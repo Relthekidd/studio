@@ -2,34 +2,42 @@
 
 import Image from 'next/image';
 import { usePlayerStore } from './store';
-import PlayerControls from './controls/PlayerControls';
-import { Progress } from '@/components/ui/progress';
 import { formatArtists } from '@/utils/formatArtists';
 import { Play, Pause } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 export default function MiniPlayer() {
- const { currentTrack, isPlaying, isExpanded, toggleExpand, progress } = usePlayerStore();
+  const {
+    currentTrack,
+    isPlaying,
+    togglePlayPause,
+    toggleExpand,
+    currentTime,
+    duration,
+  } = usePlayerStore();
 
-  // Handle cases where currentTrack or audioURL is missing
+  // Show MiniPlayer only if currentTrack exists
   if (!currentTrack || !currentTrack.audioURL) {
     console.warn('MiniPlayer: No current track or missing audioURL.');
     return null;
   }
 
-  // Hide MiniPlayer if FullScreenPlayer is expanded
-  if (isExpanded) return null;
+  // Calculate progress percentage
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <div
-      className="animate-slideInUpMini fixed inset-x-0 bottom-16 z-50 flex h-20 items-center border-t border-border/70 bg-card/80 px-4 shadow-2xl backdrop-blur-lg transition-transform duration-300 ease-in-out md:bottom-0 md:px-6"
+      className="fixed inset-x-0 bottom-16 z-50 flex h-20 items-center border-t border-border/70 bg-card/80 px-4 shadow-2xl backdrop-blur-lg transition-transform duration-300 ease-in-out md:bottom-0 md:px-6"
       role="complementary"
-      aria-label="Music Player"
+      aria-label="Mini Music Player"
     >
+      {/* Expand FullScreenPlayer */}
       <button
         className="group flex min-w-0 flex-1 cursor-pointer items-center gap-3 md:gap-4"
         onClick={() => toggleExpand()}
         aria-label="Expand player"
       >
+        {/* Cover Image */}
         <div
           className={`relative size-12 overflow-hidden rounded-md shadow-md transition-shadow group-hover:shadow-primary/30 md:size-14 ${
             isPlaying ? 'animate-pulse' : ''
@@ -42,34 +50,34 @@ export default function MiniPlayer() {
             className="object-cover"
             unoptimized
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
-            {isPlaying ? (
-              <Pause size={24} className="text-white" />
-            ) : (
-              <Play size={24} className="text-white" />
-            )}
-          </div>
         </div>
+
+        {/* Track Info */}
         <div className="flex min-w-0 flex-col">
           <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-primary md:text-base">
             {currentTrack.title || 'Unknown Title'}
           </p>
           <p className="truncate text-xs text-muted-foreground md:text-sm">
-            {formatArtists(currentTrack.artist)}
+            {formatArtists(currentTrack.artists)}
           </p>
         </div>
       </button>
 
-      <div className="mx-4 hidden w-1/3 flex-col items-center md:flex">
-        <PlayerControls variant="mini" />
+      {/* Play/Pause Button */}
+      <button
+        className="ml-auto flex items-center justify-center rounded-full bg-primary p-2 text-white shadow-md hover:bg-primary/90"
+        onClick={togglePlayPause}
+        aria-label={isPlaying ? 'Pause' : 'Play'}
+      >
+        {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+      </button>
+
+      {/* Progress Bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-secondary/30">
         <Progress
           value={progress}
-          className="mt-1 h-1 w-full bg-secondary/30 [&>div]:bg-gradient-to-r [&>div]:from-accent/70 [&>div]:to-primary/70"
+          className="h-full [&>div]:bg-gradient-to-r [&>div]:from-accent/70 [&>div]:to-primary/70"
         />
-      </div>
-
-      <div className="ml-auto md:hidden">
-        <PlayerControls variant="mini" />
       </div>
     </div>
   );

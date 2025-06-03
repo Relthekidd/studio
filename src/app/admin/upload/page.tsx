@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, setDoc, query, where, getDocs } from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthProvider';
@@ -44,6 +44,21 @@ export default function AdminUploadPage() {
 
     setUploading(true);
     try {
+      // Look up or create artist
+      const artistQuery = await getDocs(
+        query(collection(db, 'artists'), where('name', '==', artist.trim()))
+      );
+      let artistData;
+      if (artistQuery.empty) {
+        const newArtistRef = doc(collection(db, 'artists'));
+        artistData = { id: newArtistRef.id, name: artist.trim(), createdAt: serverTimestamp() };
+        await setDoc(newArtistRef, artistData);
+      } else {
+        const docData = artistQuery.docs[0];
+        artistData = { id: docData.id, name: docData.data().name };
+      }
+
+      // Upload cover and audio files
       const coverRef = ref(storage, `covers/${Date.now()}-${coverFile.name}`);
       const audioRef = ref(storage, `audio/${Date.now()}-${audioFile.name}`);
 
@@ -67,7 +82,7 @@ export default function AdminUploadPage() {
       await setDoc(newDocRef, {
         id: newDocRef.id,
         title,
-        artist: [{ id: 'artist-id', name: artist }], // Example artist structure
+        artist: [artistData], // Use the artist object
         genre,
         albumName: type === 'album' ? albumName : undefined, // Include albumName if type is album
         audioURL,

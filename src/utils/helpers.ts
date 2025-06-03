@@ -22,13 +22,11 @@ export function normalizeTrack(raw: any): Track {
     title: raw.title || 'Untitled',
     artist: Array.isArray(raw.artists)
       ? raw.artists.map((a: any) =>
-          typeof a === 'object'
-            ? { id: a.id ?? '', name: a.name ?? '' }
-            : { id: '', name: a ?? '' }
+          typeof a === 'object' ? { id: a.id ?? '', name: a.name ?? '' } : { id: '', name: a ?? '' }
         )
       : raw.artist
-      ? [{ id: raw.artist.id ?? '', name: raw.artist.name ?? raw.artist }]
-      : [],
+        ? [{ id: raw.artist.id ?? '', name: raw.artist.name ?? raw.artist }]
+        : [],
     audioURL: raw.audioURL || raw.audioUrl || '',
     coverURL: raw.coverURL || raw.coverUrl || '',
     duration: raw.duration || 0,

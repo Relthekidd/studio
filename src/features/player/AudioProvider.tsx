@@ -75,10 +75,6 @@ export function AudioProvider() {
 
   return (
     // eslint-disable-next-line jsx-a11y/media-has-caption
-    <audio
-      ref={audioRef}
-      onEnded={skipToNext}
-      style={{ display: 'none' }}
-    />
+    <audio ref={audioRef} onEnded={skipToNext} style={{ display: 'none' }} />
   );
 }

@@ -9,22 +9,6 @@ interface SearchResults {
 }
 
 /**
- * Prepares a Firestore query to search for items based on a term.
- * @param collectionName The Firestore collection to query.
- * @param term The search term.
- */
-async function fetchCollectionByKeywords(collectionName: string, term: string) {
-  const lowerTerm = term.toLowerCase();
-  const collectionRef = collection(db, collectionName);
-  const collectionQuery = query(collectionRef, where('keywords', 'array-contains', lowerTerm));
-  const snapshot = await getDocs(collectionQuery);
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-}
-
-/**
  * Searches the library for songs, albums, and artists based on a search term.
  * Supports fuzzy matching by querying the `keywords` field in Firestore.
  * @param term The search term.
@@ -36,12 +20,32 @@ export async function searchLibrary(term: string): Promise<SearchResults> {
   }
 
   try {
-    // Fetch songs, albums, and artists based on the search term
-    const [songs, albums, artists] = await Promise.all([
-      fetchCollectionByKeywords('songs', term),
-      fetchCollectionByKeywords('albums', term),
-      fetchCollectionByKeywords('artists', term),
-    ]);
+    // Query songs by title
+    const qSongs = query(
+      collection(db, 'songs'),
+      where('title', '>=', term),
+      where('title', '<=', term + '\uf8ff')
+    );
+    const songsSnapshot = await getDocs(qSongs);
+    const songs = songsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    // Query albums by title
+    const qAlbums = query(
+      collection(db, 'albums'),
+      where('title', '>=', term),
+      where('title', '<=', term + '\uf8ff')
+    );
+    const albumsSnapshot = await getDocs(qAlbums);
+    const albums = albumsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    // Query artists by name
+    const qArtists = query(
+      collection(db, 'artists'),
+      where('name', '>=', term),
+      where('name', '<=', term + '\uf8ff')
+    );
+    const artistsSnapshot = await getDocs(qArtists);
+    const artists = artistsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
     return { songs, albums, artists };
   } catch (error) {

@@ -43,7 +43,7 @@ export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylis
           imageUrl: coverImage || '/placeholder.png', // Default cover image
           songs: [], // Initialize with an empty songs array
           createdAt: new Date().toISOString(),
-          ownerId: ''
+          ownerId: '',
         },
       });
 

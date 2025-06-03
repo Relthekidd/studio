@@ -30,10 +30,7 @@ export default function AddToPlaylistModal({ trigger, track }: Props) {
 
       try {
         // Query playlists where ownerId === user.uid
-        const playlistsQuery = query(
-          collection(db, 'playlists'),
-          where('ownerId', '==', user.uid)
-        );
+        const playlistsQuery = query(collection(db, 'playlists'), where('ownerId', '==', user.uid));
         const snap = await getDocs(playlistsQuery);
         const list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         setPlaylists(list);

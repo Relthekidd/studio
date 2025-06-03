@@ -1,12 +1,13 @@
-export function formatArtists(input: any): string {
-  if (Array.isArray(input)) {
-    return input.map((a: any) => a.name || a).join(', ');
+export function formatArtists(artists: { name: string }[]): string {
+  if (!artists || artists.length === 0) return 'Unknown Artist';
+
+  if (artists.length === 1) {
+    return artists[0].name;
   }
-  if (typeof input === 'object' && input?.name) {
-    return input.name;
+
+  if (artists.length === 2) {
+    return `${artists[0].name} & ${artists[1].name}`;
   }
-  if (typeof input === 'string') {
-    return input;
-  }
-  return 'Unknown Artist';
+
+  return `${artists[0].name}, ${artists[1].name}, +${artists.length - 2}`;
 }

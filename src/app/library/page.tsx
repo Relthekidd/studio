@@ -85,7 +85,12 @@ export default function LibraryPage() {
         </TabsList>
 
         <TabsContent value="playlists">
-          {renderGridSection(createdPlaylists, 'No playlists found.', <ListMusic size={48} />, 'playlist')}
+          {renderGridSection(
+            createdPlaylists,
+            'No playlists found.',
+            <ListMusic size={48} />,
+            'playlist'
+          )}
         </TabsContent>
 
         <TabsContent value="liked">
@@ -97,7 +102,12 @@ export default function LibraryPage() {
         </TabsContent>
 
         <TabsContent value="genres">
-          {renderGridSection(genres, 'No genre playlists found.', <GanttChartSquare size={48} />, 'playlist')}
+          {renderGridSection(
+            genres,
+            'No genre playlists found.',
+            <GanttChartSquare size={48} />,
+            'playlist'
+          )}
         </TabsContent>
 
         <TabsContent value="added">

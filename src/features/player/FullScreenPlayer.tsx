@@ -3,36 +3,32 @@
 import React from 'react';
 import Image from 'next/image';
 import { usePlayerStore } from './store';
-import PlayerControls from './controls/PlayerControls';
-import { Slider } from '@/components/ui/slider';
+import { formatArtists } from '@/utils/formatArtists';
 import { formatTime } from '@/lib/utils';
-import TrackInfo from '@/components/music/TrackInfo';
-import {
-  Repeat1,
-  Repeat,
-  ChevronDown,
-  ListMusic,
-  Shuffle,
-  VolumeX,
-  Volume2,
-} from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { ChevronDown, ListMusic, Shuffle, Repeat, Repeat1, VolumeX, Volume2, Play, Pause } from 'lucide-react';
 
 export default function FullScreenPlayer() {
   const {
     currentTrack,
-    progress,
+    isPlaying,
+    togglePlayPause,
+    toggleExpand,
     currentTime,
     duration,
     seek,
-    shuffleMode,
-    isMuted,
-    setMuted,
     volume,
     setVolume,
+    isMuted,
+    setMuted,
+    shuffleMode,
+    toggleShuffle,
     repeatMode,
     toggleRepeat,
-    toggleExpand,
+    skipToNext,
+    skipToPrev,
   } = usePlayerStore();
 
   if (!currentTrack || !currentTrack.audioURL) {
@@ -59,8 +55,11 @@ export default function FullScreenPlayer() {
     return <Repeat size={20} />;
   };
 
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
   return (
     <div className="animate-slideInUp fixed inset-0 z-[100] flex flex-col items-center justify-between bg-gradient-to-br from-background via-card to-background/90 p-4 backdrop-blur-2xl md:p-6">
+      {/* Background Cover */}
       {currentTrack.coverURL && (
         <Image
           src={currentTrack.coverURL}
@@ -104,7 +103,10 @@ export default function FullScreenPlayer() {
           />
           <div className="absolute inset-0 bg-black/10 transition-colors duration-300 group-hover:bg-black/0"></div>
         </div>
-        <TrackInfo track={currentTrack} />
+        <div className="text-center">
+          <h2 className="text-lg font-bold">{currentTrack.title}</h2>
+          <p className="text-sm text-muted-foreground">{formatArtists(currentTrack.artists)}</p>
+        </div>
       </div>
 
       {/* Progress Bar */}
@@ -123,14 +125,43 @@ export default function FullScreenPlayer() {
         </div>
       </div>
 
-      <PlayerControls variant="full" className="mb-4" />
+      {/* Player Controls */}
+      <div className="flex w-full max-w-xl items-center justify-between px-2 md:px-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={skipToPrev}
+          aria-label="Previous Track"
+          className="text-muted-foreground hover:text-primary"
+        >
+          <ChevronDown size={20} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={togglePlayPause}
+          aria-label={isPlaying ? 'Pause' : 'Play'}
+          className="text-muted-foreground hover:text-primary"
+        >
+          {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={skipToNext}
+          aria-label="Next Track"
+          className="text-muted-foreground hover:text-primary"
+        >
+          <ChevronDown size={20} />
+        </Button>
+      </div>
 
       {/* Volume + Repeat */}
       <div className="mb-4 flex w-full max-w-xl items-center justify-between px-2 md:px-4">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => console.log('Toggle shuffle')}
+          onClick={toggleShuffle}
           aria-label="Shuffle"
           className="text-muted-foreground hover:text-primary"
         >

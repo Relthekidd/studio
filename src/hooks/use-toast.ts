@@ -25,12 +25,11 @@ function genId() {
 // Define action types as a union of string literals
 type ActionType = 'ADD_TOAST' | 'UPDATE_TOAST' | 'DISMISS_TOAST' | 'REMOVE_TOAST';
 
-type Action =
-  | {
-      type: ActionType; // Use ActionType here
-      toast?: ToasterToast | Partial<ToasterToast>;
-      toastId?: ToasterToast['id'];
-    };
+type Action = {
+  type: ActionType; // Use ActionType here
+  toast?: ToasterToast | Partial<ToasterToast>;
+  toastId?: ToasterToast['id'];
+};
 
 interface State {
   toasts: ToasterToast[];
@@ -66,7 +65,9 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         toasts: state.toasts.map((t) =>
-          t.id === (action.toast as ToasterToast).id ? { ...t, ...(action.toast as ToasterToast) } : t
+          t.id === (action.toast as ToasterToast).id
+            ? { ...t, ...(action.toast as ToasterToast) }
+            : t
         ),
       };
 

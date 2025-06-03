@@ -30,7 +30,9 @@ export function useLibrary() {
     setLoading(true);
     try {
       const likedSongsSnap = await getDocs(collection(db, 'users', 'currentUserId', 'likedSongs'));
-      const savedAlbumsSnap = await getDocs(collection(db, 'users', 'currentUserId', 'savedAlbums'));
+      const savedAlbumsSnap = await getDocs(
+        collection(db, 'users', 'currentUserId', 'savedAlbums')
+      );
       const playlistsSnap = await getDocs(collection(db, 'users', 'currentUserId', 'playlists'));
 
       const transformToTrack = (doc: any): Track => {

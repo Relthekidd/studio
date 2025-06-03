@@ -29,6 +29,7 @@ type PlayerStore = {
   setVolume: (val: number) => void;
   setMuted: (val: boolean) => void;
   toggleRepeat: () => void;
+  toggleShuffle: () => void; // Added toggleShuffle
   skipToNext: () => void;
   skipToPrev: () => void;
 };
@@ -85,13 +86,10 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   toggleRepeat: () =>
     set((s) => ({
-      repeatMode:
-        s.repeatMode === 'off'
-          ? 'all'
-          : s.repeatMode === 'all'
-          ? 'one'
-          : 'off',
+      repeatMode: s.repeatMode === 'off' ? 'all' : s.repeatMode === 'all' ? 'one' : 'off',
     })),
+
+  toggleShuffle: () => set((s) => ({ shuffleMode: !s.shuffleMode })), // Added implementation
 
   skipToNext: () => {
     const { queue, queueIndex } = get();

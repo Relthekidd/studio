@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Heart, Plus, ListPlus, User, Disc } from 'lucide-react';
-import { usePlayer } from '@/contexts/PlayerContext';
+import { usePlayerStore } from '@/features/player/store';
 import { useRouter } from 'next/navigation';
 import type { Track } from '@/contexts/PlayerContext';
 import AddToPlaylistModal from '@/components/playlists/AddToPlaylistModal';

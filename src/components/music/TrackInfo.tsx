@@ -10,7 +10,7 @@ export default function TrackInfo({ track }: { track: Track }) {
   return (
     <div className="text-center">
       <h2 className="text-lg font-bold">{track.title}</h2>
-      <p className="text-sm text-muted-foreground">{formatArtists(track.artist)}</p>
+      <p className="text-sm text-muted-foreground">{formatArtists(track.artists)}</p>
     </div>
   );
 }
@@ -20,8 +20,8 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
     item.type === 'album'
       ? `/album/${item.id}`
       : item.type === 'single'
-      ? `/single/${item.id}`
-      : null; // Use null if type is invalid
+        ? `/single/${item.id}`
+        : null; // Use null if type is invalid
 
   const handleClick = () => {
     if (!href) {
@@ -33,7 +33,11 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
   };
 
   return href ? (
-    <Link href={href} className={`group relative block rounded-xl bg-card/70 transition-all hover:bg-card/90 ${className || 'w-full'}`} aria-label={`View details for ${item.title}`}>
+    <Link
+      href={href}
+      className={`group relative block rounded-xl bg-card/70 transition-all hover:bg-card/90 ${className || 'w-full'}`}
+      aria-label={`View details for ${item.title}`}
+    >
       <div className="relative aspect-square">
         <Image
           src={item.coverURL || '/placeholder.png'}
@@ -46,14 +50,14 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
       <div className="p-3">
         <h3 className="truncate text-sm font-semibold">{item.title}</h3>
         <p className="truncate text-xs text-muted-foreground">
-          {Array.isArray(item.artist)
-            ? item.artist.map((artist: { id: string; name: string }, idx: number) => (
+          {Array.isArray(item.artists)
+            ? item.artists.map((artist: { id: string; name: string }, idx: number) => (
                 <span key={artist.id}>
                   {artist.name}
-                  {idx < item.artist.length - 1 ? ', ' : ''}
+                  {idx < item.artists.length - 1 ? ', ' : ''}
                 </span>
               ))
-            : item.artist || 'Unknown Artist'}
+            : item.artists || 'Unknown Artist'}
         </p>
       </div>
     </Link>
@@ -75,21 +79,22 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
       <div className="p-3">
         <h3 className="truncate text-sm font-semibold">{item.title}</h3>
         <p className="truncate text-xs text-muted-foreground">
-          {Array.isArray(item.artist)
-            ? item.artist.map((artist: { id: string; name: string }, idx: number) => (
+          {Array.isArray(item.artists)
+            ? item.artists.map((artist: { id: string; name: string }, idx: number) => (
                 <span key={artist.id}>
                   {artist.name}
-                  {idx < item.artist.length - 1 ? ', ' : ''}
+                  {idx < item.artists.length - 1 ? ', ' : ''}
                 </span>
               ))
-            : item.artist || 'Unknown Artist'}
+            : item.artists || 'Unknown Artist'}
         </p>
       </div>
     </button>
   );
 }
 
-{/* 
+{
+  /* 
 <button
   className="text-center"
   onClick={() => console.log('Track clicked')}
@@ -97,4 +102,5 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
 >
   ...
 </button>
-*/}
+*/
+}

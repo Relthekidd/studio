@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { usePlayer } from '@/contexts/PlayerContext';
+import { usePlayerStore } from '@/features/player/store';
 import { PlayCircle } from 'lucide-react';
 import SectionTitle from '@/components/SectionTitle';
 import { AlbumCard } from '@/components/AlbumCard';

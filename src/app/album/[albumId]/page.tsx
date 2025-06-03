@@ -4,13 +4,12 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { usePlayer } from '@/contexts/PlayerContext';
+import { usePlayerStore } from '@/features/player/store';
 import { Button } from '@/components/ui/button';
 import type { Track } from '@/contexts/PlayerContext';
 import { normalizeTrack } from '@/utils/normalizeTrack';
 import { formatArtists } from '@/utils/formatArtists';
 import Image from 'next/image'; // Import Image from next/image
-
 
 interface Album {
   id: string;
@@ -24,7 +23,6 @@ interface Artist {
   id: string;
   name: string;
 }
-
 
 export default function AlbumPage() {
   const { albumId } = useParams();
@@ -50,15 +48,15 @@ export default function AlbumPage() {
     };
 
     const fetchTracks = async () => {
-      const q = query(collection(db, "tracks"), where("albumId", "==", String(albumId)));
+      const q = query(collection(db, 'tracks'), where('albumId', '==', String(albumId)));
       const trackSnap = await getDocs(q);
 
       // Fetch artist details
-      const artistQuery = query(collection(db, "artists"));
+      const artistQuery = query(collection(db, 'artists'));
       const artistSnap = await getDocs(artistQuery);
       const fetchedArtists: Artist[] = artistSnap.docs.map((doc) => ({
         id: doc.id,
-        name: doc.data().name || "Unknown Artist",
+        name: doc.data().name || 'Unknown Artist',
       }));
 
       const fetchedTracks: Track[] = trackSnap.docs.map((doc) =>
@@ -96,9 +94,7 @@ export default function AlbumPage() {
           <div key={track.id} className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold">{track.title}</h3>
-              <p className="text-xs text-muted-foreground">
-                {formatArtists(track.artist)}
-              </p>
+              <p className="text-xs text-muted-foreground">{formatArtists(track.artist)}</p>
             </div>
             <Button onClick={() => togglePlayPause(track)}>
               {currentTrack?.id === track.id && isPlaying ? 'Pause' : 'Play'}

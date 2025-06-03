@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthProvider';
-import { usePlayer } from '@/contexts/PlayerContext';
+import { usePlayerStore } from '@/features/player/store';
 
 import { SonixLogo } from '@/components/icons/SonixLogo';
 import BottomNavigationBar from '@/components/layout/BottomNavigationBar';

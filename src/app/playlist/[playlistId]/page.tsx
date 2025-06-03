@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { getAuth } from 'firebase/auth';
 import { getDoc, getDocs, collection, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { usePlayer } from '@/contexts/PlayerContext';
+import { usePlayerStore } from '@/features/player/store';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,

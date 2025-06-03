@@ -83,7 +83,7 @@ export default function ArtistPage() {
     };
 
     if (artistId) fetchData();
-}, [artistId, decodedId]);
+  }, [artistId, decodedId]);
 
   const renderSection = (items: Track[], emptyMessage: string, icon: React.ReactNode) => {
     if (items.length === 0) {

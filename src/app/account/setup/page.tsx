@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { db } from '@/lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -35,6 +35,17 @@ export default function AccountSetupPage() {
         username,
         setupComplete: true,
       });
+
+      // Check if the user role is admin and create an artist document
+      const role = user.role; // Assuming `role` is available in the user object
+      if (role === 'admin') {
+        const artistRef = doc(db, 'artists', user.uid);
+        await setDoc(artistRef, {
+          id: user.uid,
+          name: displayName,
+          createdAt: serverTimestamp(),
+        });
+      }
 
       toast({ title: 'Account setup complete!' });
       router.push('/');

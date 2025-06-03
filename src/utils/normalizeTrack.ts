@@ -1,4 +1,4 @@
-import { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import { DocumentData } from 'firebase/firestore';
 
 export function normalizeTrack(
@@ -14,7 +14,7 @@ export function normalizeTrack(
   return {
     id: doc.id || '',
     title: data.title || 'Untitled',
-    artist: matchingArtists.length > 0 ? matchingArtists : [{ id: '', name: 'Unknown Artist' }],
+    artists: matchingArtists.length > 0 ? matchingArtists : [{ id: '', name: 'Unknown Artist' }],
 
     audioURL: data.audioURL || '',
     coverURL: data.coverURL || '/placeholder.png',
