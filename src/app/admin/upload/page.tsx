@@ -21,7 +21,7 @@ export default function AdminUploadPage() {
   const { toast } = useToast();
 
   const [title, setTitle] = useState('');
-  const [artist, setArtist] = useState('');
+  const [artistsInput, setArtistsInput] = useState('');
   const [genre, setGenre] = useState('');
   const [albumName, setAlbumName] = useState(''); // Add albumName state
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -37,25 +37,40 @@ export default function AdminUploadPage() {
   }, [user, loading, isAdmin, router, toast]);
 
   const handleUpload = async () => {
-    if (!title || !artist || !audioFile || !coverFile || (type === 'album' && !albumName)) {
+    if (
+      !title ||
+      !artistsInput ||
+      !audioFile ||
+      !coverFile ||
+      (type === 'album' && !albumName)
+    ) {
       toast({ title: 'Missing Fields', description: 'Please fill all fields.' });
       return;
     }
 
     setUploading(true);
     try {
-      // Look up or create artist
-      const artistQuery = await getDocs(
-        query(collection(db, 'artists'), where('name', '==', artist.trim()))
-      );
-      let artistData;
-      if (artistQuery.empty) {
-        const newArtistRef = doc(collection(db, 'artists'));
-        artistData = { id: newArtistRef.id, name: artist.trim(), createdAt: serverTimestamp() };
-        await setDoc(newArtistRef, artistData);
-      } else {
-        const docData = artistQuery.docs[0];
-        artistData = { id: docData.id, name: docData.data().name };
+      // Look up or create artists
+      const artistNames = artistsInput
+        .split(',')
+        .map((n) => n.trim())
+        .filter(Boolean);
+      const artistsData: { id: string; name: string }[] = [];
+
+      for (const name of artistNames) {
+        const artistQuery = await getDocs(
+          query(collection(db, 'artists'), where('name', '==', name))
+        );
+        let artistData;
+        if (artistQuery.empty) {
+          const newArtistRef = doc(collection(db, 'artists'));
+          artistData = { id: newArtistRef.id, name, createdAt: serverTimestamp() };
+          await setDoc(newArtistRef, artistData);
+        } else {
+          const docData = artistQuery.docs[0];
+          artistData = { id: docData.id, name: docData.data().name };
+        }
+        artistsData.push(artistData);
       }
 
       // Upload cover and audio files
@@ -76,13 +91,36 @@ export default function AdminUploadPage() {
         });
       });
 
-      // Generate custom ID for track
-      const newDocRef = doc(collection(db, type === 'album' ? 'albums' : 'songs'));
+      // Determine album
+      let albumId = '';
+      if (type === 'album') {
+        const albumQuery = await getDocs(
+          query(collection(db, 'albums'), where('title', '==', albumName.trim()))
+        );
+        if (albumQuery.empty) {
+          const newAlbumRef = doc(collection(db, 'albums'));
+          albumId = newAlbumRef.id;
+          await setDoc(newAlbumRef, {
+            id: albumId,
+            title: albumName.trim(),
+            artistIds: artistsData.map((a) => a.id),
+            coverURL,
+            genre,
+            createdAt: serverTimestamp(),
+          });
+        } else {
+          const albumDoc = albumQuery.docs[0];
+          albumId = albumDoc.id;
+        }
+      }
+
+      const newDocRef = doc(collection(db, 'songs'));
 
       await setDoc(newDocRef, {
         id: newDocRef.id,
         title,
-        artist: [artistData], // Use the artist object
+        artists: artistsData,
+        albumId,
         genre,
         albumName: type === 'album' ? albumName : undefined, // Include albumName if type is album
         audioURL,
@@ -95,7 +133,7 @@ export default function AdminUploadPage() {
 
       toast({ title: 'Upload successful!' });
       setTitle('');
-      setArtist('');
+      setArtistsInput('');
       setGenre('');
       setAlbumName(''); // Reset albumName
       setCoverFile(null);
@@ -142,7 +180,11 @@ export default function AdminUploadPage() {
         )}
 
         <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <Input placeholder="Artist" value={artist} onChange={(e) => setArtist(e.target.value)} />
+        <Input
+          placeholder="Artists (comma separated)"
+          value={artistsInput}
+          onChange={(e) => setArtistsInput(e.target.value)}
+        />
         <Input placeholder="Genre" value={genre} onChange={(e) => setGenre(e.target.value)} />
 
         <div className="space-y-2">
