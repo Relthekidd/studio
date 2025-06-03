@@ -60,7 +60,8 @@ export default function SearchPage() {
           return {
             id: doc.id,
             title: data.title || 'Untitled',
-            audioURL: data.audioURL || '',
+            artist: data.artist || 'Unknown Artist',
+            imageURL: data.coverURL || '/placeholder.png',
             coverURL: data.coverURL || '/placeholder.png',
             artists,
             album: data.album || null,

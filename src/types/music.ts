@@ -3,14 +3,25 @@ export type Artist = {
   name: string;
 };
 
+export type AlbumInfo = {
+  id: string;
+  name: string;
+  coverURL: string;
+};
+
 export type Track = {
-  album: any;
   id: string;
   title: string;
+  artists: Artist[];
   audioURL: string;
   coverURL?: string;
-  artists: Artist[]; // Updated to support multiple artists
-  type: string; // Required so all components agree
+  type: string;
+  albumId?: string;
+  album?: AlbumInfo;
+  duration?: number;
+  trackNumber?: number;
+  description?: string;
+  dataAiHint?: string;
 };
 
 // A song is represented the same as a Track in most of the app

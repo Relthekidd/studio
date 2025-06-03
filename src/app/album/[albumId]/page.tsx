@@ -96,7 +96,7 @@ export default function AlbumPage() {
           <div key={track.id} className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold">{track.title}</h3>
-              <p className="text-xs text-muted-foreground">{formatArtists(track.artist)}</p>
+              <p className="text-xs text-muted-foreground">{formatArtists(track.artists)}</p>
             </div>
             <Button onClick={() => togglePlayPause(track)}>
               {currentTrack?.id === track.id && isPlaying ? 'Pause' : 'Play'}

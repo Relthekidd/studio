@@ -39,11 +39,11 @@ export default function ArtistPage() {
         albumSnap.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title || 'Untitled',
-          artist: doc.data().artist || decodedId,
+          artists: doc.data().artists || [{ id: '', name: doc.data().artist || decodedId }],
           genre: doc.data().genre || '',
           type: 'album' as const,
-          audioURL: '', // Provide default value for required Track property
-          coverURL: doc.data().coverURL || '', // Use imageUrl as coverURL
+          audioURL: '',
+          coverURL: doc.data().coverURL || '',
         }))
       );
 
@@ -54,11 +54,11 @@ export default function ArtistPage() {
         singleSnap.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title || 'Untitled',
-          artist: doc.data().artist || decodedId,
+          artists: doc.data().artists || [{ id: '', name: doc.data().artist || decodedId }],
           genre: doc.data().genre || '',
           type: 'track' as const,
-          audioURL: doc.data().audioURL || doc.data().audioSrc || '', // fallback to audioSrc if audioURL is missing
-          coverURL: doc.data().coverURL || doc.data().imageUrl || '', // fallback to imageUrl if coverURL is missing
+          audioURL: doc.data().audioURL || doc.data().audioSrc || '',
+          coverURL: doc.data().coverURL || doc.data().imageUrl || '',
         }))
       );
 
@@ -71,14 +71,14 @@ export default function ArtistPage() {
           return {
             id: doc.id,
             title: data.title || 'Untitled',
-            artist: data.artist || '',
+            artists: data.artists || [{ id: '', name: data.artist || '' }],
             genre: data.genre || '',
             type: 'track' as const,
             audioURL: data.audioURL || data.audioSrc || '',
             coverURL: data.coverURL || data.imageUrl || '',
           };
         })
-        .filter((track) => track.artist !== decodedId);
+        .filter((track) => !(track.artists[0]?.id === decodedId || track.artists[0]?.name === decodedId));
       setFeaturedTracks(filtered);
     };
 

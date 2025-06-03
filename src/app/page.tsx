@@ -27,9 +27,9 @@ export default function Home() {
           return {
             id: doc.id,
             title: data.title,
-            artist: data.artist,
+            artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
             audioURL: data.audioURL,
-            coverURL: data.coverURL, // required by Track interface
+            coverURL: data.coverURL,
             duration: data.duration || 0,
             type: 'track',
           };
