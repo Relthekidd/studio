@@ -6,7 +6,7 @@ import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firesto
 import { db } from '@/lib/firebase';
 import { usePlayerStore } from '@/features/player/store';
 import { Button } from '@/components/ui/button';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import { normalizeTrack } from '@/utils/normalizeTrack';
 import { formatArtists } from '@/utils/formatArtists';
 import Image from 'next/image'; // Import Image from next/image
@@ -28,7 +28,9 @@ export default function AlbumPage() {
   const { albumId } = useParams();
   const [album, setAlbum] = useState<Album | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
-  const { currentTrack, isPlaying, togglePlayPause } = usePlayer();
+  const currentTrack = usePlayerStore((s) => s.currentTrack);
+  const isPlaying = usePlayerStore((s) => s.isPlaying);
+  const togglePlayPause = usePlayerStore((s) => s.togglePlayPause);
 
   useEffect(() => {
     console.log('AlbumPage albumId:', albumId); // Log albumId

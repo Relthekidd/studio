@@ -16,7 +16,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const router = useRouter();
 
   const { user, loading, logout } = useAuth();
-  const { currentTrack, isExpanded } = usePlayer();
+  const currentTrack = usePlayerStore((s) => s.currentTrack);
+  const isExpanded = usePlayerStore((s) => s.isExpanded);
 
   useEffect(() => {
     if (!loading && !user && pathname !== '/login') {

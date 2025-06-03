@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DiscAlbum, Music, MicVocal } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import BackButton from '@/components/ui/BackButton';
 
 export default function ArtistPage() {

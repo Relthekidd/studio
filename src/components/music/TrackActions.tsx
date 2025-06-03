@@ -9,7 +9,7 @@ import {
 import { MoreHorizontal, Heart, Plus, ListPlus, User, Disc } from 'lucide-react';
 import { usePlayerStore } from '@/features/player/store';
 import { useRouter } from 'next/navigation';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import AddToPlaylistModal from '@/components/playlists/AddToPlaylistModal';
 
 interface Props {
@@ -17,7 +17,8 @@ interface Props {
 }
 
 export default function TrackActions({ track }: Props) {
-  const { queue, setQueue } = usePlayer(); // Access queue and setQueue from usePlayer
+  const queue = usePlayerStore((s) => s.queue);
+  const setQueue = usePlayerStore((s) => s.setQueue);
   const router = useRouter();
 
   const handleAddToQueue = () => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import { AlbumCard as TrackCard } from '@/components/AlbumCard'; // or however you're displaying each track
 
 interface SectionProps {

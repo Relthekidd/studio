@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { RadioGroup } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 import { useState, useEffect } from 'react';
 import { formatArtists } from '@/utils/formatArtists';
 import { saveLikedSong, isSongLiked } from '@/utils/saveLibraryData'; // Import utility functions

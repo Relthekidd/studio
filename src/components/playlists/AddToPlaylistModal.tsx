@@ -13,7 +13,7 @@ import { useUser } from '@/hooks/useUser';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 
 interface Props {
   trigger: React.ReactNode;

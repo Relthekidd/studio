@@ -6,7 +6,7 @@ import { collection, getDocs, getDoc, doc, query, orderBy, limit } from 'firebas
 
 import Top5Showcase from '@/components/Top5Showcase';
 import { db } from '@/lib/firebase';
-import type { Track } from '@/contexts/PlayerContext';
+import type { Track } from '@/types/music';
 
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
