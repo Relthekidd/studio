@@ -9,11 +9,12 @@ import {
   signInWithPopup,
   updateProfile,
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthProvider';
+import { ADMIN_EMAIL_DOMAIN, ADMIN_EMAILS } from '@/lib/config';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -24,6 +25,28 @@ export default function LoginPage() {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+
+  const determineRole = (email?: string | null): 'admin' | 'listener' => {
+    if (!email) return 'listener';
+    const domain = email.split('@')[1] ?? '';
+    if (ADMIN_EMAILS.includes(email) || domain === ADMIN_EMAIL_DOMAIN) {
+      return 'admin';
+    }
+    return 'listener';
+  };
+
+  const ensureProfile = async (uid: string, email?: string | null) => {
+    let docRef = doc(db, 'users', uid);
+    let snap = await getDoc(docRef);
+    if (!snap.exists()) {
+      docRef = doc(db, 'profiles', uid);
+      snap = await getDoc(docRef);
+    }
+    if (!snap.exists()) {
+      const role = determineRole(email);
+      await setDoc(doc(db, 'users', uid), { email, role });
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -37,7 +60,8 @@ export default function LoginPage() {
 
     try {
       if (mode === 'login') {
-        await signInWithEmailAndPassword(auth, email, password);
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        await ensureProfile(credential.user.uid, credential.user.email);
         toast({ title: 'Logged in!' });
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -48,16 +72,7 @@ export default function LoginPage() {
           displayName: 'Barry Allen',
         });
 
-        // Determine role
-        const role = email === 'angladea16@gmail.com' ? 'admin' : 'listener';
-
-        // Create Firestore profile in the /users collection
-        await setDoc(doc(db, 'users', newUser.uid), {
-          email: newUser.email,
-          displayName: 'Barry Allen',
-          role,
-        });
-
+        await ensureProfile(newUser.uid, newUser.email);
         toast({ title: 'Account created!' });
       }
     } catch (err: any) {
@@ -73,7 +88,8 @@ export default function LoginPage() {
 
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const credential = await signInWithPopup(auth, googleProvider);
+      await ensureProfile(credential.user.uid, credential.user.email);
       toast({ title: 'Logged in with Google!' });
     } catch (err: any) {
       toast({
