@@ -77,6 +77,9 @@ export default function SingleDetailPage() {
 
           console.log('Normalized Tracklist:', normalizedTracklist); // Debugging log
 
+          // Store fetched artist details in state
+          setArtistsDetails(fetchedArtists);
+
           setSingle({
             id: singleDocSnap.id,
             title: singleData.title,
