@@ -6,7 +6,6 @@ import { usePlayerStore } from './store';
 import { formatArtists } from '@/utils/formatArtists';
 import { formatTime } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ListMusic, Shuffle, Repeat, Repeat1, VolumeX, Volume2, Play, Pause } from 'lucide-react';
 
