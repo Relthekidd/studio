@@ -2,11 +2,12 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, getAuth, signOut, User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { firebaseApp, db } from '@/lib/firebase';
+import { ADMIN_EMAIL_DOMAIN, ADMIN_EMAILS } from '@/lib/config';
 
 interface ExtendedUser extends User {
-  role?: 'admin' | 'user' | 'moderator'; // Add the role property
+  role?: 'admin' | 'listener' | 'moderator';
 }
 
 interface AuthContextType {
@@ -18,6 +19,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const determineRole = (email?: string | null): 'admin' | 'listener' => {
+  if (!email) return 'listener';
+  const domain = email.split('@')[1] ?? '';
+  if (ADMIN_EMAILS.includes(email) || domain === ADMIN_EMAIL_DOMAIN) {
+    return 'admin';
+  }
+  return 'listener';
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,19 +38,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUser({ ...firebaseUser, role: userData.role }); // Merge role into user object
-            setIsAdmin(userData.role === 'admin'); // Check if the user is an admin
+          let profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          if (!profileDoc.exists()) {
+            profileDoc = await getDoc(doc(db, 'profiles', firebaseUser.uid));
+          }
+
+          if (profileDoc.exists()) {
+            const data = profileDoc.data();
+            setUser({ ...firebaseUser, role: data.role });
+            setIsAdmin(data.role === 'admin');
           } else {
-            setUser({ ...firebaseUser, role: 'user' }); // Default role to 'user'
-            setIsAdmin(false);
+            const role = determineRole(firebaseUser.email);
+            await setDoc(doc(db, 'users', firebaseUser.uid), {
+              email: firebaseUser.email,
+              role,
+            });
+            setUser({ ...firebaseUser, role });
+            setIsAdmin(role === 'admin');
           }
         } catch (error) {
           console.error('Error fetching user role:', error);
-          setUser({ ...firebaseUser, role: 'user' }); // Default role to 'user' on error
-          setIsAdmin(false);
+          const role = determineRole(firebaseUser.email);
+          setUser({ ...firebaseUser, role });
+          setIsAdmin(role === 'admin');
         }
       } else {
         setUser(null);

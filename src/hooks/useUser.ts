@@ -11,7 +11,10 @@ export function useUser() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        let userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (!userDoc.exists()) {
+          userDoc = await getDoc(doc(db, 'profiles', firebaseUser.uid));
+        }
         setUser({
           uid: firebaseUser.uid,
           email: firebaseUser.email,
