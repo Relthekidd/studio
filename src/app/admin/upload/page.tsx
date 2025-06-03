@@ -64,8 +64,8 @@ export default function AdminUploadPage() {
         let artistData;
         if (artistQuery.empty) {
           const newArtistRef = doc(collection(db, 'artists'));
-          artistData = { id: newArtistRef.id, name, createdAt: serverTimestamp() };
-          await setDoc(newArtistRef, artistData);
+          artistData = { id: newArtistRef.id, name };
+          await setDoc(newArtistRef, { ...artistData, createdAt: serverTimestamp() });
         } else {
           const docData = artistQuery.docs[0];
           artistData = { id: docData.id, name: docData.data().name };

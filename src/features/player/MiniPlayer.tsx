@@ -73,7 +73,7 @@ export default function MiniPlayer() {
       </button>
 
       {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-secondary/30">
+      <div className="absolute bottom-0 inset-x-0 h-1 bg-secondary/30">
         <Progress
           value={progress}
           className="h-full [&>div]:bg-gradient-to-r [&>div]:from-accent/70 [&>div]:to-primary/70"

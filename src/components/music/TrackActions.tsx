@@ -55,8 +55,8 @@ export default function TrackActions({ track }: Props) {
           <Plus className="mr-2 size-4" />
           Add to Queue
         </DropdownMenuItem>
-        {track.artists && track.artists.length > 0 && (
-          <DropdownMenuItem onClick={() => router.push(`/artist/${track.artists[0].id}`)}>
+        {track.artist && typeof track.artist === 'string' && (
+          <DropdownMenuItem onClick={() => router.push(`/artist/${track.artist}`)}>
             <User className="mr-2 size-4" />
             Go to Artist
           </DropdownMenuItem>
