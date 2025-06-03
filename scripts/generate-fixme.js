@@ -42,4 +42,4 @@ for (const file of results) {
 }
 
 fs.writeFileSync('FIXME.md', markdown, 'utf-8');
-console.log('✅ FIXME.md updated with current lint errors.');
+console.info('✅ FIXME.md updated with current lint errors.');
