@@ -67,14 +67,14 @@ export default function SingleDetailPage() {
             }));
           }
 
-          setArtistsDetails(fetchedArtists);
-
           // Normalize tracklist
           const normalizedTracklist = Array.isArray(singleData.tracklist)
             ? singleData.tracklist
                 .filter((track) => track && typeof track === 'object')
                 .map((track) => normalizeTrack(track, fetchedArtists))
             : [];
+
+          console.log('Normalized Tracklist:', normalizedTracklist); // Debugging log
 
           setSingle({
             id: singleDocSnap.id,
