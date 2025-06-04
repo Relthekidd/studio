@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { collection, getDocs, getDoc, doc, query, orderBy, limit } from 'firebase/firestore';
+import { useAuth } from '@/contexts/AuthProvider';
 
 import Top5Showcase from '@/components/Top5Showcase';
 import { db } from '@/lib/firebase';
@@ -21,6 +22,7 @@ interface Artist {
 
 export default function ProfilePage() {
   const { userId } = useParams();
+  const { user } = useAuth();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [topTracks, setTopTracks] = useState<Track[]>([]);
   const [topArtists, setTopArtists] = useState<Artist[]>([]);
@@ -31,7 +33,7 @@ export default function ProfilePage() {
       if (typeof userId !== 'string') return;
 
       // Fetch user profile
-      const profileSnap = await getDoc(doc(db, 'users', userId));
+      const profileSnap = await getDoc(doc(db, 'profiles', userId));
       if (profileSnap.exists()) {
         setUserProfile(profileSnap.data());
       }
@@ -79,12 +81,22 @@ export default function ProfilePage() {
     <div className="container mx-auto space-y-6 px-4 py-6">
       <div className="flex items-center justify-between">
         <SectionTitle>{userProfile?.displayName || 'User'}’s Profile</SectionTitle>
-        <Link
-          href="/library"
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:underline"
-        >
-          <ArrowLeft size={16} /> Back
-        </Link>
+        <div className="flex gap-2">
+          {user?.uid === userId && (
+            <Link
+              href="/account"
+              className="text-sm text-muted-foreground hover:underline"
+            >
+              Edit Profile
+            </Link>
+          )}
+          <Link
+            href="/library"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:underline"
+          >
+            <ArrowLeft size={16} /> Back
+          </Link>
+        </div>
       </div>
 
       <button

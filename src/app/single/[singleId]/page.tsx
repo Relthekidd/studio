@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button';
 import BackButton from '@/components/ui/BackButton';
 import TrackActions from '@/components/music/TrackActions';
 import { Card, CardContent } from '@/components/ui/card';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, setDoc, serverTimestamp } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { normalizeTrack } from '@/utils/normalizeTrack';
 import { formatArtists } from '@/utils/formatArtists';
@@ -39,6 +40,7 @@ type Single = {
 export default function SingleDetailPage() {
   const params = useParams();
   const setTrack = usePlayerStore((s) => s.setTrack);
+  const setQueue = usePlayerStore((s) => s.setQueue);
   const [single, setSingle] = useState<Single | null>(null);
   const [artistsDetails, setArtistsDetails] = useState<Artist[]>([]);
 
@@ -108,6 +110,7 @@ export default function SingleDetailPage() {
       return;
     }
 
+    if (single?.tracklist) setQueue(single.tracklist);
     setTrack(track);
   };
 
@@ -212,6 +215,25 @@ export default function SingleDetailPage() {
             >
               <PlayCircle size={20} className="mr-2" /> Play Track
             </Button>
+            <div className="mt-2 flex gap-2">
+              <Button size="sm" onClick={() => setQueue(single.tracklist)}>
+                Add to Queue
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={async () => {
+                  const user = getAuth().currentUser;
+                  if (!user) return;
+                  await setDoc(
+                    doc(db, 'profiles', user.uid, 'likedSongs', single.id),
+                    { id: single.id, addedAt: serverTimestamp() }
+                  );
+                }}
+              >
+                Add to Library
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
