@@ -25,16 +25,7 @@ export default function TrackActions({ track }: Props) {
     // TODO: implement favorite functionality
   };
 
-  const handleAddToPlaylistClick = () => {
-    // TODO: implement add to playlist functionality
-  };
-
-  const artists = Array.isArray(track.artists)
-    ? track.artists
-    : typeof (track as any).artist === 'string'
-      ? [{ id: '', name: (track as any).artist }]
-      : [];
-
+  
   const handleAddToQueue = () => {
     // Add the track to the queue
     setQueue([...queue, track]);
@@ -69,8 +60,8 @@ export default function TrackActions({ track }: Props) {
           <Plus className="mr-2 size-4" />
           Add to Queue
         </DropdownMenuItem>
-        {track.artist && typeof track.artist === 'string' && (
-          <DropdownMenuItem onClick={() => router.push(`/artist/${track.artist}`)}>
+        {track.artists && typeof track.artists === 'string' && (
+          <DropdownMenuItem onClick={() => router.push(`/artist/${track.artists}`)}>
             <User className="mr-2 size-4" />
             Go to Artist
           </DropdownMenuItem>
