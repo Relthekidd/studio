@@ -21,6 +21,12 @@ export default function TrackActions({ track }: Props) {
   const setQueue = usePlayerStore((s) => s.setQueue);
   const router = useRouter();
 
+  const artists = Array.isArray(track.artists)
+    ? track.artists
+    : typeof (track as any).artist === 'string'
+      ? [{ id: '', name: (track as any).artist }]
+      : [];
+
   const handleAddToQueue = () => {
     // Add the track to the queue
     setQueue([...queue, track]);
