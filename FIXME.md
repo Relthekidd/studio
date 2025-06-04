@@ -9,15 +9,19 @@ This file is auto-generated.
 
 ---
 ### `src/app/login/page.tsx`
-- [55:6] React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
+- [32:6] React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
 
 ---
-### `src/app/search/page.tsx`
-- [21:10] 'formatArtists' is defined but never used. – `@typescript-eslint/no-unused-vars`
+### `src/app/playlist/[playlistId]/page.tsx`
+- [9:10] 'usePlayerStore' is defined but never used. – `@typescript-eslint/no-unused-vars`
 
 ---
 ### `src/app/single/[singleId]/page.tsx`
-- [43:26] 'setArtistsDetails' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+- [42:26] 'setArtistsDetails' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+
+---
+### `src/components/layout/ClientLayout.tsx`
+- [6:10] 'usePlayerStore' is defined but never used. – `@typescript-eslint/no-unused-vars`
 
 ---
 ### `src/components/music/QueueModal.tsx`
@@ -33,12 +37,8 @@ This file is auto-generated.
 - [27:23] Classname 'destructive' is not a Tailwind CSS class! – `tailwindcss/no-custom-classname`
 
 ---
-### `src/features/player/FullScreenPlayer.tsx`
-- [9:10] 'Progress' is defined but never used. – `@typescript-eslint/no-unused-vars`
-
----
 ### `src/features/player/MiniPlayer.tsx`
-- [76:12] Classnames 'left-0, right-0' could be replaced by the 'inset-x-0' shorthand! – `tailwindcss/enforces-shorthand`
+- [76:12] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 
 ---
 ### `src/features/player/QueueModal.tsx`

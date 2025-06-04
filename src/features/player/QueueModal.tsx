@@ -62,7 +62,7 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
               </div>
 
               {/* Track Info */}
-              <div className="flex flex-col min-w-0">
+              <div className="min-w-0 flex flex-col">
                 <p className="truncate text-sm font-semibold">{track.title || 'Untitled'}</p>
                 <p className="truncate text-xs text-muted-foreground">
                   {formatArtists(track.artists)}
