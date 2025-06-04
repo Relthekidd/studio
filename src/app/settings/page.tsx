@@ -1,144 +1,106 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { useAuth } from '@/contexts/AuthProvider';
+import { useToast } from '@/hooks/use-toast';
+import { doc, getDoc } from 'firebase/firestore';
+import { changeUserEmail, changeUserPassword } from '@/utils/user';
 import { db } from '@/lib/firebase';
-import SearchBar from '@/components/SearchBar';
-import FilterChip from '@/components/FilterChip';
+import BackButton from '@/components/ui/BackButton';
 import SectionTitle from '@/components/SectionTitle';
-import { AlbumCard } from '@/components/AlbumCard';
-import type { Track } from '@/types/music';
-import {
-  Music,
-  DiscAlbum,
-  ListMusic,
-  User,
-  Users as UsersIcon,
-  Search as SearchIcon,
-} from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
-const resultTypes = ['All', 'Tracks', 'Albums', 'Singles'];
+export default function SettingsPage() {
+  const { user, loading } = useAuth();
+  const { toast } = useToast();
 
-export default function SearchPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeType, setActiveType] = useState('All');
-  const [searchResults, setSearchResults] = useState<Track[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
-    const fetchResults = async () => {
-      setLoading(true);
-
-      try {
-        const lowerTerm = searchTerm.toLowerCase();
-
-        // Firestore query based on activeType
-        let q;
-        if (activeType === 'Tracks' || activeType === 'All') {
-          q = query(collection(db, 'tracks'), where('keywords', 'array-contains', lowerTerm));
-        } else if (activeType === 'Albums') {
-          q = query(collection(db, 'albums'), where('keywords', 'array-contains', lowerTerm));
-        } else if (activeType === 'Singles') {
-          q = query(collection(db, 'singles'), where('keywords', 'array-contains', lowerTerm));
-        } else {
-          // If no valid type, return empty results
-          setSearchResults([]);
-          setLoading(false);
-          return;
-        }
-
-        const querySnapshot = await getDocs(q);
-        const results: Track[] = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-
-          const artists = Array.isArray(data.artists)
-            ? data.artists
-            : data.artist
-              ? [{ id: data.artistId ?? '', name: data.artist }]
-              : [];
-
-          return {
-            id: doc.id,
-            title: data.title || 'Untitled',
-            artists,
-            audioURL: data.audioURL || '',
-            coverURL: data.coverURL || '/placeholder.png',
-            type: activeType.toLowerCase(),
-            albumId: data.albumId,
-            album: data.album || null,
-            duration: data.duration,
-            trackNumber: data.trackNumber,
-            description: data.description,
-            dataAiHint: data.dataAiHint,
-          };
-        });
-
-        setSearchResults(results);
-      } catch (err) {
-        console.error('Error fetching search results:', err);
-        setSearchResults([]);
-      } finally {
-        setLoading(false);
+    const fetchProfile = async () => {
+      if (!user) return;
+      const snap = await getDoc(doc(db, 'profiles', user.uid));
+      if (snap.exists()) {
+        setEmail(snap.data().email || user.email || '');
       }
     };
+    if (user) fetchProfile();
+  }, [user]);
 
-    if (searchTerm.trim()) {
-      fetchResults();
-    } else {
-      setSearchResults([]);
+  const handleEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await changeUserEmail(currentPassword, email);
+      toast({ title: 'Email updated' });
+    } catch (err: any) {
+      toast({
+        title: 'Failed to update email',
+        description: err.message,
+        variant: 'destructive',
+      });
     }
-  }, [searchTerm, activeType]);
-
-  const getIconForType = (type: string) => {
-    if (type === 'Tracks') return <Music size={16} className="mr-1.5" />;
-    if (type === 'Albums' || type === 'Singles') return <DiscAlbum size={16} className="mr-1.5" />;
-    if (type === 'Playlists') return <ListMusic size={16} className="mr-1.5" />;
-    if (type === 'Artists') return <User size={16} className="mr-1.5" />;
-    if (type === 'Users') return <UsersIcon size={16} className="mr-1.5" />;
-    return <SearchIcon size={16} className="mr-1.5" />;
   };
 
-  return (
-    <div className="container mx-auto space-y-6 p-4 md:space-y-8 md:p-6">
-      <SearchBar
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Search tracks, albums, artists..."
-      />
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await changeUserPassword(currentPassword, newPassword);
+      toast({ title: 'Password updated' });
+      setNewPassword('');
+    } catch (err: any) {
+      toast({
+        title: 'Failed to change password',
+        description: err.message,
+        variant: 'destructive',
+      });
+    }
+  };
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        {resultTypes.map((type) => (
-          <FilterChip
-            key={type}
-            isActive={activeType === type}
-            onClick={() => setActiveType(type)}
-            className="flex items-center"
-          >
-            {getIconForType(type)}
-            {type}
-          </FilterChip>
-        ))}
+  if (loading || !user) return <div className="p-6">Loading...</div>;
+
+  return (
+    <div className="container mx-auto space-y-6 px-4 py-6">
+      <div className="flex items-center justify-between">
+        <SectionTitle>Settings</SectionTitle>
+        <BackButton />
       </div>
 
-      <SectionTitle className="text-2xl">
-        {searchTerm || activeType !== 'All' ? 'Results' : 'Start Searching or Select Filters'}
-      </SectionTitle>
+      <form onSubmit={handleEmailChange} className="space-y-4">
+        <h2 className="font-semibold">Change Email</h2>
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="New email"
+        />
+        <Input
+          type="password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          placeholder="Current password"
+        />
+        <Button type="submit">Update Email</Button>
+      </form>
 
-      {loading ? (
-        <p className="py-8 text-center text-muted-foreground">Loading...</p>
-      ) : searchResults.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
-          {searchResults.map((item) => (
-            <AlbumCard key={item.id} item={item} className="h-full" />
-          ))}
-        </div>
-      ) : (
-        (searchTerm || activeType !== 'All') && (
-          <p className="py-8 text-center text-muted-foreground">
-            No results found for &quot;{searchTerm}&quot; in {activeType}.
-          </p>
-        )
-      )}
+      <form onSubmit={handlePasswordChange} className="space-y-4">
+        <h2 className="font-semibold">Change Password</h2>
+        <Input
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          placeholder="New password"
+        />
+        <Input
+          type="password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          placeholder="Current password"
+        />
+        <Button type="submit">Update Password</Button>
+      </form>
     </div>
   );
 }

@@ -6,10 +6,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import Link from 'next/link';
+import { doc, getDoc } from 'firebase/firestore';
+import { updateUserProfile } from '@/utils/user';
+import BackButton from '@/components/ui/BackButton';
 
-import { Camera, ArrowLeft } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -36,7 +37,7 @@ export default function AccountPage() {
 
     const loadUserProfile = async () => {
       if (!user) return;
-      const profileRef = doc(db, 'users', user.uid);
+      const profileRef = doc(db, 'profiles', user.uid);
       const snapshot = await getDoc(profileRef);
 
       if (snapshot.exists()) {
@@ -58,8 +59,7 @@ export default function AccountPage() {
     if (!user) return;
 
     try {
-      const profileRef = doc(db, 'users', user.uid);
-      await updateDoc(profileRef, {
+      await updateUserProfile(user.uid, {
         displayName,
         email,
         bio,
@@ -96,12 +96,7 @@ export default function AccountPage() {
     <div className="container mx-auto space-y-6 px-4 py-6">
       <div className="flex items-center justify-between">
         <SectionTitle>Account</SectionTitle>
-        <Link
-          href="/library"
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:underline"
-        >
-          <ArrowLeft size={16} /> Back
-        </Link>
+        <BackButton />
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">

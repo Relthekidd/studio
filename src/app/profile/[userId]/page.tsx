@@ -9,7 +9,7 @@ import Top5Showcase from '@/components/Top5Showcase';
 import { db } from '@/lib/firebase';
 import type { Track } from '@/types/music';
 
-import { ArrowLeft } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import Link from 'next/link';
 import SectionTitle from '@/components/SectionTitle';
 
@@ -83,19 +83,11 @@ export default function ProfilePage() {
         <SectionTitle>{userProfile?.displayName || 'User'}’s Profile</SectionTitle>
         <div className="flex gap-2">
           {user?.uid === userId && (
-            <Link
-              href="/account"
-              className="text-sm text-muted-foreground hover:underline"
-            >
+            <Link href="/account" className="text-sm text-muted-foreground hover:underline">
               Edit Profile
             </Link>
           )}
-          <Link
-            href="/library"
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:underline"
-          >
-            <ArrowLeft size={16} /> Back
-          </Link>
+          <BackButton />
         </div>
       </div>
 
