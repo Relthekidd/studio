@@ -2,12 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc, collection, query, where, getDocs, setDoc, serverTimestamp } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  setDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { usePlayerStore } from '@/features/player/store';
 import { formatTime } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import type { Track } from '@/types/music';
 import { normalizeTrack } from '@/utils/normalizeTrack';
 import { formatArtists } from '@/utils/formatArtists';
@@ -32,11 +42,12 @@ export default function AlbumPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const currentTrack = usePlayerStore((s) => s.currentTrack);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
-  const setTrack = usePlayerStore((s) => s.setTrack);
+  const setCurrentTrack = usePlayerStore((s) => s.setCurrentTrack);
+  const setIsPlaying = usePlayerStore((s) => s.setIsPlaying);
   const setQueue = usePlayerStore((s) => s.setQueue);
+  const { toast } = useToast();
 
   useEffect(() => {
-
     const fetchAlbum = async () => {
       if (!albumId) return;
 
@@ -74,11 +85,13 @@ export default function AlbumPage() {
 
   const handlePlay = (track: Track) => {
     setQueue(tracks);
-    setTrack(track);
+    setCurrentTrack(track);
+    setIsPlaying(true);
   };
 
   const handleAddAlbumToQueue = () => {
     setQueue([...tracks]);
+    toast({ title: 'Added album to queue' });
   };
 
   const handleAddToLibrary = async () => {
@@ -88,6 +101,7 @@ export default function AlbumPage() {
       albumId: album.id,
       addedAt: serverTimestamp(),
     });
+    toast({ title: 'Saved to library' });
   };
 
   if (!album) return <div>Loading album...</div>;
@@ -106,10 +120,8 @@ export default function AlbumPage() {
         </div>
         <div>
           <h1 className="text-4xl font-bold">{album.title}</h1>
-          {album.description && (
-            <p className="text-muted-foreground">{album.description}</p>
-          )}
-          <div className="mt-4 flex gap-2">
+          {album.description && <p className="text-muted-foreground">{album.description}</p>}
+          <div className="mt-4 flex justify-center gap-2">
             <Button onClick={handleAddAlbumToQueue} size="sm">
               Add to Queue
             </Button>

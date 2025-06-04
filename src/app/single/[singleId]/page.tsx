@@ -13,11 +13,21 @@ import { Button } from '@/components/ui/button';
 import BackButton from '@/components/ui/BackButton';
 import TrackActions from '@/components/music/TrackActions';
 import { Card, CardContent } from '@/components/ui/card';
-import { doc, getDoc, collection, query, where, getDocs, setDoc, serverTimestamp } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  setDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { normalizeTrack } from '@/utils/normalizeTrack';
 import { formatArtists } from '@/utils/formatArtists';
+import { useToast } from '@/hooks/use-toast';
 
 type Artist = {
   id: string;
@@ -39,8 +49,10 @@ type Single = {
 
 export default function SingleDetailPage() {
   const params = useParams();
-  const setTrack = usePlayerStore((s) => s.setTrack);
+  const setCurrentTrack = usePlayerStore((s) => s.setCurrentTrack);
+  const setIsPlaying = usePlayerStore((s) => s.setIsPlaying);
   const setQueue = usePlayerStore((s) => s.setQueue);
+  const { toast } = useToast();
   const [single, setSingle] = useState<Single | null>(null);
   const [artistsDetails, setArtistsDetails] = useState<Artist[]>([]);
 
@@ -77,7 +89,6 @@ export default function SingleDetailPage() {
                 .map((track) => normalizeTrack(track, fetchedArtists))
             : [];
 
-
           // Store fetched artist details in state
           setArtistsDetails(fetchedArtists);
 
@@ -111,7 +122,8 @@ export default function SingleDetailPage() {
     }
 
     if (single?.tracklist) setQueue(single.tracklist);
-    setTrack(track);
+    setCurrentTrack(track);
+    setIsPlaying(true);
   };
 
   if (!single) {
@@ -215,8 +227,14 @@ export default function SingleDetailPage() {
             >
               <PlayCircle size={20} className="mr-2" /> Play Track
             </Button>
-            <div className="mt-2 flex gap-2">
-              <Button size="sm" onClick={() => setQueue(single.tracklist)}>
+            <div className="mt-2 flex justify-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => {
+                  setQueue(single.tracklist);
+                  toast({ title: 'Added to queue' });
+                }}
+              >
                 Add to Queue
               </Button>
               <Button
@@ -225,10 +243,11 @@ export default function SingleDetailPage() {
                 onClick={async () => {
                   const user = getAuth().currentUser;
                   if (!user) return;
-                  await setDoc(
-                    doc(db, 'profiles', user.uid, 'likedSongs', single.id),
-                    { id: single.id, addedAt: serverTimestamp() }
-                  );
+                  await setDoc(doc(db, 'profiles', user.uid, 'likedSongs', single.id), {
+                    id: single.id,
+                    addedAt: serverTimestamp(),
+                  });
+                  toast({ title: 'Saved to library' });
                 }}
               >
                 Add to Library
@@ -323,4 +342,3 @@ const TrackListItem = ({ track, onPlay, singleCoverURL }: TrackListItemProps) =>
     </div>
   );
 };
-
