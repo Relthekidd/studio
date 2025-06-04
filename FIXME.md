@@ -29,6 +29,11 @@ This file is auto-generated.
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 
 ---
+### `src/components/music/TrackActions.tsx`
+- [28:9] 'handleAddToPlaylistClick' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+- [32:9] 'artists' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+
+---
 ### `src/components/playlists/AddToPlaylistModal.tsx`
 - [44:6] React Hook useEffect has an unnecessary dependency: 'toast'. Either exclude it or remove the dependency array. Outer scope values like 'toast' aren't valid dependencies because mutating them doesn't re-render the component. – `react-hooks/exhaustive-deps`
 

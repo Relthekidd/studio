@@ -60,12 +60,16 @@ export default function SearchPage() {
           return {
             id: doc.id,
             title: data.title || 'Untitled',
-            artist: data.artist || 'Unknown Artist',
-            imageURL: data.coverURL || '/placeholder.png',
-            coverURL: data.coverURL || '/placeholder.png',
             artists,
-            album: data.album || null,
+            audioURL: data.audioURL || '',
+            coverURL: data.coverURL || '/placeholder.png',
             type: activeType.toLowerCase(),
+            albumId: data.albumId,
+            album: data.album || null,
+            duration: data.duration,
+            trackNumber: data.trackNumber,
+            description: data.description,
+            dataAiHint: data.dataAiHint,
           };
         });
 

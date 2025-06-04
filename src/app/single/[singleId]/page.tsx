@@ -294,7 +294,7 @@ const TrackListItem = ({ track, onPlay, singleCoverURL }: TrackListItemProps) =>
       <TrackActions
         track={{
           ...track,
-          artist: track.artists,
+          artists: track.artists,
           coverURL: track.album?.coverURL || singleCoverURL || '/placeholder.png',
         }}
       />
