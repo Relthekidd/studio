@@ -73,7 +73,7 @@ export const savePlaylist = async ({ userId, playlistData }: SavePlaylistParams)
       createdAt: playlistData.createdAt || serverTimestamp(), // Use provided timestamp or Firestore's server timestamp
       id: playlistId, // Include the generated playlist ID
     });
-    console.log('Playlist saved successfully');
+    console.info('Playlist saved successfully');
   } catch (error) {
     console.error('Error saving playlist:', error);
   }

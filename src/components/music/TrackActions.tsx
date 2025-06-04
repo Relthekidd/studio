@@ -21,6 +21,14 @@ export default function TrackActions({ track }: Props) {
   const setQueue = usePlayerStore((s) => s.setQueue);
   const router = useRouter();
 
+  const handleFavorite = () => {
+    // TODO: implement favorite functionality
+  };
+
+  const handleAddToPlaylistClick = () => {
+    // TODO: implement add to playlist functionality
+  };
+
   const artists = Array.isArray(track.artists)
     ? track.artists
     : typeof (track as any).artist === 'string'
@@ -40,9 +48,13 @@ export default function TrackActions({ track }: Props) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={() => console.log('Favorite', track.id)}>
+        <DropdownMenuItem onClick={handleFavorite}>
           <Heart className="mr-2 size-4" />
           Favorite
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => console.log('Add to playlist', track.id)}>
+          <ListPlus className="mr-2 size-4" />
+          Add to Playlist
         </DropdownMenuItem>
         <AddToPlaylistModal
           track={track}

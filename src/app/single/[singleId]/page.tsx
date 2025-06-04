@@ -75,7 +75,6 @@ export default function SingleDetailPage() {
                 .map((track) => normalizeTrack(track, fetchedArtists))
             : [];
 
-          console.log('Normalized Tracklist:', normalizedTracklist); // Debugging log
 
           // Store fetched artist details in state
           setArtistsDetails(fetchedArtists);

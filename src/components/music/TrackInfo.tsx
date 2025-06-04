@@ -93,14 +93,4 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
   );
 }
 
-{
-  /* 
-<button
-  className="text-center"
-  onClick={() => console.log('Track clicked')}
-  aria-label="View details"
->
-  ...
-</button>
-*/
-}
+

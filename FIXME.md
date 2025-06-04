@@ -9,7 +9,19 @@ This file is auto-generated.
 
 ---
 ### `src/app/login/page.tsx`
-- [55:6] React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
+- [32:6] React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
+
+---
+### `src/app/playlist/[playlistId]/page.tsx`
+- [9:10] 'usePlayerStore' is defined but never used. – `@typescript-eslint/no-unused-vars`
+
+---
+### `src/app/single/[singleId]/page.tsx`
+- [42:26] 'setArtistsDetails' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+
+---
+### `src/components/layout/ClientLayout.tsx`
+- [6:10] 'usePlayerStore' is defined but never used. – `@typescript-eslint/no-unused-vars`
 
 ---
 ### `src/components/music/QueueModal.tsx`

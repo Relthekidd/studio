@@ -33,7 +33,6 @@ export default function AlbumPage() {
   const togglePlayPause = usePlayerStore((s) => s.togglePlayPause);
 
   useEffect(() => {
-    console.log('AlbumPage albumId:', albumId); // Log albumId
 
     const fetchAlbum = async () => {
       if (!albumId) return;
@@ -42,10 +41,9 @@ export default function AlbumPage() {
       const albumSnap = await getDoc(albumRef);
 
       if (albumSnap.exists()) {
-        console.log('Album data:', albumSnap.data()); // Log fetched album data
         setAlbum({ id: albumSnap.id, ...albumSnap.data() } as Album);
       } else {
-        console.log('Album not found');
+        console.error('Album not found');
       }
     };
 
