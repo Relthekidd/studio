@@ -51,7 +51,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                   Admin
                 </span>
               )}
-              <ProfileMenu isAuthenticated={!!user} userId={user.uid} onLogout={logout} />
+              <ProfileMenu
+                isAuthenticated={!!user}
+                userId={user.uid}
+                role={user.role as any}
+                onLogout={logout}
+              />
             </div>
           </div>
         </header>

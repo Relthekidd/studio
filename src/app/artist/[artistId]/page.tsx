@@ -13,12 +13,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Track } from '@/types/music';
 import BackButton from '@/components/ui/BackButton';
+import { formatArtists } from '@/utils/formatArtists';
 
 export default function ArtistPage() {
   const { artistId } = useParams();
   const [albums, setAlbums] = useState<Track[]>([]);
   const [singles, setSingles] = useState<Track[]>([]);
   const [featuredTracks, setFeaturedTracks] = useState<Track[]>([]);
+  const [topSongs, setTopSongs] = useState<Track[]>([]);
   const [artistProfile, setArtistProfile] = useState<any | null>(null);
 
   const decodedId = decodeURIComponent(artistId as string);
@@ -80,6 +82,15 @@ export default function ArtistPage() {
         })
         .filter((track) => !(track.artists[0]?.id === decodedId || track.artists[0]?.name === decodedId));
       setFeaturedTracks(filtered);
+
+      const topSongsSnap = await getDocs(
+        query(collection(db, 'songs'), where('artistIds', 'array-contains', decodedId))
+      );
+      const songs = topSongsSnap.docs
+        .map((d) => d.data() as Track)
+        .sort((a, b) => (b as any).streams - (a as any).streams)
+        .slice(0, 10);
+      setTopSongs(songs);
     };
 
     if (artistId) fetchData();
@@ -127,6 +138,22 @@ export default function ArtistPage() {
           </div>
         </CardContent>
       </Card>
+
+      {topSongs.length > 0 && (
+        <div>
+          <SectionTitle>Top Songs</SectionTitle>
+          <div className="space-y-2">
+            {topSongs.map((song) => (
+              <div key={song.id} className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">{song.title}</p>
+                  <p className="text-xs text-muted-foreground">{formatArtists(song.artists)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <Tabs defaultValue="albums">
         <TabsList className="mb-6 grid w-full grid-cols-2 border border-border bg-card md:grid-cols-3">

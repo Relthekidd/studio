@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, getAuth, signOut, User } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { firebaseApp, db } from '@/lib/firebase';
 import { ADMIN_EMAIL_DOMAIN, ADMIN_EMAILS } from '@/lib/config';
 
@@ -38,8 +38,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          let profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          let profileDoc = await getDoc(doc(db, 'profiles', firebaseUser.uid));
+
           if (!profileDoc.exists()) {
+            const role = determineRole(firebaseUser.email);
+            const newProfile = {
+              displayName: firebaseUser.displayName || '',
+              email: firebaseUser.email,
+              avatarURL: firebaseUser.photoURL || '',
+              role,
+              createdAt: serverTimestamp(),
+              likedSongs: [],
+              playlists: [],
+              customizations: [],
+            };
+            await setDoc(doc(db, 'profiles', firebaseUser.uid), newProfile);
             profileDoc = await getDoc(doc(db, 'profiles', firebaseUser.uid));
           }
 
@@ -47,14 +60,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const data = profileDoc.data();
             setUser({ ...firebaseUser, role: data.role });
             setIsAdmin(data.role === 'admin');
-          } else {
-            const role = determineRole(firebaseUser.email);
-            await setDoc(doc(db, 'users', firebaseUser.uid), {
-              email: firebaseUser.email,
-              role,
-            });
-            setUser({ ...firebaseUser, role });
-            setIsAdmin(role === 'admin');
           }
         } catch (error) {
           console.error('Error fetching user role:', error);
