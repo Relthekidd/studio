@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, setDoc, serverTimestamp } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { usePlayerStore } from '@/features/player/store';
+import { formatTime } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import type { Track } from '@/types/music';
 import { normalizeTrack } from '@/utils/normalizeTrack';
@@ -30,7 +32,8 @@ export default function AlbumPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const currentTrack = usePlayerStore((s) => s.currentTrack);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
-  const togglePlayPause = usePlayerStore((s) => s.togglePlayPause);
+  const setTrack = usePlayerStore((s) => s.setTrack);
+  const setQueue = usePlayerStore((s) => s.setQueue);
 
   useEffect(() => {
 
@@ -69,6 +72,24 @@ export default function AlbumPage() {
     fetchTracks();
   }, [albumId]);
 
+  const handlePlay = (track: Track) => {
+    setQueue(tracks);
+    setTrack(track);
+  };
+
+  const handleAddAlbumToQueue = () => {
+    setQueue([...tracks]);
+  };
+
+  const handleAddToLibrary = async () => {
+    const user = getAuth().currentUser;
+    if (!user || !album) return;
+    await setDoc(doc(db, 'profiles', user.uid, 'savedAlbums', album.id), {
+      albumId: album.id,
+      addedAt: serverTimestamp(),
+    });
+  };
+
   if (!album) return <div>Loading album...</div>;
 
   return (
@@ -85,7 +106,17 @@ export default function AlbumPage() {
         </div>
         <div>
           <h1 className="text-4xl font-bold">{album.title}</h1>
-          {album.description && <p className="text-muted-foreground">{album.description}</p>}
+          {album.description && (
+            <p className="text-muted-foreground">{album.description}</p>
+          )}
+          <div className="mt-4 flex gap-2">
+            <Button onClick={handleAddAlbumToQueue} size="sm">
+              Add to Queue
+            </Button>
+            <Button onClick={handleAddToLibrary} size="sm" variant="secondary">
+              Add to Library
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -96,9 +127,14 @@ export default function AlbumPage() {
               <h3 className="text-sm font-semibold">{track.title}</h3>
               <p className="text-xs text-muted-foreground">{formatArtists(track.artists)}</p>
             </div>
-            <Button onClick={() => togglePlayPause(track)}>
-              {currentTrack?.id === track.id && isPlaying ? 'Pause' : 'Play'}
-            </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {track.duration ? formatTime(track.duration) : ''}
+              </span>
+              <Button onClick={() => handlePlay(track)}>
+                {currentTrack?.id === track.id && isPlaying ? 'Pause' : 'Play'}
+              </Button>
+            </div>
           </div>
         ))}
       </div>

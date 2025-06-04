@@ -10,15 +10,24 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { UserCircle, Settings, LogOut, UserCog, LogIn, User as UserIcon } from 'lucide-react'; // Added UserIcon
+import {
+  UserCircle,
+  Settings,
+  LogOut,
+  UserCog,
+  LogIn,
+  User as UserIcon,
+  Upload,
+} from 'lucide-react';
 
 interface ProfileMenuProps {
   isAuthenticated: boolean;
   onLogout: () => void;
   userId?: string; // To link to the current user's profile
+  role?: 'admin' | 'artist' | 'listener';
 }
 
-export default function ProfileMenu({ isAuthenticated, onLogout, userId }: ProfileMenuProps) {
+export default function ProfileMenu({ isAuthenticated, onLogout, userId, role }: ProfileMenuProps) {
   // const user = { name: "Demo User", email: "demo@example.com" }; // Placeholder
 
   return (
@@ -59,6 +68,22 @@ export default function ProfileMenu({ isAuthenticated, onLogout, userId }: Profi
                 <span>Account Settings</span>
               </Link>
             </DropdownMenuItem>
+            {role === 'admin' && (
+              <DropdownMenuItem asChild>
+                <Link href="/admin/upload" className="flex cursor-pointer items-center hover:bg-accent/10">
+                  <Upload className="mr-2 size-4 text-primary" />
+                  <span>Admin Upload</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
+            {role === 'artist' && (
+              <DropdownMenuItem asChild>
+                <Link href="/artist/${userId}" className="flex cursor-pointer items-center hover:bg-accent/10">
+                  <Upload className="mr-2 size-4 text-primary" />
+                  <span>Upload Music</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem asChild>
               <Link
                 href="/settings"
