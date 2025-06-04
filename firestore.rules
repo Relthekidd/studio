@@ -16,5 +16,15 @@ service cloud.firestore {
     match /profiles/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // Allow users to read their profile document under /users
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Allow users to read and manage their liked songs
+      match /likedSongs/{songId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
   }
 }
