@@ -9,29 +9,12 @@ This file is auto-generated.
 
 ---
 ### `src/app/login/page.tsx`
-- [32:6] React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
-
----
-### `src/app/playlist/[playlistId]/page.tsx`
-- [9:10] 'usePlayerStore' is defined but never used. – `@typescript-eslint/no-unused-vars`
-
----
-### `src/app/single/[singleId]/page.tsx`
-- [42:26] 'setArtistsDetails' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
-
----
-### `src/components/layout/ClientLayout.tsx`
-- [6:10] 'usePlayerStore' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [55:6] React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
 
 ---
 ### `src/components/music/QueueModal.tsx`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-
----
-### `src/components/music/TrackActions.tsx`
-- [28:9] 'handleAddToPlaylistClick' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
-- [32:9] 'artists' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
 
 ---
 ### `src/components/playlists/AddToPlaylistModal.tsx`
