@@ -61,16 +61,12 @@ export default function TrackActions({ track }: Props) {
           <Plus className="mr-2 size-4" />
           Add to Queue
         </DropdownMenuItem>
-        {artists.map((artist) => (
-          <DropdownMenuItem
-            key={artist.id || artist.name}
-            onClick={() => artist.id && router.push(`/artist/${artist.id}`)}
-            disabled={!artist.id}
-          >
+        {track.artist && typeof track.artist === 'string' && (
+          <DropdownMenuItem onClick={() => router.push(`/artist/${track.artist}`)}>
             <User className="mr-2 size-4" />
-            {artist.name || 'Artist'}
+            Go to Artist
           </DropdownMenuItem>
-        ))}
+        )}
         {track.albumId && (
           <DropdownMenuItem onClick={() => router.push(`/album/${track.albumId}`)}>
             <Disc className="mr-2 size-4" />

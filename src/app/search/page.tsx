@@ -18,7 +18,6 @@ import {
   Music,
 } from 'lucide-react';
 import { normalizeTrack } from '@/utils/normalizeTrack';
-import { formatArtists } from '@/utils/formatArtists';
 import { searchLibrary } from '@/utils/searchLibrary';
 
 const resultTypes = ['All', 'Tracks', 'Albums', 'Singles', 'Playlists', 'Artists', 'Users'];
