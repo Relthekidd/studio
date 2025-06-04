@@ -7,8 +7,8 @@ import { usePlayerStore } from '@/features/player/store';
 
 import { SonixLogo } from '@/components/icons/SonixLogo';
 import BottomNavigationBar from '@/components/layout/BottomNavigationBar';
-import FullScreenPlayer from '@/components/player/FullScreenPlayer';
-import MiniPlayer from '@/components/player/MiniPlayer';
+import FullScreenPlayer from '@/features/player/FullScreenPlayer';
+import MiniPlayer from '@/features/player/MiniPlayer';
 import ProfileMenu from '@/components/layout/ProfileMenu';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
