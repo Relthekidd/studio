@@ -46,7 +46,7 @@ export default function DiscoverPage() {
 
       <section>
         <SectionTitle className="text-2xl">Newest Releases</SectionTitle>
-        <div className="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent -mx-4 flex space-x-4 overflow-x-auto px-4 pb-4">
+        <div className="scrollbar-thin -mx-4 flex space-x-4 overflow-x-auto px-4 pb-4">
           {newestReleases.map((track) => (
             <AlbumCard key={track.id} item={track} className="w-36 shrink-0 sm:w-40 md:w-48" />
           ))}

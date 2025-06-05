@@ -25,8 +25,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     }
   }, [loading, user, pathname, router]);
 
-  const hideNavRoutes = ['/login', '/account', '/settings', '/profile'];
-  const showNav = user && !hideNavRoutes.some((path) => pathname.startsWith(path));
+  const tabRoutes = ['/', '/search', '/discover', '/library'];
+  const showNav = user && tabRoutes.includes(pathname);
 
   if (loading) {
     return (
