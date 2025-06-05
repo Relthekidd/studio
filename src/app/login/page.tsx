@@ -52,7 +52,7 @@ export default function LoginPage() {
     if (!authLoading && user) {
       router.push('/');
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
