@@ -12,7 +12,7 @@ import { db } from '@/lib/firebase';
 import { useUser } from '@/hooks/useUser';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 import type { Track } from '@/types/music';
 
 interface Props {
@@ -29,9 +29,8 @@ export default function AddToPlaylistModal({ trigger, track }: Props) {
       if (!user?.uid) return;
 
       try {
-        // Query playlists where ownerId === user.uid
-        const playlistsQuery = query(collection(db, 'playlists'), where('ownerId', '==', user.uid));
-        const snap = await getDocs(playlistsQuery);
+        // Fetch playlists from the current user's subcollection
+        const snap = await getDocs(collection(db, 'users', user.uid, 'playlists'));
         const list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         setPlaylists(list);
       } catch (err) {

@@ -19,7 +19,7 @@ import { useState, useEffect } from 'react';
 import { formatArtists } from '@/utils/formatArtists';
 import { saveLikedSong, isSongLiked } from '@/utils/saveLibraryData'; // Import utility functions
 import { useUser } from '@/hooks/useUser';
-import { DEFAULT_COVER_URL } from '@/utils/helpers';
+import { getTrackRoute, safeImageSrc } from '@/utils/helpers';
 
 export function AlbumCard({ item, className }: { item: Track; className?: string }) {
   const router = useRouter();
@@ -28,12 +28,12 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
   const [isFavorited, setIsFavorited] = useState(false);
 
-  // Determine type dynamically: "album" if albumId exists, otherwise "single"
-  const type = item.albumId ? 'album' : 'single';
+  // Determine type dynamically, falling back to album/single detection
+  const type = item.type || (item.albumId ? 'album' : 'single');
   const id = item.id;
 
   // Generate the href dynamically based on type and id
-  const href = `/${type}/${id}`;
+  const href = getTrackRoute({ type, id });
 
   // Fetch whether the song is liked
   useEffect(() => {
@@ -85,8 +85,8 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
     >
       <div className="relative aspect-square">
         <Image
-          src={item.coverURL && item.coverURL !== '' ? item.coverURL : DEFAULT_COVER_URL}
-          alt={item.title}
+          src={safeImageSrc(item.coverURL || (item as any).imageUrl)}
+          alt={item.title || (item as any).name}
           width={500}
           height={500}
           className="size-full rounded-t-xl object-cover"
@@ -133,8 +133,10 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
         </div>
       </div>
       <div className="p-3">
-        <h3 className="truncate text-sm font-semibold">{item.title}</h3>
-        <p className="truncate text-xs text-muted-foreground">{formatArtists(item.artists)}</p>
+        <h3 className="truncate text-sm font-semibold">{item.title || (item as any).name}</h3>
+        {item.artists && (
+          <p className="truncate text-xs text-muted-foreground">{formatArtists(item.artists)}</p>
+        )}
       </div>
     </div>
   );

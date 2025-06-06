@@ -43,7 +43,7 @@ export const isSongLiked = async (userId: string, trackId: string): Promise<bool
 
 // Define a TypeScript interface for a playlist
 interface PlaylistData {
-  name: string; // Playlist name
+  title: string; // Playlist title
   description?: string; // Optional description
   ownerId: string; // User ID of the playlist owner
   imageUrl?: string; // Optional cover image URL
@@ -59,13 +59,13 @@ interface SavePlaylistParams {
 
 // Save a new playlist created by the user
 export const savePlaylist = async ({ userId, playlistData }: SavePlaylistParams) => {
-  if (!userId || !playlistData.name) {
+  if (!userId || !playlistData.title) {
     console.error('Missing userId or playlist name');
     return;
   }
 
   const playlistsColRef = collection(db, `users/${userId}/playlists`);
-  const playlistId = playlistData.name.replace(/\s+/g, '-').toLowerCase(); // Generate a unique ID based on the name
+  const playlistId = playlistData.title.replace(/\s+/g, '-').toLowerCase(); // Generate a unique ID based on the title
 
   const playlistRef = doc(playlistsColRef, playlistId);
 
