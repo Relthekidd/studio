@@ -1,6 +1,6 @@
 // src/utils/searchLibrary.ts
 import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import type { Song, Album, Artist } from '@/types/music';
 
 interface UserResult {
@@ -33,7 +33,7 @@ export async function searchLibrary(term: string): Promise<SearchResults> {
       getDocs(collection(db, 'songs')),
       getDocs(collection(db, 'albums')),
       getDocs(collection(db, 'artists')),
-      getDocs(collection(db, 'profiles')),
+      getDocs(query(collection(db, 'profiles'), where('isProfilePublic', '==', true))),
     ]);
 
     const songs = songsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Song[];
