@@ -29,12 +29,13 @@ export default function SearchPage() {
     songs: Track[];
     albums: Album[];
     artists: Artist[];
-  }>({ songs: [], albums: [], artists: [] });
+    users: { id: string; displayName: string; avatarURL?: string }[];
+  }>({ songs: [], albums: [], artists: [], users: [] });
 
   useEffect(() => {
     const fetchResults = async () => {
       if (!searchTerm.trim()) {
-        setSearchResults({ songs: [], albums: [], artists: [] });
+        setSearchResults({ songs: [], albums: [], artists: [], users: [] });
         return;
       }
 
@@ -44,6 +45,7 @@ export default function SearchPage() {
         songs: results.songs.map((song: Song) => normalizeTrack(song)),
         albums: results.albums,
         artists: results.artists,
+        users: results.users,
       });
     };
 
@@ -143,9 +145,29 @@ export default function SearchPage() {
           </div>
         )}
 
+        {(activeType === 'All' || activeType === 'Users') && searchResults.users.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <SectionTitle className="text-xl">Users</SectionTitle>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+              {searchResults.users.map((u) => (
+                <Link key={u.id} href={`/profile/${u.id}`} legacyBehavior>
+                  <Card className="flex cursor-pointer items-center gap-4 p-4 transition-colors hover:bg-card/80">
+                    <Avatar>
+                      <AvatarImage src={u.avatarURL} alt={u.displayName} />
+                      <AvatarFallback>{u.displayName?.[0]?.toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">{u.displayName}</span>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {searchResults.songs.length === 0 &&
           searchResults.albums.length === 0 &&
           searchResults.artists.length === 0 &&
+          searchResults.users.length === 0 &&
           (searchTerm || activeType !== 'All') && (
             <p className="py-8 text-center text-muted-foreground">
               No results found for &quot;{searchTerm}&quot;{' '}
