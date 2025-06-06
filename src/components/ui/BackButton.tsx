@@ -8,7 +8,13 @@ export default function BackButton() {
 
   return (
     <button
-      onClick={() => router.back()}
+      onClick={() => {
+        if (typeof window !== 'undefined' && window.history.length > 1) {
+          router.back();
+        } else {
+          router.push('/discover');
+        }
+      }}
       className="mb-4 flex items-center gap-2 text-sm text-muted-foreground transition hover:text-primary"
     >
       <ArrowLeft size={16} />

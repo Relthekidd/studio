@@ -82,12 +82,19 @@ export default function SingleDetailPage() {
             }));
           }
 
-          // Normalize tracklist
-          const normalizedTracklist = Array.isArray(singleData.tracklist)
-            ? singleData.tracklist
-                .filter((track) => track && typeof track === 'object')
-                .map((track) => normalizeTrack(track, fetchedArtists))
-            : [];
+          // Normalize tracklist. If no tracklist exists, treat the document
+          // itself as a single track.
+          const normalizedTracklist =
+            Array.isArray(singleData.tracklist) && singleData.tracklist.length > 0
+              ? singleData.tracklist
+                  .filter((track) => track && typeof track === 'object')
+                  .map((track) => normalizeTrack(track, fetchedArtists))
+              : [
+                  normalizeTrack(
+                    { id: singleDocSnap.id, ...singleData },
+                    fetchedArtists,
+                  ),
+                ];
 
           // Store fetched artist details in state
           setArtistsDetails(fetchedArtists);
