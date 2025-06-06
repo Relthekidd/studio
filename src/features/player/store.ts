@@ -58,10 +58,15 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       currentTrack: track,
       queueIndex: index >= 0 ? index : 0,
       isPlaying: true,
+      isExpanded: false,
     });
   },
 
-  setCurrentTrack: (track) => set({ currentTrack: track }),
+  setCurrentTrack: (track) =>
+    set({
+      currentTrack: track,
+      isExpanded: false,
+    }),
   setIsPlaying: (val) => set({ isPlaying: val }),
 
   addToQueue: (track) => set((s) => ({ queue: [...s.queue, track] })),
@@ -72,6 +77,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       queueIndex: 0,
       currentTrack: tracks[0] ?? null,
       isPlaying: !!tracks[0],
+      isExpanded: false,
     });
   },
 

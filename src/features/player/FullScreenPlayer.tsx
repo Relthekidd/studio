@@ -8,7 +8,7 @@ import { formatArtists } from '@/utils/formatArtists';
 import { formatTime } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ListMusic, Shuffle, Repeat, Repeat1, VolumeX, Volume2, Play, Pause } from 'lucide-react';
+import { ChevronDown, ListMusic, Shuffle, Repeat, Repeat1, VolumeX, Volume2, Play, Pause, SkipForward, SkipBack } from 'lucide-react';
 
 export default function FullScreenPlayer() {
   const {
@@ -134,7 +134,7 @@ export default function FullScreenPlayer() {
           aria-label="Previous Track"
           className="text-muted-foreground hover:text-primary"
         >
-          <ChevronDown size={20} />
+          <SkipBack size={20} />
         </Button>
         <Button
           variant="ghost"
@@ -152,7 +152,7 @@ export default function FullScreenPlayer() {
           aria-label="Next Track"
           className="text-muted-foreground hover:text-primary"
         >
-          <ChevronDown size={20} />
+          <SkipForward size={20} />
         </Button>
       </div>
 
