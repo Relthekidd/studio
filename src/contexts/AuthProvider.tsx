@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { onAuthStateChanged, getAuth, signOut, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { firebaseApp, db } from '@/lib/firebase';
-import { ADMIN_EMAIL_DOMAIN, ADMIN_EMAILS } from '@/lib/config';
 
 interface ExtendedUser extends User {
   role?: 'admin' | 'listener' | 'moderator';
@@ -19,14 +18,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const determineRole = (email?: string | null): 'admin' | 'listener' => {
-  if (!email) return 'listener';
-  const domain = email.split('@')[1] ?? '';
-  if (ADMIN_EMAILS.includes(email) || domain === ADMIN_EMAIL_DOMAIN) {
-    return 'admin';
-  }
-  return 'listener';
-};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<ExtendedUser | null>(null);
@@ -41,12 +32,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           let profileDoc = await getDoc(doc(db, 'profiles', firebaseUser.uid));
 
           if (!profileDoc.exists()) {
-            const role = determineRole(firebaseUser.email);
             const newProfile = {
               displayName: firebaseUser.displayName || '',
               email: firebaseUser.email,
               avatarURL: firebaseUser.photoURL || '',
-              role,
+              role: 'listener',
               createdAt: serverTimestamp(),
               likedSongs: [],
               playlists: [],
@@ -63,9 +53,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         } catch (error) {
           console.error('Error fetching user role:', error);
-          const role = determineRole(firebaseUser.email);
-          setUser({ ...firebaseUser, role });
-          setIsAdmin(role === 'admin');
+          setUser({ ...firebaseUser, role: 'listener' });
+          setIsAdmin(false);
         }
       } else {
         setUser(null);

@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
@@ -116,20 +117,26 @@ export default function AdminUploadPage() {
 
       const newDocRef = doc(collection(db, 'songs'));
 
-      await setDoc(newDocRef, {
+      const songData: Record<string, any> = {
         id: newDocRef.id,
         title,
         artists: artistsData,
+        artistIds: artistsData.map((a) => a.id),
         albumId,
         genre,
-        albumName: type === 'album' ? albumName : undefined, // Include albumName if type is album
         audioURL,
         coverURL,
         duration,
         type,
-        description: '', // Add description field
+        description: '',
         createdAt: serverTimestamp(),
-      });
+      };
+
+      if (type === 'album') {
+        songData.albumName = albumName.trim();
+      }
+
+      await setDoc(newDocRef, songData);
 
       toast({ title: 'Upload successful!' });
       setTitle('');
@@ -149,27 +156,28 @@ export default function AdminUploadPage() {
   return (
     <div className="container max-w-xl space-y-6 py-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Upload New Track</h1>
+        <h1 className="text-2xl font-bold">Upload</h1>
         <Link
-          href="/profile"
+          href="/"
           className="flex items-center gap-1 text-sm text-muted-foreground hover:underline"
         >
-          <ArrowLeft size={16} /> Back
+          <ArrowLeft size={16} /> Home
         </Link>
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>Type</Label>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as 'single' | 'album')}
-            className="w-full rounded border px-3 py-2"
-          >
-            <option value="single">Single</option>
-            <option value="album">Album</option>
-          </select>
-        </div>
+      <Card>
+        <CardContent className="space-y-4 p-6">
+          <div className="space-y-2">
+            <Label>Type</Label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as 'single' | 'album')}
+              className="w-full rounded border px-3 py-2"
+            >
+              <option value="single">Single</option>
+              <option value="album">Album</option>
+            </select>
+          </div>
 
         {type === 'album' && ( // Show albumName field only if type is album
           <Input
@@ -208,7 +216,8 @@ export default function AdminUploadPage() {
         <Button disabled={uploading} onClick={handleUpload} className="w-full">
           {uploading ? 'Uploading...' : 'Upload'}
         </Button>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

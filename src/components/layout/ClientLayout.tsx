@@ -9,6 +9,7 @@ import { SonixLogo } from '@/components/icons/SonixLogo';
 import BottomNavigationBar from '@/components/layout/BottomNavigationBar';
 import FullScreenPlayer from '@/features/player/FullScreenPlayer';
 import MiniPlayer from '@/features/player/MiniPlayer';
+import { AudioProvider } from '@/features/player/AudioProvider';
 import ProfileMenu from '@/components/layout/ProfileMenu';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -68,13 +69,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           : children}
       </main>
 
-      {showNav && (
-        <>
-          {currentTrack && !isExpanded && <MiniPlayer />}
-          {currentTrack && isExpanded && <FullScreenPlayer />}
-          <BottomNavigationBar />
-        </>
-      )}
+      {currentTrack && !isExpanded && <MiniPlayer />}
+      {currentTrack && isExpanded && <FullScreenPlayer />}
+      {showNav && <BottomNavigationBar />}
+      <AudioProvider />
     </div>
   );
 }

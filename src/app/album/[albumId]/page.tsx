@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Track } from '@/types/music';
 import { normalizeTrack } from '@/utils/normalizeTrack';
-import { formatArtists } from '@/utils/formatArtists';
+import TrackListItem from '@/components/music/TrackListItem';
 import Image from 'next/image'; // Import Image from next/image
 
 interface Album {
@@ -132,22 +132,14 @@ export default function AlbumPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-1">
         {tracks.map((track) => (
-          <div key={track.id} className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold">{track.title}</h3>
-              <p className="text-xs text-muted-foreground">{formatArtists(track.artists)}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">
-                {track.duration ? formatTime(track.duration) : ''}
-              </span>
-              <Button onClick={() => handlePlay(track)}>
-                {currentTrack?.id === track.id && isPlaying ? 'Pause' : 'Play'}
-              </Button>
-            </div>
-          </div>
+          <TrackListItem
+            key={track.id}
+            track={track}
+            onPlay={handlePlay}
+            coverURL={album.coverURL}
+          />
         ))}
       </div>
     </div>

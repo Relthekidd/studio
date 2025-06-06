@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import BackButton from '@/components/ui/BackButton';
 import TrackActions from '@/components/music/TrackActions';
+import TrackListItem from '@/components/music/TrackListItem';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   doc,
@@ -26,7 +27,6 @@ import {
 import { getAuth } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { normalizeTrack } from '@/utils/normalizeTrack';
-import { formatArtists } from '@/utils/formatArtists';
 import { useToast } from '@/hooks/use-toast';
 
 type Artist = {
@@ -271,12 +271,7 @@ export default function SingleDetailPage() {
             <CardContent className="p-0">
               <div className="space-y-1">
                 {single.tracklist.map((track) => (
-                  <TrackListItem
-                    key={track.id}
-                    track={track}
-                    onPlay={handlePlayTrack}
-                    singleCoverURL={single.coverURL}
-                  />
+                  <TrackListItem key={track.id} track={track} onPlay={handlePlayTrack} coverURL={single.coverURL} />
                 ))}
               </div>
             </CardContent>
@@ -287,65 +282,3 @@ export default function SingleDetailPage() {
   );
 }
 
-type TrackListItemProps = {
-  track: Track;
-  onPlay: (track: Track) => void;
-  singleCoverURL: string;
-};
-
-const TrackListItem = ({ track, onPlay, singleCoverURL }: TrackListItemProps) => {
-  const currentTrack = usePlayerStore((s) => s.currentTrack);
-  const isPlaying = usePlayerStore((s) => s.isPlaying);
-  const togglePlayPause = usePlayerStore((s) => s.togglePlayPause);
-  const isCurrent = currentTrack?.id === track.id;
-
-  const handlePlayClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isCurrent) {
-      togglePlayPause();
-    } else {
-      onPlay(track);
-    }
-  };
-
-  return (
-    <div
-      className="group flex min-w-0 flex-1 cursor-pointer items-center gap-3 md:gap-4"
-      role="button"
-      tabIndex={0}
-      onClick={() => onPlay(track)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onPlay(track);
-        }
-      }}
-      aria-label={`Play ${track.title}`}
-    >
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handlePlayClick}
-          aria-label={`Play ${track.title}`}
-        >
-          {isCurrent && isPlaying ? (
-            <PlayCircle size={20} className="text-primary" />
-          ) : (
-            <PlayCircle size={20} />
-          )}
-        </Button>
-        <div>
-          <div className="font-medium">{track.title}</div>
-          <div className="text-xs text-muted-foreground">{formatArtists(track.artists)}</div>
-        </div>
-      </div>
-      <TrackActions
-        track={{
-          ...track,
-          artists: track.artists,
-          coverURL: track.album?.coverURL || singleCoverURL || '/placeholder.png',
-        }}
-      />
-    </div>
-  );
-};

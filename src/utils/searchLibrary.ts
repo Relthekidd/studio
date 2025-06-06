@@ -3,10 +3,17 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import type { Song, Album, Artist } from '@/types/music';
 
+interface UserResult {
+  id: string;
+  displayName: string;
+  avatarURL?: string;
+}
+
 interface SearchResults {
   songs: Song[];
   albums: Album[];
   artists: Artist[];
+  users: UserResult[];
 }
 
 /**
@@ -18,19 +25,23 @@ interface SearchResults {
 export async function searchLibrary(term: string): Promise<SearchResults> {
   const search = term.trim().toLowerCase();
   if (!search) {
-    return { songs: [], albums: [], artists: [] };
+    return { songs: [], albums: [], artists: [], users: [] };
   }
 
   try {
-    const [songsSnap, albumsSnap, artistsSnap] = await Promise.all([
+    const [songsSnap, albumsSnap, artistsSnap, usersSnap] = await Promise.all([
       getDocs(collection(db, 'songs')),
       getDocs(collection(db, 'albums')),
       getDocs(collection(db, 'artists')),
+      getDocs(collection(db, 'profiles')),
     ]);
 
     const songs = songsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Song[];
     const albums = albumsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Album[];
     const artists = artistsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Artist[];
+    const users = usersSnap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .filter((u: any) => u.isProfilePublic !== false) as UserResult[];
 
     const filteredSongs = songs.filter((s) => {
       const title = (s as any).title || '';
@@ -54,10 +65,17 @@ export async function searchLibrary(term: string): Promise<SearchResults> {
     });
 
     const filteredArtists = artists.filter((a) => (a.name || '').toLowerCase().includes(search));
-
-    return { songs: filteredSongs, albums: filteredAlbums, artists: filteredArtists };
+    const filteredUsers = users.filter((u) =>
+      (u.displayName || '').toLowerCase().includes(search),
+    );
+    return {
+      songs: filteredSongs,
+      albums: filteredAlbums,
+      artists: filteredArtists,
+      users: filteredUsers,
+    };
   } catch (error) {
     console.error('Error searching library:', error);
-    return { songs: [], albums: [], artists: [] };
+    return { songs: [], albums: [], artists: [], users: [] };
   }
 }
