@@ -72,14 +72,6 @@ export default function ProfileMenu({ isAuthenticated, onLogout, userId, role }:
               <DropdownMenuItem asChild>
                 <Link href="/admin/upload" className="flex cursor-pointer items-center hover:bg-accent/10">
                   <Upload className="mr-2 size-4 text-primary" />
-                  <span>Admin Upload</span>
-                </Link>
-              </DropdownMenuItem>
-            )}
-            {role === 'artist' && (
-              <DropdownMenuItem asChild>
-                <Link href="/artist/${userId}" className="flex cursor-pointer items-center hover:bg-accent/10">
-                  <Upload className="mr-2 size-4 text-primary" />
                   <span>Upload Music</span>
                 </Link>
               </DropdownMenuItem>
