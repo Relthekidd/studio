@@ -8,34 +8,34 @@ body {
 
 @layer base {
   :root {
-    /* Sonix Dark Theme */
-    --background: 0 0% 10%; /* Slightly darker background #1A1A1A */
-    --foreground: 0 0% 90%; /* Lighter Gray for text #E6E6E6 */
+    /* Sonix Luxury Dark Theme */
+    --background: 0 0% 7%; /* Dark Charcoal #121212 */
+    --foreground: 210 17% 98%; /* Cream White #F8F9FA */
 
-    --card: 0 0% 15%; /* Darker cards #262626 */
-    --card-foreground: 0 0% 90%; /* #E6E6E6 */
+    --card: 0 0% 12%; /* Slightly lighter than background */
+    --card-foreground: 210 17% 98%;
 
-    --popover: 0 0% 12%; /* Darker popover #1F1F1F */
-    --popover-foreground: 0 0% 90%; /* #E6E6E6 */
+    --popover: 0 0% 10%;
+    --popover-foreground: 210 17% 98%;
 
-    --primary: 283 100% 66%; /* Electric Purple #BE52FF */
-    --primary-foreground: 0 0% 98%; /* White/Light text on purple #FAFAFA */
+    --primary: 265 33% 25%; /* Deep Indigo #3D2B56 */
+    --primary-foreground: 210 17% 98%;
 
-    --secondary: 0 0% 20%; /* Another shade of dark gray for secondary elements #333333 */
-    --secondary-foreground: 0 0% 90%; /* #E6E6E6 */
+    --secondary: 212 30% 17%; /* Rich Navy #1E2A38 */
+    --secondary-foreground: 210 17% 98%;
 
-    --muted: 0 0% 28%; /* Muted gray for less emphasis #474747 */
-    --muted-foreground: 0 0% 70%; /* Lighter muted text #B3B3B3 */
+    --muted: 0 0% 28%; /* Muted gray */
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 112 100% 52%; /* Neon Green #39FF14 */
-    --accent-foreground: 0 0% 8%; /* Darker text on neon green for contrast #141414 */
+    --accent: 46 65% 52%; /* Gold #D4AF37 */
+    --accent-foreground: 0 0% 7%;
 
-    --destructive: 0 80% 60%; /* A vibrant red for destructive actions */
-    --destructive-foreground: 0 0% 98%; /* #FAFAFA */
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 210 17% 98%;
 
-    --border: 0 0% 22%; /* Border color #383838 */
-    --input: 0 0% 18%; /* Input background #2E2E2E */
-    --ring: 112 100% 52%; /* Neon Green for focus rings */
+    --border: 0 0% 22%;
+    --input: 0 0% 18%;
+    --ring: 46 65% 52%; /* Gold for focus rings */
 
     --radius: 0.75rem; /* Rounded cards and elements */
 
@@ -58,39 +58,39 @@ body {
   }
 
   .dark {
-    /* All variables are already defined for the dark theme in :root as Sonix is always dark. */
-    --background: 0 0% 10%;
-    --foreground: 0 0% 90%;
-    --card: 0 0% 15%;
-    --card-foreground: 0 0% 90%;
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 90%;
-    --primary: 283 100% 66%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 90%;
+    /* Duplicate variables for dark mode */
+    --background: 0 0% 7%;
+    --foreground: 210 17% 98%;
+    --card: 0 0% 12%;
+    --card-foreground: 210 17% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 210 17% 98%;
+    --primary: 265 33% 25%;
+    --primary-foreground: 210 17% 98%;
+    --secondary: 212 30% 17%;
+    --secondary-foreground: 210 17% 98%;
     --muted: 0 0% 28%;
     --muted-foreground: 0 0% 70%;
-    --accent: 112 100% 52%;
-    --accent-foreground: 0 0% 8%;
+    --accent: 46 65% 52%;
+    --accent-foreground: 0 0% 7%;
     --destructive: 0 80% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 210 17% 98%;
     --border: 0 0% 22%;
     --input: 0 0% 18%;
-    --ring: 112 100% 52%;
-    --chart-1: 283 100% 66%;
-    --chart-2: 112 100% 52%;
-    --chart-3: 210 80% 60%;
-    --chart-4: 30 90% 60%;
-    --chart-5: 330 90% 65%;
-    --sidebar-background: 0 0% 8%;
+    --ring: 46 65% 52%;
+    --chart-1: 265 33% 25%;
+    --chart-2: 46 65% 52%;
+    --chart-3: 140 52% 55%;
+    --chart-4: 37 72% 89%;
+    --chart-5: 0 0% 75%;
+    --sidebar-background: 0 0% 7%;
     --sidebar-foreground: 0 0% 85%;
-    --sidebar-primary: 283 100% 66%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 112 100% 52%;
-    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-primary: 265 33% 25%;
+    --sidebar-primary-foreground: 210 17% 98%;
+    --sidebar-accent: 46 65% 52%;
+    --sidebar-accent-foreground: 0 0% 7%;
     --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 112 100% 52%;
+    --sidebar-ring: 46 65% 52%;
   }
 }
 
