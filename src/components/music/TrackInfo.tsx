@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Track } from '@/types/music';
 import { formatArtists } from '@/utils/formatArtists';
+import { DEFAULT_COVER_URL } from '@/utils/helpers';
 
 export default function TrackInfo({ track }: { track: Track }) {
   return (
@@ -40,7 +41,7 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
     >
       <div className="relative aspect-square">
         <Image
-          src={item.coverURL || '/placeholder.png'}
+          src={item.coverURL || DEFAULT_COVER_URL}
           alt={item.title}
           width={500}
           height={500}
@@ -69,7 +70,7 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
     >
       <div className="relative aspect-square">
         <Image
-          src={item.coverURL || '/placeholder.png'}
+          src={item.coverURL || DEFAULT_COVER_URL}
           alt={item.title}
           width={500}
           height={500}

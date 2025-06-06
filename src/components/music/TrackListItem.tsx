@@ -6,6 +6,7 @@ import TrackActions from './TrackActions';
 import { usePlayerStore } from '@/features/player/store';
 import type { Track } from '@/types/music';
 import { formatArtists } from '@/utils/formatArtists';
+import { DEFAULT_COVER_URL } from '@/utils/helpers';
 
 export type TrackListItemProps = {
   track: Track;
@@ -51,7 +52,11 @@ export default function TrackListItem({ track, onPlay, coverURL }: TrackListItem
         </div>
       </div>
       <TrackActions
-        track={{ ...track, artists: track.artists, coverURL: track.album?.coverURL || coverURL || '/placeholder.png' }}
+        track={{
+          ...track,
+          artists: track.artists,
+          coverURL: track.album?.coverURL || coverURL || DEFAULT_COVER_URL,
+        }}
       />
     </div>
   );

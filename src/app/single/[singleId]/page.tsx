@@ -27,6 +27,7 @@ import {
 import { getAuth } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { normalizeTrack } from '@/utils/normalizeTrack';
+import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { useToast } from '@/hooks/use-toast';
 
 type Artist = {
@@ -102,7 +103,7 @@ export default function SingleDetailPage() {
           setSingle({
             id: singleDocSnap.id,
             title: singleData.title,
-            coverURL: singleData.coverURL || '/placeholder.png',
+            coverURL: singleData.coverURL || DEFAULT_COVER_URL,
             releaseDate: singleData.releaseDate,
             tracklist: normalizedTracklist,
             credits: singleData.credits || '',

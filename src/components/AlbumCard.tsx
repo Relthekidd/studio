@@ -19,6 +19,7 @@ import { useState, useEffect } from 'react';
 import { formatArtists } from '@/utils/formatArtists';
 import { saveLikedSong, isSongLiked } from '@/utils/saveLibraryData'; // Import utility functions
 import { useUser } from '@/hooks/useUser';
+import { DEFAULT_COVER_URL } from '@/utils/helpers';
 
 export function AlbumCard({ item, className }: { item: Track; className?: string }) {
   const router = useRouter();
@@ -84,7 +85,7 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
     >
       <div className="relative aspect-square">
         <Image
-          src={item.coverURL && item.coverURL !== '' ? item.coverURL : '/placeholder.png'}
+          src={item.coverURL && item.coverURL !== '' ? item.coverURL : DEFAULT_COVER_URL}
           alt={item.title}
           width={500}
           height={500}

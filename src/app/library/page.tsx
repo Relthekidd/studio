@@ -7,10 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ListMusic, Heart, DiscAlbum, GanttChartSquare, Music, Loader } from 'lucide-react';
 import CreatePlaylistModal from '@/components/playlists/CreatePlaylistModal';
 import { useLibrary } from '@/hooks/useLibrary';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function LibraryPage() {
   const { library, loading, reloadLibrary } = useLibrary();
+  const [tab, setTab] = useState('playlists');
 
   const likedSongs = library?.likedSongs || [];
   const savedAlbums = library?.savedAlbums || [];
@@ -72,10 +73,16 @@ export default function LibraryPage() {
     <div className="container mx-auto space-y-8 p-4 md:p-6 lg:p-8">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <SectionTitle className="mb-0">My Library</SectionTitle>
-        <CreatePlaylistModal onPlaylistCreated={reloadLibrary} />
+        {tab === 'playlists' && (
+          <CreatePlaylistModal onPlaylistCreated={reloadLibrary} />
+        )}
       </div>
 
-      <Tabs defaultValue="playlists" className="w-full">
+      <Tabs
+        defaultValue="playlists"
+        className="w-full"
+        onValueChange={(val) => setTab(val)}
+      >
         <TabsList className="mb-6 grid w-full grid-cols-3 border border-border bg-card md:grid-cols-6">
           <TabsTrigger value="playlists">Playlists</TabsTrigger>
           <TabsTrigger value="liked">Liked Songs</TabsTrigger>

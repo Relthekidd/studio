@@ -9,10 +9,6 @@ This file is auto-generated.
 - [44:9] 'isPlaying' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
 
 ---
-### `src/app/profile/[userId]/page.tsx`
-- [149:6] React Hook useEffect has a missing dependency: 'user.uid'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
-
----
 ### `src/app/single/[singleId]/page.tsx`
 - [14:8] 'TrackActions' is defined but never used. – `@typescript-eslint/no-unused-vars`
 
@@ -31,10 +27,10 @@ This file is auto-generated.
 
 ---
 ### `src/features/player/MiniPlayer.tsx`
-- [76:12] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [77:12] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 
 ---
 ### `src/features/player/QueueModal.tsx`
-- [65:20] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [66:20] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 
 ---

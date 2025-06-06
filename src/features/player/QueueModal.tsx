@@ -3,6 +3,7 @@
 import { usePlayerStore } from './store';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Image from 'next/image';
+import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { formatArtists } from '@/utils/formatArtists';
 import { X } from 'lucide-react';
 import { Track } from '@/types/music';
@@ -53,7 +54,7 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
               {/* Thumbnail */}
               <div className="relative size-12 overflow-hidden rounded-md shadow-md">
                 <Image
-                  src={track.coverURL || '/placeholder.png'}
+                  src={track.coverURL || DEFAULT_COVER_URL}
                   alt={track.title || 'Unknown Track'}
                   fill
                   className="object-cover"

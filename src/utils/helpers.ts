@@ -1,6 +1,10 @@
 // src/utils/helpers.ts
 import type { Track } from '@/types/music';
 
+// Default image used when a track or album is missing artwork
+export const DEFAULT_COVER_URL =
+  'https://placehold.co/500x500?text=No+Image';
+
 export function formatArtists(input: any): string {
   if (Array.isArray(input)) {
     return input
@@ -14,7 +18,7 @@ export function formatArtists(input: any): string {
 }
 
 export function safeImageSrc(src: string | undefined | null): string {
-  return src && src.trim() !== '' ? src : '/placeholder.png';
+  return src && src.trim() !== '' ? src : DEFAULT_COVER_URL;
 }
 
 export function normalizeTrack(raw: any): Track {

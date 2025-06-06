@@ -15,6 +15,7 @@ import { PlusCircle } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import { toast } from '@/hooks/use-toast';
 import { savePlaylist } from '@/utils/saveLibraryData';
+import { DEFAULT_COVER_URL } from '@/utils/helpers';
 
 interface CreatePlaylistModalProps {
   onPlaylistCreated?: () => void;
@@ -40,7 +41,7 @@ export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylis
         playlistData: {
           name: title,
           description,
-          imageUrl: coverImage || '/placeholder.png', // Default cover image
+          imageUrl: coverImage || DEFAULT_COVER_URL,
           songs: [], // Initialize with an empty songs array
           createdAt: new Date().toISOString(),
           ownerId: '',

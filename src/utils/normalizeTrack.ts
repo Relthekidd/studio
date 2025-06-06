@@ -1,5 +1,6 @@
 import type { Track } from '@/types/music';
 import { DocumentData } from 'firebase/firestore';
+import { DEFAULT_COVER_URL } from './helpers';
 
 export function normalizeTrack(
   doc: DocumentData,
@@ -17,7 +18,7 @@ export function normalizeTrack(
     artists: matchingArtists.length > 0 ? matchingArtists : [{ id: '', name: 'Unknown Artist' }],
 
     audioURL: data.audioURL || '',
-    coverURL: data.coverURL || '/placeholder.png',
+    coverURL: data.coverURL || DEFAULT_COVER_URL,
 
     type: data.type || 'single',
     albumId: data.albumId || '',
@@ -25,7 +26,7 @@ export function normalizeTrack(
       ? {
           id: data.album.id || '',
           name: data.album.name || 'Unknown Album',
-          coverURL: data.album.coverURL || '/placeholder.png',
+          coverURL: data.album.coverURL || DEFAULT_COVER_URL,
         }
       : undefined,
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -32,27 +32,30 @@ export default function AccountPage() {
   const [showFavoritesPublicly, setShowFavoritesPublicly] = useState(true);
   const [showTopStatsPublicly, setShowTopStatsPublicly] = useState(true);
 
+  const loadUserProfile = useCallback(async () => {
+    if (!user) return;
+    const profileRef = doc(db, 'profiles', user.uid);
+    const snapshot = await getDoc(profileRef);
+
+    if (snapshot.exists()) {
+      const profile = snapshot.data();
+      setDisplayName(profile.displayName || '');
+      setEmail(profile.email || '');
+      setBio(profile.bio || '');
+      setIsProfilePublic(profile.isProfilePublic ?? true);
+      setShowFavoritesPublicly(profile.showFavoritesPublicly ?? true);
+      setShowTopStatsPublicly(profile.showTopStatsPublicly ?? true);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!loading && !user) router.push('/login');
-
-    const loadUserProfile = async () => {
-      if (!user) return;
-      const profileRef = doc(db, 'profiles', user.uid);
-      const snapshot = await getDoc(profileRef);
-
-      if (snapshot.exists()) {
-        const profile = snapshot.data();
-        setDisplayName(profile.displayName || '');
-        setEmail(profile.email || '');
-        setBio(profile.bio || '');
-        setIsProfilePublic(profile.isProfilePublic ?? true);
-        setShowFavoritesPublicly(profile.showFavoritesPublicly ?? true);
-        setShowTopStatsPublicly(profile.showTopStatsPublicly ?? true);
-      }
-    };
-
     if (user) loadUserProfile();
-  }, [user, loading, router]);
+
+    const handleChange = () => loadUserProfile();
+    window.addEventListener('profileChange', handleChange);
+    return () => window.removeEventListener('profileChange', handleChange);
+  }, [user, loading, router, loadUserProfile]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();

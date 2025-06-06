@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import {
   collection,
@@ -72,9 +72,8 @@ export default function ProfilePage() {
     });
   };
 
-  useEffect(() => {
-    const fetchProfileAndTop5 = async () => {
-      if (typeof userId !== 'string') return;
+  const fetchProfileAndTop5 = useCallback(async () => {
+    if (typeof userId !== 'string') return;
 
       // Fetch user profile
       const profileSnap = await getDoc(doc(db, 'profiles', userId));
@@ -143,10 +142,13 @@ export default function ProfilePage() {
         }));
 
       setTopArtists(top5Artists);
-    };
+  }, [userId, user]);
 
+  useEffect(() => {
     fetchProfileAndTop5();
-  }, [userId]);
+    window.addEventListener('profileChange', fetchProfileAndTop5);
+    return () => window.removeEventListener('profileChange', fetchProfileAndTop5);
+  }, [fetchProfileAndTop5]);
 
   return (
     <div className="container mx-auto space-y-6 px-4 py-6">
