@@ -1,5 +1,6 @@
 // src/hooks/useLibrary.ts
 import { useState, useEffect, useCallback } from 'react';
+import { useUser } from '@/hooks/useUser';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import type { Track } from '@/types/music';
@@ -25,15 +26,21 @@ export interface LibraryData {
 export function useLibrary() {
   const [library, setLibrary] = useState<LibraryData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useUser();
 
   const reloadLibrary = useCallback(async () => {
+    if (!user?.uid) {
+      setLibrary(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
-      const likedSongsSnap = await getDocs(collection(db, 'users', 'currentUserId', 'likedSongs'));
+      const likedSongsSnap = await getDocs(collection(db, 'users', user.uid, 'likedSongs'));
       const savedAlbumsSnap = await getDocs(
-        collection(db, 'users', 'currentUserId', 'savedAlbums')
+        collection(db, 'users', user.uid, 'savedAlbums')
       );
-      const playlistsSnap = await getDocs(collection(db, 'users', 'currentUserId', 'playlists'));
+      const playlistsSnap = await getDocs(collection(db, 'users', user.uid, 'playlists'));
 
       const transformToTrack = (doc: any): Track => {
         const data = doc.data();
@@ -77,11 +84,11 @@ export function useLibrary() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     reloadLibrary();
-  }, [reloadLibrary]);
+  }, [reloadLibrary, user]);
 
   return { library, loading, reloadLibrary };
 }
