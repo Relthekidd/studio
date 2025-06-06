@@ -116,14 +116,19 @@ export default function ProfilePage() {
 
       // Generate top 5 artists from tracks
       const artistsMap = new Map<string, number>();
-      tracks.forEach((t) => {
-        if (Array.isArray(t.artist)) {
-          t.artist.forEach((artistObj) => {
-            const artistName = artistObj.name;
+      tracks.forEach((t: any) => {
+        const trackArtists = t.artists ?? t.artist;
+        if (Array.isArray(trackArtists)) {
+          trackArtists.forEach((artistObj: any) => {
+            const artistName =
+              typeof artistObj === 'string' ? artistObj : artistObj.name;
             artistsMap.set(artistName, (artistsMap.get(artistName) || 0) + 1);
           });
-        } else if (typeof t.artist === 'string') {
-          artistsMap.set(t.artist, (artistsMap.get(t.artist) || 0) + 1);
+        } else if (typeof trackArtists === 'string') {
+          artistsMap.set(
+            trackArtists,
+            (artistsMap.get(trackArtists) || 0) + 1
+          );
         }
       });
 
