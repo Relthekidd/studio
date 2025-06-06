@@ -3,8 +3,18 @@
 This file is auto-generated.
 
 ---
+### `src/app/album/[albumId]/page.tsx`
+- [18:10] 'formatTime' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [43:9] 'currentTrack' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+- [44:9] 'isPlaying' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+
+---
 ### `src/app/profile/[userId]/page.tsx`
-- [144:6] React Hook useEffect has a missing dependency: 'user.uid'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
+- [149:6] React Hook useEffect has a missing dependency: 'user.uid'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
+
+---
+### `src/app/single/[singleId]/page.tsx`
+- [14:8] 'TrackActions' is defined but never used. – `@typescript-eslint/no-unused-vars`
 
 ---
 ### `src/components/music/QueueModal.tsx`
