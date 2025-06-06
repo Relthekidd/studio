@@ -13,7 +13,7 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     async function fetchTracks() {
-      const tracksRef = collection(db, 'tracks');
+      const tracksRef = collection(db, 'songs');
       const q = query(tracksRef, orderBy('createdAt', 'desc'), limit(20));
       const snapshot = await getDocs(q);
 
