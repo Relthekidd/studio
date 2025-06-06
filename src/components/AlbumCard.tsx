@@ -133,7 +133,7 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
       </div>
       <div className="p-3">
         <h3 className="truncate text-sm font-semibold">{item.title}</h3>
-        <p className="truncate text-xs text-muted-foreground">{formatArtists(item.artist)}</p>
+        <p className="truncate text-xs text-muted-foreground">{formatArtists(item.artists)}</p>
       </div>
     </div>
   );
