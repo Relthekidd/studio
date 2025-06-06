@@ -97,7 +97,7 @@ export default function AlbumPage() {
   const handleAddToLibrary = async () => {
     const user = getAuth().currentUser;
     if (!user || !album) return;
-    await setDoc(doc(db, 'profiles', user.uid, 'savedAlbums', album.id), {
+    await setDoc(doc(db, 'users', user.uid, 'savedAlbums', album.id), {
       albumId: album.id,
       addedAt: serverTimestamp(),
     });
