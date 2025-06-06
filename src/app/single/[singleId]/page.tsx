@@ -11,7 +11,6 @@ import SectionTitle from '@/components/SectionTitle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import BackButton from '@/components/ui/BackButton';
-import TrackActions from '@/components/music/TrackActions';
 import TrackListItem from '@/components/music/TrackListItem';
 import { Card, CardContent } from '@/components/ui/card';
 import {
