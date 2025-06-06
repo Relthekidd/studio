@@ -77,7 +77,15 @@ export function useLibrary() {
             };
           })
           .sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime()),
-        createdPlaylists: playlistsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+        createdPlaylists: playlistsSnap.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title || data.name || 'Untitled',
+            coverURL: data.coverURL || data.imageUrl || DEFAULT_COVER_URL,
+            ...data,
+          };
+        }),
         genres: [], // Add logic for genres if needed
       });
     } catch (error) {

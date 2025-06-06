@@ -9,7 +9,7 @@ This file is auto-generated.
 
 ---
 ### `src/components/playlists/AddToPlaylistModal.tsx`
-- [44:6] React Hook useEffect has an unnecessary dependency: 'toast'. Either exclude it or remove the dependency array. Outer scope values like 'toast' aren't valid dependencies because mutating them doesn't re-render the component. – `react-hooks/exhaustive-deps`
+- [43:6] React Hook useEffect has an unnecessary dependency: 'toast'. Either exclude it or remove the dependency array. Outer scope values like 'toast' aren't valid dependencies because mutating them doesn't re-render the component. – `react-hooks/exhaustive-deps`
 
 ---
 ### `src/components/ui/toast.tsx`

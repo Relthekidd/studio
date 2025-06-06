@@ -63,5 +63,6 @@ export function capitalize(str: string): string {
 
 export function getTrackRoute(item: { type: string; id: string }): string {
   const type = item.type?.toLowerCase();
+  if (type === 'playlist') return `/playlist/${item.id}`;
   return type === 'album' ? `/album/${item.id}` : `/single/${item.id}`;
 }

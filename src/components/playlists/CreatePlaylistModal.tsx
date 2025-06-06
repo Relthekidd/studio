@@ -39,7 +39,7 @@ export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylis
       await savePlaylist({
         userId: user.uid, // Pass the current user's ID
         playlistData: {
-          name: title,
+          title,
           description,
           imageUrl: coverImage || DEFAULT_COVER_URL,
           songs: [], // Initialize with an empty songs array
