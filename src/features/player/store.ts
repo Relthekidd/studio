@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Track } from '@/types/music';
 
 type RepeatMode = 'off' | 'one' | 'all';
@@ -37,95 +38,114 @@ type PlayerStore = {
   skipToPrev: () => void;
 };
 
-export const usePlayerStore = create<PlayerStore>((set, get) => ({
-  currentTrack: null,
-  isPlaying: false,
-  isExpanded: false,
-  progress: 0,
-  currentTime: 0,
-  duration: 0,
-  volume: 1,
-  isMuted: false,
-  repeatMode: 'off',
-  shuffleMode: false,
-  queue: [],
-  queueIndex: 0,
-
-  setTrack: (track) => {
-    const queue = get().queue;
-    const index = queue.findIndex((t) => t.id === track.id);
-    set({
-      currentTrack: track,
-      queueIndex: index >= 0 ? index : 0,
-      isPlaying: true,
+export const usePlayerStore = create<PlayerStore>()(
+  persist(
+    (set, get) => ({
+      currentTrack: null,
+      isPlaying: false,
       isExpanded: false,
-    });
-  },
-
-  setCurrentTrack: (track) =>
-    set({
-      currentTrack: track,
-      isExpanded: false,
-    }),
-  setIsPlaying: (val) => set({ isPlaying: val }),
-
-  addToQueue: (track) => set((s) => ({ queue: [...s.queue, track] })),
-
-  setQueue: (tracks) => {
-    set({
-      queue: tracks,
+      progress: 0,
+      currentTime: 0,
+      duration: 0,
+      volume: 1,
+      isMuted: false,
+      repeatMode: 'off',
+      shuffleMode: false,
+      queue: [],
       queueIndex: 0,
-      currentTrack: tracks[0] ?? null,
-      isPlaying: !!tracks[0],
-      isExpanded: false,
-    });
-  },
 
-  togglePlayPause: () => set((s) => ({ isPlaying: !s.isPlaying })),
-  toggleExpand: () => set((s) => ({ isExpanded: !s.isExpanded })),
-  setProgress: (val) => set({ progress: val }),
-  setCurrentTime: (val) => set({ currentTime: val }),
-  setDuration: (val) => set({ duration: val }),
+      setTrack: (track) => {
+        const queue = get().queue;
+        const index = queue.findIndex((t) => t.id === track.id);
+        set({
+          currentTrack: track,
+          queueIndex: index >= 0 ? index : 0,
+          isPlaying: true,
+          isExpanded: false,
+        });
+      },
 
-  seek: (val) => {
-    const duration = get().duration || 1;
-    set({
-      currentTime: val,
-      progress: (val / duration) * 100,
-    });
-  },
+      setCurrentTrack: (track) =>
+        set({
+          currentTrack: track,
+          isExpanded: false,
+        }),
+      setIsPlaying: (val) => set({ isPlaying: val }),
 
-  setVolume: (val) => set({ volume: val }),
-  setMuted: (val) => set({ isMuted: val }),
+      addToQueue: (track) => set((s) => ({ queue: [...s.queue, track] })),
 
-  toggleRepeat: () =>
-    set((s) => ({
-      repeatMode: s.repeatMode === 'off' ? 'all' : s.repeatMode === 'all' ? 'one' : 'off',
-    })),
+      setQueue: (tracks) => {
+        set({
+          queue: tracks,
+          queueIndex: 0,
+          currentTrack: tracks[0] ?? null,
+          isPlaying: !!tracks[0],
+          isExpanded: false,
+        });
+      },
 
-  toggleShuffle: () => set((s) => ({ shuffleMode: !s.shuffleMode })), // Added implementation
+      togglePlayPause: () => set((s) => ({ isPlaying: !s.isPlaying })),
+      toggleExpand: () => set((s) => ({ isExpanded: !s.isExpanded })),
+      setProgress: (val) => set({ progress: val }),
+      setCurrentTime: (val) => set({ currentTime: val }),
+      setDuration: (val) => set({ duration: val }),
 
-  skipToNext: () => {
-    const { queue, queueIndex } = get();
-    const nextIndex = queueIndex + 1;
-    if (nextIndex < queue.length) {
-      set({
-        queueIndex: nextIndex,
-        currentTrack: queue[nextIndex],
-        isPlaying: true,
-      });
+      seek: (val) => {
+        const duration = get().duration || 1;
+        set({
+          currentTime: val,
+          progress: (val / duration) * 100,
+        });
+      },
+
+      setVolume: (val) => set({ volume: val }),
+      setMuted: (val) => set({ isMuted: val }),
+
+      toggleRepeat: () =>
+        set((s) => ({
+          repeatMode: s.repeatMode === 'off' ? 'all' : s.repeatMode === 'all' ? 'one' : 'off',
+        })),
+
+      toggleShuffle: () => set((s) => ({ shuffleMode: !s.shuffleMode })), // Added implementation
+
+      skipToNext: () => {
+        const { queue, queueIndex } = get();
+        const nextIndex = queueIndex + 1;
+        if (nextIndex < queue.length) {
+          set({
+            queueIndex: nextIndex,
+            currentTrack: queue[nextIndex],
+            isPlaying: true,
+          });
+        }
+      },
+
+      skipToPrev: () => {
+        const { queue, queueIndex } = get();
+        const prevIndex = queueIndex - 1;
+        if (prevIndex >= 0) {
+          set({
+            queueIndex: prevIndex,
+            currentTrack: queue[prevIndex],
+            isPlaying: true,
+          });
+        }
+      },
+    }),
+    {
+      name: 'player-store',
+      partialize: (state) => ({
+        currentTrack: state.currentTrack,
+        isPlaying: state.isPlaying,
+        currentTime: state.currentTime,
+        duration: state.duration,
+        volume: state.volume,
+        isMuted: state.isMuted,
+        repeatMode: state.repeatMode,
+        shuffleMode: state.shuffleMode,
+        queue: state.queue,
+        queueIndex: state.queueIndex,
+      }),
     }
-  },
-
-  skipToPrev: () => {
-    const { queue, queueIndex } = get();
-    const prevIndex = queueIndex - 1;
-    if (prevIndex >= 0) {
-      set({
-        queueIndex: prevIndex,
-        currentTrack: queue[prevIndex],
-        isPlaying: true,
-      });
-    }
-  },
-}));
+  )
+);

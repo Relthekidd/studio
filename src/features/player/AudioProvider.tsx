@@ -11,6 +11,7 @@ export function AudioProvider() {
     isPlaying,
     volume,
     isMuted,
+    currentTime,
     setCurrentTime,
     setDuration,
     setProgress,
@@ -24,6 +25,9 @@ export function AudioProvider() {
 
     audio.src = currentTrack.audioURL;
     audio.load();
+    if (currentTime > 0) {
+      audio.currentTime = currentTime;
+    }
 
     if (isPlaying) {
       audio.play().catch((err) => console.warn('Playback error:', err));
