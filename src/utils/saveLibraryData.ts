@@ -18,6 +18,9 @@ export const saveLikedSong = async (
       trackId,
       likedAt: serverTimestamp(),
     });
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('libraryChange'));
+    }
   } catch (error) {
     console.error('Error saving liked song:', error);
   }
@@ -73,6 +76,9 @@ export const savePlaylist = async ({ userId, playlistData }: SavePlaylistParams)
       createdAt: playlistData.createdAt || serverTimestamp(), // Use provided timestamp or Firestore's server timestamp
       id: playlistId, // Include the generated playlist ID
     });
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('libraryChange'));
+    }
     console.info('Playlist saved successfully');
   } catch (error) {
     console.error('Error saving playlist:', error);
@@ -83,6 +89,9 @@ export const removeLikedSong = async (userId: string, trackId: string) => {
   const ref = doc(db, `users/${userId}/likedSongs`, trackId);
   try {
     await deleteDoc(ref);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('libraryChange'));
+    }
   } catch (error) {
     console.error('Error removing liked song:', error);
   }

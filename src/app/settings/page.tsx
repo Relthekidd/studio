@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
@@ -19,16 +19,20 @@ export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
-      const snap = await getDoc(doc(db, 'profiles', user.uid));
-      if (snap.exists()) {
-        setEmail(snap.data().email || user.email || '');
-      }
-    };
-    if (user) fetchProfile();
+  const fetchProfile = useCallback(async () => {
+    if (!user) return;
+    const snap = await getDoc(doc(db, 'profiles', user.uid));
+    if (snap.exists()) {
+      setEmail(snap.data().email || user.email || '');
+    }
   }, [user]);
+
+  useEffect(() => {
+    if (user) fetchProfile();
+    const handle = () => fetchProfile();
+    window.addEventListener('settingsChange', handle);
+    return () => window.removeEventListener('settingsChange', handle);
+  }, [user, fetchProfile]);
 
   const handleEmailChange = async (e: React.FormEvent) => {
     e.preventDefault();

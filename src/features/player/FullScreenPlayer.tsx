@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { usePlayerStore } from './store';
 import { formatArtists } from '@/utils/formatArtists';
 import { formatTime } from '@/lib/utils';
@@ -94,7 +95,7 @@ export default function FullScreenPlayer() {
       <div className="my-auto flex flex-col items-center gap-4 md:gap-6">
         <div className="group relative size-60 overflow-hidden rounded-xl shadow-2xl shadow-primary/30 sm:size-72 md:size-80">
           <Image
-            src={currentTrack.coverURL || '/placeholder.png'}
+            src={currentTrack.coverURL || DEFAULT_COVER_URL}
             alt={currentTrack.title || 'Unknown Track'}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"

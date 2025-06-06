@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { usePlayerStore } from './store';
 import { formatArtists } from '@/utils/formatArtists';
+import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { Play, Pause } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
@@ -44,7 +45,7 @@ export default function MiniPlayer() {
           }`}
         >
           <Image
-            src={currentTrack.coverURL || '/placeholder.png'}
+            src={currentTrack.coverURL || DEFAULT_COVER_URL}
             alt={currentTrack.title || 'Unknown Track'}
             fill
             className="object-cover"

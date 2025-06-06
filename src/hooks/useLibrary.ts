@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/hooks/useUser';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
+import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import type { Track } from '@/types/music';
 
 export interface Album {
@@ -49,13 +50,13 @@ export function useLibrary() {
           title: data.title || 'Untitled',
           artists: data.artists || [{ id: '', name: 'Unknown Artist' }],
           audioURL: data.audioURL || '',
-          coverURL: data.coverURL || '/placeholder.png',
+          coverURL: data.coverURL || DEFAULT_COVER_URL,
           type: data.type || 'track',
           albumId: data.albumId || '',
           album:
             data.album ||
             (data.albumId
-              ? { id: data.albumId, name: 'Unknown Album', coverURL: '/placeholder.png' }
+              ? { id: data.albumId, name: 'Unknown Album', coverURL: DEFAULT_COVER_URL }
               : undefined),
           duration: data.duration || 0,
           trackNumber: data.trackNumber || 1,

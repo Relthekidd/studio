@@ -10,6 +10,9 @@ import { doc, updateDoc } from 'firebase/firestore';
 export async function updateUserProfile(userId: string, updates: Record<string, any>) {
   const ref = doc(db, 'profiles', userId);
   await updateDoc(ref, updates);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('profileChange'));
+  }
 }
 
 export async function changeUserEmail(currentPassword: string, newEmail: string) {
@@ -18,6 +21,9 @@ export async function changeUserEmail(currentPassword: string, newEmail: string)
   const credential = EmailAuthProvider.credential(user.email, currentPassword);
   await reauthenticateWithCredential(user, credential);
   await updateEmail(user, newEmail);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('settingsChange'));
+  }
 }
 
 export async function changeUserPassword(currentPassword: string, newPassword: string) {
@@ -26,4 +32,7 @@ export async function changeUserPassword(currentPassword: string, newPassword: s
   const credential = EmailAuthProvider.credential(user.email, currentPassword);
   await reauthenticateWithCredential(user, credential);
   await updatePassword(user, newPassword);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('settingsChange'));
+  }
 }
