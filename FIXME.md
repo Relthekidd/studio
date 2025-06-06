@@ -3,13 +3,8 @@
 This file is auto-generated.
 
 ---
-### `src/app/discover/page.tsx`
-- [49:14] Classname 'scrollbar-thumb-gray-400' is not a Tailwind CSS class! – `tailwindcss/no-custom-classname`
-- [49:14] Classname 'scrollbar-track-transparent' is not a Tailwind CSS class! – `tailwindcss/no-custom-classname`
-
----
-### `src/app/login/page.tsx`
-- [55:6] React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
+### `src/app/profile/[userId]/page.tsx`
+- [144:6] React Hook useEffect has a missing dependency: 'user.uid'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
 
 ---
 ### `src/components/music/QueueModal.tsx`
