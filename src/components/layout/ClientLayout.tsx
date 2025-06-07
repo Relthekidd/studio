@@ -3,12 +3,10 @@
 import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthProvider';
-import { usePlayerStore } from '@/features/player/store';
 
 import { SonixLogo } from '@/components/icons/SonixLogo';
 import BottomNavigationBar from '@/components/layout/BottomNavigationBar';
-import FullScreenPlayer from '@/features/player/FullScreenPlayer';
-import MiniPlayer from '@/features/player/MiniPlayer';
+import PlayerManager from '@/features/player/PlayerManager';
 import { AudioProvider } from '@/features/player/AudioProvider';
 import ProfileMenu from '@/components/layout/ProfileMenu';
 
@@ -17,8 +15,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const router = useRouter();
 
   const { user, loading, logout } = useAuth();
-  const currentTrack = usePlayerStore((s) => s.currentTrack);
-  const isExpanded = usePlayerStore((s) => s.isExpanded);
 
   useEffect(() => {
     if (!loading && !user && pathname !== '/login') {
@@ -67,8 +63,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           : children}
       </main>
 
-      {currentTrack && !isExpanded && <MiniPlayer />}
-      {currentTrack && isExpanded && <FullScreenPlayer />}
+      <PlayerManager />
       {showLayout && <BottomNavigationBar />}
       <AudioProvider />
     </div>
