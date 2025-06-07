@@ -27,17 +27,14 @@ export default function MiniPlayer() {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div
-      className="fixed inset-x-0 bottom-16 z-50 flex h-20 items-center border-t border-border/70 bg-card/80 px-4 shadow-2xl backdrop-blur-lg transition-transform duration-300 ease-in-out md:bottom-0 md:px-6"
-      role="complementary"
+    <button
+      type="button"
+      className="animate-slideInUpMini fixed inset-x-0 bottom-16 z-50 flex h-20 items-center border-t border-border/70 bg-card/80 px-4 shadow-2xl backdrop-blur-lg transition-transform duration-300 ease-in-out md:bottom-0 md:px-6"
       aria-label="Mini Music Player"
+      onClick={() => toggleExpand()}
     >
       {/* Expand FullScreenPlayer */}
-      <button
-        className="group flex min-w-0 flex-1 cursor-pointer items-center gap-3 md:gap-4"
-        onClick={() => toggleExpand()}
-        aria-label="Expand player"
-      >
+      <div className="group flex min-w-0 flex-1 items-center gap-3 md:gap-4">
         {/* Cover Image */}
         <div
           className={`relative size-12 overflow-hidden rounded-md shadow-md transition-shadow group-hover:shadow-primary/30 md:size-14 ${
@@ -62,12 +59,15 @@ export default function MiniPlayer() {
             {formatArtists(currentTrack.artists)}
           </p>
         </div>
-      </button>
+      </div>
 
       {/* Play/Pause Button */}
       <button
         className="ml-auto flex items-center justify-center rounded-full bg-primary p-2 text-white shadow-md hover:bg-primary/90"
-        onClick={togglePlayPause}
+        onClick={(e) => {
+          e.stopPropagation();
+          togglePlayPause();
+        }}
         aria-label={isPlaying ? 'Pause' : 'Play'}
       >
         {isPlaying ? <Pause size={24} /> : <Play size={24} />}
@@ -80,6 +80,6 @@ export default function MiniPlayer() {
           className="h-full [&>div]:bg-gradient-to-r [&>div]:from-accent/70 [&>div]:to-primary/70"
         />
       </div>
-    </div>
+    </button>
   );
 }
