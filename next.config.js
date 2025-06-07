@@ -1,6 +1,9 @@
-import type { NextConfig } from 'next';
+// next.config.js or next.config.cjs (depending on your module type)
 
-const nextConfig: NextConfig = {
+import withPWA from 'next-pwa';
+
+const nextConfig = {
+  // ✅ This is Next.js native config
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -23,4 +26,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// ✅ This is PWA plugin config
+const pwaConfig = {
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+};
+
+export default withPWA(pwaConfig)(nextConfig);
