@@ -1,7 +1,7 @@
 'use client';
 
 import { usePlayerStore } from './store';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import Image from 'next/image';
 import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { formatArtists } from '@/utils/formatArtists';
@@ -31,11 +31,14 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="fixed inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-lg bg-card p-4 shadow-lg">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-bold">Up Next</DialogTitle>
-        </DialogHeader>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent
+        side="bottom"
+        className="max-h-[80vh] overflow-y-auto rounded-t-lg bg-card p-4 shadow-lg"
+      >
+        <SheetHeader>
+          <SheetTitle className="text-lg font-bold">Up Next</SheetTitle>
+        </SheetHeader>
         <div className="flex flex-col gap-2">
           {queue.map((track, index) => (
             <button
@@ -86,7 +89,7 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
             </button>
           ))}
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

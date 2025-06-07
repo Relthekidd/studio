@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 
 // Import or define the Track type
-import { Track } from '@/types/music'; // Replace with the correct path if needed
 
 export default function FullScreenPlayer() {
   const [showQueue, setShowQueue] = useState(false); // State to toggle queue modal
@@ -45,7 +44,6 @@ export default function FullScreenPlayer() {
     toggleRepeat,
     queue,
     queueIndex,
-    setQueue,
     setCurrentTrack,
   } = usePlayerStore();
 
@@ -87,10 +85,6 @@ export default function FullScreenPlayer() {
     } else {
       console.warn('No previous track in the queue.');
     }
-  };
-
-  const handleAddToQueue = (track: Track) => {
-    setQueue([...queue, track]);
   };
 
   return (
@@ -160,12 +154,7 @@ export default function FullScreenPlayer() {
         >
           <Shuffle size={20} />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleSkipToPrev}
-          aria-label="Previous Track"
-        >
+        <Button variant="ghost" size="icon" onClick={handleSkipToPrev} aria-label="Previous Track">
           <SkipBack size={24} />
         </Button>
         <Button
@@ -176,20 +165,10 @@ export default function FullScreenPlayer() {
         >
           {isPlaying ? <Pause size={32} /> : <Play size={32} />}
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleSkipToNext}
-          aria-label="Next Track"
-        >
+        <Button variant="ghost" size="icon" onClick={handleSkipToNext} aria-label="Next Track">
           <SkipForward size={24} />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleRepeat}
-          aria-label="Repeat"
-        >
+        <Button variant="ghost" size="icon" onClick={toggleRepeat} aria-label="Repeat">
           {getRepeatIcon()}
         </Button>
       </div>
@@ -215,12 +194,7 @@ export default function FullScreenPlayer() {
       </div>
 
       {/* Queue Modal */}
-      {showQueue && (
-        <QueueModal
-          isOpen={showQueue}
-          onClose={() => setShowQueue(false)}
-        />
-      )}
+      {showQueue && <QueueModal isOpen={showQueue} onClose={() => setShowQueue(false)} />}
     </div>
   );
 }
