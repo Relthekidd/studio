@@ -5,8 +5,8 @@ import { useParams } from 'next/navigation';
 import {
   collection,
   getDocs,
-  getDoc,
   doc,
+  onSnapshot,
   query,
   orderBy,
   limit,
@@ -72,28 +72,8 @@ export default function ProfilePage() {
     });
   };
 
-  const fetchProfileAndTop5 = useCallback(async () => {
+  const fetchTopInfo = useCallback(async () => {
     if (typeof userId !== 'string') return;
-
-      // Fetch user profile
-      const profileSnap = await getDoc(doc(db, 'profiles', userId));
-      if (profileSnap.exists()) {
-        const data = profileSnap.data();
-        setUserProfile(data);
-        setSettings((prev) => ({
-          ...prev,
-          ...data.customizations,
-        }));
-      }
-
-      const followersSnap = await getDocs(collection(db, 'profiles', userId, 'followers'));
-      const followingSnap = await getDocs(collection(db, 'profiles', userId, 'following'));
-      setFollowers(followersSnap.size);
-      setFollowing(followingSnap.size);
-      if (user?.uid) {
-        const followDoc = await getDoc(doc(db, 'profiles', userId, 'followers', user.uid));
-        setIsFollowing(followDoc.exists());
-      }
 
       // Fetch top 5 tracks
       const top5TracksQuery = query(
@@ -142,13 +122,41 @@ export default function ProfilePage() {
         }));
 
       setTopArtists(top5Artists);
+  }, [userId]);
+
+  useEffect(() => {
+    if (typeof userId !== 'string') return;
+
+    const profileRef = doc(db, 'profiles', userId);
+    const unsubProfile = onSnapshot(profileRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        setUserProfile(data);
+        setSettings((prev) => ({ ...prev, ...data.customizations }));
+      }
+    });
+
+    const unsubFollowers = onSnapshot(collection(db, 'profiles', userId, 'followers'), (snap) => {
+      setFollowers(snap.size);
+      if (user?.uid) setIsFollowing(snap.docs.some((d) => d.id === user.uid));
+    });
+
+    const unsubFollowing = onSnapshot(collection(db, 'profiles', userId, 'following'), (snap) => {
+      setFollowing(snap.size);
+    });
+
+    return () => {
+      unsubProfile();
+      unsubFollowers();
+      unsubFollowing();
+    };
   }, [userId, user]);
 
   useEffect(() => {
-    fetchProfileAndTop5();
-    window.addEventListener('profileChange', fetchProfileAndTop5);
-    return () => window.removeEventListener('profileChange', fetchProfileAndTop5);
-  }, [fetchProfileAndTop5]);
+    fetchTopInfo();
+    window.addEventListener('profileChange', fetchTopInfo);
+    return () => window.removeEventListener('profileChange', fetchTopInfo);
+  }, [fetchTopInfo]);
 
   return (
     <div className="container mx-auto space-y-6 px-4 py-6">
