@@ -20,11 +20,7 @@ This file is auto-generated.
 - [37:6] React Hook useEffect has a missing dependency: 'currentTime'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
 
 ---
-### `src/features/player/MiniPlayer.tsx`
-- [78:12] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-
----
-### `src/features/player/QueueModal.tsx`
-- [66:20] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+### `src/features/player/FullScreenPlayer.tsx`
+- [92:9] 'handleAddToQueue' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
 
 ---
