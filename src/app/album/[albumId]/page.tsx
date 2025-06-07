@@ -42,6 +42,7 @@ export default function AlbumPage() {
   const setCurrentTrack = usePlayerStore((s) => s.setCurrentTrack);
   const setIsPlaying = usePlayerStore((s) => s.setIsPlaying);
   const setQueue = usePlayerStore((s) => s.setQueue);
+  const addTracksToQueue = usePlayerStore((s) => s.addTracksToQueue);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -87,7 +88,7 @@ export default function AlbumPage() {
   };
 
   const handleAddAlbumToQueue = () => {
-    setQueue([...tracks]);
+    addTracksToQueue(tracks);
     toast({ title: 'Added album to queue' });
   };
 

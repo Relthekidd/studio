@@ -24,6 +24,7 @@ type PlayerStore = {
   setCurrentTrack: (track: Track | null) => void;
   setIsPlaying: (val: boolean) => void;
   addToQueue: (track: Track) => void;
+  addTracksToQueue: (tracks: Track[]) => void;
   togglePlayPause: () => void;
   toggleExpand: () => void;
   setProgress: (val: number) => void;
@@ -62,6 +63,9 @@ export const usePlayerStore = create<PlayerStore>()(
           queueIndex: index >= 0 ? index : 0,
           isPlaying: true,
           isExpanded: false,
+          currentTime: 0,
+          progress: 0,
+          duration: 0,
         });
       },
 
@@ -69,10 +73,14 @@ export const usePlayerStore = create<PlayerStore>()(
         set({
           currentTrack: track,
           isExpanded: false,
+          currentTime: 0,
+          progress: 0,
+          duration: 0,
         }),
       setIsPlaying: (val) => set({ isPlaying: val }),
 
       addToQueue: (track) => set((s) => ({ queue: [...s.queue, track] })),
+      addTracksToQueue: (tracks) => set((s) => ({ queue: [...s.queue, ...tracks] })),
 
       setQueue: (tracks) => {
         set({
@@ -81,6 +89,9 @@ export const usePlayerStore = create<PlayerStore>()(
           currentTrack: tracks[0] ?? null,
           isPlaying: !!tracks[0],
           isExpanded: false,
+          currentTime: 0,
+          progress: 0,
+          duration: 0,
         });
       },
 

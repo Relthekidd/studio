@@ -17,8 +17,7 @@ interface Props {
 }
 
 export default function TrackActions({ track }: Props) {
-  const queue = usePlayerStore((s) => s.queue);
-  const setQueue = usePlayerStore((s) => s.setQueue);
+  const addToQueue = usePlayerStore((s) => s.addToQueue);
   const router = useRouter();
 
   const handleFavorite = () => {
@@ -27,8 +26,7 @@ export default function TrackActions({ track }: Props) {
 
   
   const handleAddToQueue = () => {
-    // Add the track to the queue
-    setQueue([...queue, track]);
+    addToQueue(track);
   };
 
   return (

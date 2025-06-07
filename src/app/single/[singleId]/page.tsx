@@ -52,6 +52,7 @@ export default function SingleDetailPage() {
   const setCurrentTrack = usePlayerStore((s) => s.setCurrentTrack);
   const setIsPlaying = usePlayerStore((s) => s.setIsPlaying);
   const setQueue = usePlayerStore((s) => s.setQueue);
+  const addTracksToQueue = usePlayerStore((s) => s.addTracksToQueue);
   const { toast } = useToast();
   const [single, setSingle] = useState<Single | null>(null);
   const [artistsDetails, setArtistsDetails] = useState<Artist[]>([]);
@@ -238,7 +239,7 @@ export default function SingleDetailPage() {
               <Button
                 size="sm"
                 onClick={() => {
-                  setQueue(single.tracklist);
+                  addTracksToQueue(single.tracklist);
                   toast({ title: 'Added to queue' });
                 }}
               >
