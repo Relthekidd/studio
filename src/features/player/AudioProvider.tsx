@@ -18,23 +18,21 @@ export function AudioProvider() {
     skipToNext,
   } = usePlayerStore();
 
-  // Handle track change or play/pause toggle
+  // Handle track change, play/pause toggle and seeking
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentTrack) return;
 
     audio.src = currentTrack.audioURL;
     audio.load();
-    if (currentTime > 0) {
-      audio.currentTime = currentTime;
-    }
+    audio.currentTime = currentTime;
 
     if (isPlaying) {
       audio.play().catch((err) => console.warn('Playback error:', err));
     } else {
       audio.pause();
     }
-  }, [currentTrack, isPlaying]);
+  }, [currentTrack, isPlaying, currentTime]);
 
   // Sync volume and mute
   useEffect(() => {
