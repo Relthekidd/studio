@@ -16,6 +16,10 @@ This file is auto-generated.
 - [27:23] Classname 'destructive' is not a Tailwind CSS class! – `tailwindcss/no-custom-classname`
 
 ---
+### `src/features/player/AudioProvider.tsx`
+- [37:6] React Hook useEffect has a missing dependency: 'currentTime'. Either include it or remove the dependency array. – `react-hooks/exhaustive-deps`
+
+---
 ### `src/features/player/MiniPlayer.tsx`
 - [77:12] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 
