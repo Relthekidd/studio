@@ -7,12 +7,11 @@ import Link from 'next/link';
 import { CalendarDays, ListMusic, Info, PlayCircle } from 'lucide-react';
 import { usePlayerStore } from '@/features/player/store';
 import type { Track } from '@/types/music';
-import SectionTitle from '@/components/SectionTitle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import BackButton from '@/components/ui/BackButton';
-import TrackListItem from '@/components/music/TrackListItem';
-import { Card, CardContent } from '@/components/ui/card';
+import AddToPlaylistModal from '@/components/playlists/AddToPlaylistModal';
+import { Card } from '@/components/ui/card';
 import {
   doc,
   getDoc,
@@ -235,7 +234,7 @@ export default function SingleDetailPage() {
             >
               <PlayCircle size={20} className="mr-2" /> Play Track
             </Button>
-            <div className="mt-2 flex justify-center gap-2">
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
               <Button
                 size="sm"
                 onClick={() => {
@@ -260,25 +259,17 @@ export default function SingleDetailPage() {
               >
                 Add to Library
               </Button>
+              {single.tracklist && single.tracklist[0] && (
+                <AddToPlaylistModal
+                  track={single.tracklist[0]}
+                  trigger={<Button size="sm" variant="outline">Add to Playlist</Button>}
+                />
+              )}
             </div>
           </div>
         </div>
       </Card>
 
-      {single.tracklist && single.tracklist.length > 0 && (
-        <>
-          <SectionTitle id="tracklist-title">Tracklist</SectionTitle>
-          <Card>
-            <CardContent className="p-0">
-              <div className="space-y-1">
-                {single.tracklist.map((track) => (
-                  <TrackListItem key={track.id} track={track} onPlay={handlePlayTrack} coverURL={single.coverURL} />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      )}
     </div>
   );
 }
