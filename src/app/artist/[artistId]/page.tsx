@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
 import SectionTitle from '@/components/SectionTitle';
@@ -14,6 +14,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { Track } from '@/types/music';
 import BackButton from '@/components/ui/BackButton';
 import { formatArtists } from '@/utils/formatArtists';
+import { useAuth } from '@/contexts/AuthProvider';
+import { followArtist, unfollowArtist } from '@/utils/followArtist';
+import { Button } from '@/components/ui/button';
 
 export default function ArtistPage() {
   const { artistId } = useParams();
@@ -22,23 +25,24 @@ export default function ArtistPage() {
   const [featuredTracks, setFeaturedTracks] = useState<Track[]>([]);
   const [topSongs, setTopSongs] = useState<Track[]>([]);
   const [artistProfile, setArtistProfile] = useState<any | null>(null);
+  const [followers, setFollowers] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const { user } = useAuth();
 
   const decodedId = decodeURIComponent(artistId as string);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const artistSnap = await getDocs(
-        query(collection(db, 'artists'), where('id', '==', decodedId))
-      );
-      if (!artistSnap.empty) {
-        setArtistProfile(artistSnap.docs[0].data());
-      }
+    if (!artistId) return;
 
-      const albumSnap = await getDocs(
-        query(collection(db, 'albums'), where('artist', '==', decodedId))
-      );
+    const artistQuery = query(collection(db, 'artists'), where('id', '==', decodedId));
+    const unsubArtist = onSnapshot(artistQuery, (snap) => {
+      if (!snap.empty) setArtistProfile(snap.docs[0].data());
+    });
+
+    const albumQuery = query(collection(db, 'albums'), where('artist', '==', decodedId));
+    const unsubAlbums = onSnapshot(albumQuery, (snap) => {
       setAlbums(
-        albumSnap.docs.map((doc) => ({
+        snap.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title || 'Untitled',
           artists: doc.data().artists || [{ id: '', name: doc.data().artist || decodedId }],
@@ -48,12 +52,12 @@ export default function ArtistPage() {
           coverURL: doc.data().coverURL || '',
         }))
       );
+    });
 
-      const singleSnap = await getDocs(
-        query(collection(db, 'tracks'), where('artist', '==', decodedId))
-      );
+    const singleQuery = query(collection(db, 'tracks'), where('artist', '==', decodedId));
+    const unsubSingles = onSnapshot(singleQuery, (snap) => {
       setSingles(
-        singleSnap.docs.map((doc) => ({
+        snap.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title || 'Untitled',
           artists: doc.data().artists || [{ id: '', name: doc.data().artist || decodedId }],
@@ -63,11 +67,11 @@ export default function ArtistPage() {
           coverURL: doc.data().coverURL || doc.data().imageUrl || '',
         }))
       );
+    });
 
-      const featuredSnap = await getDocs(
-        query(collection(db, 'tracks'), where('artists', 'array-contains', decodedId))
-      );
-      const filtered = featuredSnap.docs
+    const featuredQuery = query(collection(db, 'tracks'), where('artists', 'array-contains', decodedId));
+    const unsubFeatured = onSnapshot(featuredQuery, (snap) => {
+      const filtered = snap.docs
         .map((doc) => {
           const data = doc.data();
           return {
@@ -82,19 +86,42 @@ export default function ArtistPage() {
         })
         .filter((track) => !(track.artists[0]?.id === decodedId || track.artists[0]?.name === decodedId));
       setFeaturedTracks(filtered);
+    });
 
-      const topSongsSnap = await getDocs(
-        query(collection(db, 'songs'), where('artistIds', 'array-contains', decodedId))
-      );
-      const songs = topSongsSnap.docs
+    const topQuery = query(collection(db, 'songs'), where('artistIds', 'array-contains', decodedId));
+    const unsubTop = onSnapshot(topQuery, (snap) => {
+      const songs = snap.docs
         .map((d) => d.data() as Track)
         .sort((a, b) => (b as any).streams - (a as any).streams)
         .slice(0, 10);
       setTopSongs(songs);
-    };
+    });
 
-    if (artistId) fetchData();
-  }, [artistId, decodedId]);
+    const followersQuery = collection(db, 'artists', decodedId, 'followers');
+    const unsubFollowers = onSnapshot(followersQuery, (snap) => {
+      setFollowers(snap.size);
+      if (user?.uid) setIsFollowing(snap.docs.some((d) => d.id === user.uid));
+    });
+
+    return () => {
+      unsubArtist();
+      unsubAlbums();
+      unsubSingles();
+      unsubFeatured();
+      unsubTop();
+      unsubFollowers();
+    };
+  }, [artistId, decodedId, user]);
+
+  const handleFollow = async () => {
+    if (!user) return;
+    if (isFollowing) {
+      await unfollowArtist(user.uid, decodedId);
+    } else {
+      await followArtist(user.uid, decodedId);
+    }
+    setIsFollowing(!isFollowing);
+  };
 
   const renderSection = (items: Track[], emptyMessage: string, icon: React.ReactNode) => {
     if (items.length === 0) {
@@ -131,6 +158,14 @@ export default function ArtistPage() {
 
             <div className="text-center sm:text-left">
               <h1 className="text-3xl font-bold md:text-4xl">{artistProfile?.name || decodedId}</h1>
+              <div className="mt-2 flex items-center justify-center gap-2 sm:justify-start">
+                <span className="text-sm text-muted-foreground">{followers} followers</span>
+                {user && (
+                  <Button size="sm" onClick={() => handleFollow()}>
+                    {isFollowing ? 'Unfollow' : 'Follow'}
+                  </Button>
+                )}
+              </div>
               {artistProfile?.bio && (
                 <p className="mt-2 text-sm text-muted-foreground">{artistProfile.bio}</p>
               )}
