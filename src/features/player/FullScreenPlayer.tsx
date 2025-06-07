@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { usePlayerStore } from './store';
@@ -9,8 +9,10 @@ import { formatTime } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ListMusic, Shuffle, Repeat, Repeat1, VolumeX, Volume2, Play, Pause, SkipForward, SkipBack } from 'lucide-react';
+import QueueModal from './QueueModal';
 
 export default function FullScreenPlayer() {
+  const [showQueue, setShowQueue] = useState(false);
   const {
     currentTrack,
     isPlaying,
@@ -85,6 +87,7 @@ export default function FullScreenPlayer() {
           variant="ghost"
           size="icon"
           className="z-[110] text-muted-foreground transition-colors hover:text-accent"
+          onClick={() => setShowQueue(true)}
           aria-label="View Queue"
         >
           <ListMusic size={22} />
@@ -197,6 +200,8 @@ export default function FullScreenPlayer() {
           {getRepeatIcon()}
         </Button>
       </div>
+
+      <QueueModal isOpen={showQueue} onClose={() => setShowQueue(false)} />
     </div>
   );
 }
