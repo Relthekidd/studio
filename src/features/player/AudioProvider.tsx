@@ -18,21 +18,36 @@ export function AudioProvider() {
     skipToNext,
   } = usePlayerStore();
 
-  // Handle track change, play/pause toggle and seeking
+  // Load new track
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentTrack) return;
 
     audio.src = currentTrack.audioURL;
     audio.load();
-    audio.currentTime = currentTime;
+  }, [currentTrack]);
+
+  // Play / pause
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
 
     if (isPlaying) {
       audio.play().catch((err) => console.warn('Playback error:', err));
     } else {
       audio.pause();
     }
-  }, [currentTrack, isPlaying, currentTime]);
+  }, [isPlaying]);
+
+  // Seek to currentTime changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (Math.abs(audio.currentTime - currentTime) > 0.1) {
+      audio.currentTime = currentTime;
+    }
+  }, [currentTime]);
 
   // Sync volume and mute
   useEffect(() => {
