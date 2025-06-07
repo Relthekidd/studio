@@ -5,6 +5,7 @@ import { usePlayerStore } from './store';
 import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { Play, Pause } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { formatArtists } from '@/utils/formatArtists';
 
 export default function MiniPlayer() {
   const {
@@ -22,6 +23,9 @@ export default function MiniPlayer() {
     return null;
   }
 
+  // Debug log for cover URL
+  console.log('Cover URL:', currentTrack.coverURL);
+
   // Calculate progress percentage
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
@@ -35,23 +39,26 @@ export default function MiniPlayer() {
     >
       {/* Cover Image */}
       <div
-        className={`relative mr-3 size-12 overflow-hidden rounded-md shadow-md transition-shadow group-hover:shadow-primary/30 md:mr-4 md:size-14 ${
-          isPlaying ? 'animate-pulse' : ''
-        }`}
+        className={`relative mr-3 size-12 overflow-hidden rounded-md shadow-md transition-shadow group-hover:shadow-primary/30 md:mr-4 md:size-14 ${isPlaying ? 'animate-pulse' : ''}`}
       >
         <Image
           src={currentTrack.coverURL || DEFAULT_COVER_URL}
           alt={currentTrack.title || 'Unknown Track'}
-          fill
-          className="object-cover"
+          layout="fill" // Ensure the image fills the container
+          objectFit="cover" // Ensure the image is cropped properly
           unoptimized
         />
       </div>
 
-      {/* Track Title */}
-      <p className="flex-1 truncate text-left text-sm font-semibold text-foreground md:text-base">
-        {currentTrack.title || 'Unknown Title'}
-      </p>
+      {/* Track Info */}
+      <div className="flex-1 truncate">
+        <p className="truncate text-left text-sm font-semibold text-foreground md:text-base">
+          {currentTrack.title || 'Unknown Title'}
+        </p>
+        <p className="truncate text-left text-xs text-muted-foreground md:text-sm">
+          {formatArtists(currentTrack.artists)}
+        </p>
+      </div>
 
       {/* Play/Pause */}
       <button
