@@ -58,7 +58,7 @@ export default function FullScreenPlayer() {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="animate-slideInUp fixed inset-0 z-[100] flex flex-col items-center justify-between bg-gradient-to-br from-background via-card to-background/90 p-4 backdrop-blur-2xl md:p-6">
+    <div className="animate-slideInUp fixed inset-0 z-[100] flex flex-col items-center justify-between overflow-y-auto bg-gradient-to-br from-background via-card to-background/90 p-4 pb-32 backdrop-blur-2xl md:p-6">
       {/* Background Cover */}
       {currentTrack.coverURL && (
         <Image

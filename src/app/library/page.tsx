@@ -3,15 +3,13 @@
 
 import { AlbumCard } from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ListMusic, Heart, DiscAlbum, GanttChartSquare, Music, Loader } from 'lucide-react';
 import CreatePlaylistModal from '@/components/playlists/CreatePlaylistModal';
 import { useLibrary } from '@/hooks/useLibrary';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export default function LibraryPage() {
   const { library, loading, reloadLibrary } = useLibrary();
-  const [tab, setTab] = useState('playlists');
 
   const likedSongs = library?.likedSongs || [];
   const savedAlbums = library?.savedAlbums || [];
@@ -70,57 +68,36 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="container mx-auto space-y-8 p-4 md:p-6 lg:p-8">
-      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+    <div className="container mx-auto space-y-12 p-4 md:p-6 lg:p-8">
+      <div className="flex items-center justify-between">
         <SectionTitle className="mb-0">My Library</SectionTitle>
-        {tab === 'playlists' && (
-          <CreatePlaylistModal onPlaylistCreated={reloadLibrary} />
-        )}
+        <CreatePlaylistModal onPlaylistCreated={reloadLibrary} />
       </div>
 
-      <Tabs
-        defaultValue="playlists"
-        className="w-full"
-        onValueChange={(val) => setTab(val)}
-      >
-        <TabsList className="mb-6 grid w-full grid-cols-3 border border-border bg-card md:grid-cols-6">
-          <TabsTrigger value="playlists">Playlists</TabsTrigger>
-          <TabsTrigger value="liked">Liked Songs</TabsTrigger>
-          <TabsTrigger value="albums">Albums</TabsTrigger>
-          <TabsTrigger value="genres">Genres</TabsTrigger>
-          <TabsTrigger value="added">Recently Added</TabsTrigger>
-        </TabsList>
+      <section className="space-y-6">
+        <SectionTitle className="text-lg">Playlists</SectionTitle>
+        {renderGridSection(createdPlaylists, 'No playlists found.', <ListMusic size={48} />, 'playlist')}
+      </section>
 
-        <TabsContent value="playlists">
-          {renderGridSection(
-            createdPlaylists,
-            'No playlists found.',
-            <ListMusic size={48} />,
-            'playlist'
-          )}
-        </TabsContent>
+      <section className="space-y-6">
+        <SectionTitle className="text-lg">Liked Songs</SectionTitle>
+        {renderGridSection(likedSongs, 'No liked songs yet.', <Heart size={48} />, 'track')}
+      </section>
 
-        <TabsContent value="liked">
-          {renderGridSection(likedSongs, 'No liked songs yet.', <Heart size={48} />, 'track')}
-        </TabsContent>
+      <section className="space-y-6">
+        <SectionTitle className="text-lg">Albums</SectionTitle>
+        {renderGridSection(savedAlbums, 'No saved albums.', <DiscAlbum size={48} />, 'album')}
+      </section>
 
-        <TabsContent value="albums">
-          {renderGridSection(savedAlbums, 'No saved albums.', <DiscAlbum size={48} />, 'album')}
-        </TabsContent>
+      <section className="space-y-6">
+        <SectionTitle className="text-lg">Genres</SectionTitle>
+        {renderGridSection(genres, 'No genre playlists found.', <GanttChartSquare size={48} />, 'playlist')}
+      </section>
 
-        <TabsContent value="genres">
-          {renderGridSection(
-            genres,
-            'No genre playlists found.',
-            <GanttChartSquare size={48} />,
-            'playlist'
-          )}
-        </TabsContent>
-
-        <TabsContent value="added">
-          {renderGridSection(recentlyAdded, 'No recent activity.', <Music size={48} />, 'track')}
-        </TabsContent>
-      </Tabs>
+      <section className="space-y-6">
+        <SectionTitle className="text-lg">Recently Added</SectionTitle>
+        {renderGridSection(recentlyAdded, 'No recent activity.', <Music size={48} />, 'track')}
+      </section>
     </div>
   );
 }
