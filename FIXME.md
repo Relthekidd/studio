@@ -21,7 +21,7 @@ This file is auto-generated.
 
 ---
 ### `src/features/player/MiniPlayer.tsx`
-- [77:12] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [78:12] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 
 ---
 ### `src/features/player/QueueModal.tsx`

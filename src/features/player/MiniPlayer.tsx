@@ -29,7 +29,8 @@ export default function MiniPlayer() {
   return (
     <button
       type="button"
-      className="animate-slideInUpMini fixed inset-x-0 bottom-16 z-50 flex h-20 items-center border-t border-border/70 bg-card/80 px-4 shadow-2xl backdrop-blur-lg transition-transform duration-300 ease-in-out md:bottom-0 md:px-6"
+      className="animate-slideInUpMini fixed inset-x-0 z-50 flex h-20 items-center border-t border-border/70 bg-card/80 px-4 shadow-2xl backdrop-blur-lg transition-transform duration-300 ease-in-out md:bottom-4 md:px-6"
+      style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
       aria-label="Mini Music Player"
       onClick={() => toggleExpand()}
     >
