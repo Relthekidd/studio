@@ -22,9 +22,11 @@ export default function AdminUploadPage() {
   const { toast } = useToast();
 
   const [title, setTitle] = useState('');
-  const [artistsInput, setArtistsInput] = useState('');
+  const [mainArtistsInput, setMainArtistsInput] = useState('');
+  const [featuredArtistsInput, setFeaturedArtistsInput] = useState('');
   const [genre, setGenre] = useState('');
-  const [albumName, setAlbumName] = useState(''); // Add albumName state
+  const [albumName, setAlbumName] = useState('');
+  const [albumDescription, setAlbumDescription] = useState('');
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -40,7 +42,7 @@ export default function AdminUploadPage() {
   const handleUpload = async () => {
     if (
       !title ||
-      !artistsInput ||
+      !mainArtistsInput ||
       !audioFile ||
       !coverFile ||
       (type === 'album' && !albumName)
@@ -52,13 +54,21 @@ export default function AdminUploadPage() {
     setUploading(true);
     try {
       // Look up or create artists
-      const artistNames = artistsInput
+      const mainArtistNames = mainArtistsInput
         .split(',')
         .map((n) => n.trim())
         .filter(Boolean);
-      const artistsData: { id: string; name: string }[] = [];
+      const featuredArtistNames = featuredArtistsInput
+        .split(',')
+        .map((n) => n.trim())
+        .filter(Boolean);
 
-      for (const name of artistNames) {
+      const allNames = [...mainArtistNames, ...featuredArtistNames];
+      const artistsData: { id: string; name: string }[] = [];
+      const mainArtistIds: string[] = [];
+      const featuredArtistIds: string[] = [];
+
+      for (const name of allNames) {
         const artistQuery = await getDocs(
           query(collection(db, 'artists'), where('name', '==', name))
         );
@@ -72,6 +82,11 @@ export default function AdminUploadPage() {
           artistData = { id: docData.id, name: docData.data().name };
         }
         artistsData.push(artistData);
+        if (mainArtistNames.includes(name)) {
+          mainArtistIds.push(artistData.id);
+        } else {
+          featuredArtistIds.push(artistData.id);
+        }
       }
 
       // Upload cover and audio files
@@ -107,6 +122,7 @@ export default function AdminUploadPage() {
             artistIds: artistsData.map((a) => a.id),
             coverURL,
             genre,
+            description: albumDescription.trim(),
             createdAt: serverTimestamp(),
           });
         } else {
@@ -122,6 +138,8 @@ export default function AdminUploadPage() {
         title,
         artists: artistsData,
         artistIds: artistsData.map((a) => a.id),
+        mainArtistIds,
+        featuredArtistIds,
         albumId,
         genre,
         audioURL,
@@ -134,15 +152,18 @@ export default function AdminUploadPage() {
 
       if (type === 'album') {
         songData.albumName = albumName.trim();
+        songData.albumDescription = albumDescription.trim();
       }
 
       await setDoc(newDocRef, songData);
 
       toast({ title: 'Upload successful!' });
       setTitle('');
-      setArtistsInput('');
+      setMainArtistsInput('');
+      setFeaturedArtistsInput('');
       setGenre('');
-      setAlbumName(''); // Reset albumName
+      setAlbumName('');
+      setAlbumDescription('');
       setCoverFile(null);
       setAudioFile(null);
     } catch (err) {
@@ -179,7 +200,7 @@ export default function AdminUploadPage() {
             </select>
           </div>
 
-        {type === 'album' && ( // Show albumName field only if type is album
+        {type === 'album' && (
           <Input
             placeholder="Album Name"
             value={albumName}
@@ -189,11 +210,38 @@ export default function AdminUploadPage() {
 
         <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input
-          placeholder="Artists (comma separated)"
-          value={artistsInput}
-          onChange={(e) => setArtistsInput(e.target.value)}
+          placeholder="Main Artists (comma separated)"
+          value={mainArtistsInput}
+          onChange={(e) => setMainArtistsInput(e.target.value)}
         />
-        <Input placeholder="Genre" value={genre} onChange={(e) => setGenre(e.target.value)} />
+        <Input
+          placeholder="Featured Artists (comma separated)"
+          value={featuredArtistsInput}
+          onChange={(e) => setFeaturedArtistsInput(e.target.value)}
+        />
+        <div className="space-y-2">
+          <Label>Genre</Label>
+          <select
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+            className="w-full rounded border px-3 py-2"
+          >
+            <option value="">Select genre</option>
+            <option value="Pop">Pop</option>
+            <option value="Hip-Hop">Hip-Hop</option>
+            <option value="Rock">Rock</option>
+            <option value="Electronic">Electronic</option>
+            <option value="Country">Country</option>
+          </select>
+        </div>
+        {type === 'album' && (
+          <textarea
+            className="w-full rounded border p-2"
+            placeholder="Album Description"
+            value={albumDescription}
+            onChange={(e) => setAlbumDescription(e.target.value)}
+          />
+        )}
 
         <div className="space-y-2">
           <Label>Cover Image</Label>
