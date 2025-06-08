@@ -22,7 +22,7 @@ export default function GenrePage() {
 
   useEffect(() => {
     const fetchGenreTracks = async () => {
-      const q = query(collection(db, 'tracks'), where('genre', '==', genre));
+      const q = query(collection(db, 'songs'), where('genre', '==', genre));
       const snap = await getDocs(q);
       setTracks(snap.docs.map((doc) => doc.data() as Track));
     };

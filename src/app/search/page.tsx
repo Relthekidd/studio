@@ -42,7 +42,9 @@ export default function SearchPage() {
       const results = await searchLibrary(searchTerm);
 
       setSearchResults({
-        songs: results.songs.map((song: Song) => normalizeTrack(song)),
+        songs: results.songs.map((song: Song) =>
+          normalizeTrack(song, (song as any).artists || [])
+        ),
         albums: results.albums,
         artists: results.artists,
         users: results.users,

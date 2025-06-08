@@ -9,14 +9,10 @@ import {
   query,
   where,
   getDocs,
-  setDoc,
-  serverTimestamp,
 } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { usePlayerStore } from '@/features/player/store';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import type { Track } from '@/types/music';
 import { normalizeTrack } from '@/utils/normalizeTrack';
 import TrackListItem from '@/components/music/TrackListItem';
@@ -42,8 +38,6 @@ export default function AlbumPage() {
   const setCurrentTrack = usePlayerStore((s) => s.setCurrentTrack);
   const setIsPlaying = usePlayerStore((s) => s.setIsPlaying);
   const setQueue = usePlayerStore((s) => s.setQueue);
-  const addTracksToQueue = usePlayerStore((s) => s.addTracksToQueue);
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchAlbum = async () => {
@@ -60,7 +54,7 @@ export default function AlbumPage() {
     };
 
     const fetchTracks = async () => {
-      const q = query(collection(db, 'tracks'), where('albumId', '==', String(albumId)));
+      const q = query(collection(db, 'songs'), where('albumId', '==', String(albumId)));
       const trackSnap = await getDocs(q);
 
       // Fetch artist details
@@ -81,26 +75,17 @@ export default function AlbumPage() {
     fetchTracks();
   }, [albumId]);
 
-  const handlePlay = (track: Track) => {
-    setQueue(tracks);
+  const handlePlayTrack = (track: Track) => {
     setCurrentTrack(track);
     setIsPlaying(true);
   };
 
-  const handleAddAlbumToQueue = () => {
-    addTracksToQueue(tracks);
-    toast({ title: 'Added album to queue' });
+  const handlePlayAlbum = () => {
+    if (tracks.length === 0) return;
+    setQueue(tracks);
+    setIsPlaying(true);
   };
 
-  const handleAddToLibrary = async () => {
-    const user = getAuth().currentUser;
-    if (!user || !album) return;
-    await setDoc(doc(db, 'users', user.uid, 'savedAlbums', album.id), {
-      albumId: album.id,
-      addedAt: serverTimestamp(),
-    });
-    toast({ title: 'Saved to library' });
-  };
 
   if (!album) return <div>Loading album...</div>;
 
@@ -119,12 +104,9 @@ export default function AlbumPage() {
         <div>
           <h1 className="text-4xl font-bold">{album.title}</h1>
           {album.description && <p className="text-muted-foreground">{album.description}</p>}
-          <div className="mt-4 flex justify-center gap-2">
-            <Button onClick={handleAddAlbumToQueue} size="sm">
-              Add to Queue
-            </Button>
-            <Button onClick={handleAddToLibrary} size="sm" variant="secondary">
-              Add to Library
+          <div className="mt-4">
+            <Button onClick={handlePlayAlbum} size="sm">
+              Play Album
             </Button>
           </div>
         </div>
@@ -135,7 +117,7 @@ export default function AlbumPage() {
           <TrackListItem
             key={track.id}
             track={track}
-            onPlay={handlePlay}
+            onPlay={handlePlayTrack}
             coverURL={album.coverURL}
           />
         ))}
