@@ -16,3 +16,7 @@ This file is auto-generated.
 - [27:23] Classname 'destructive' is not a Tailwind CSS class! – `tailwindcss/no-custom-classname`
 
 ---
+### `src/features/player/QueueModal.tsx`
+- [71:20] Classnames 'h-12, w-12' could be replaced by the 'size-12' shorthand! – `tailwindcss/enforces-shorthand`
+
+---
