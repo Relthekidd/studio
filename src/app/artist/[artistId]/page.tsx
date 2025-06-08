@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  getDoc,
+} from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
 import SectionTitle from '@/components/SectionTitle';
@@ -59,8 +66,7 @@ export default function ArtistPage() {
 
     const singleQuery = query(
       collection(db, 'songs'),
-      where('artistIds', 'array-contains', decodedId),
-      where('type', '==', 'single')
+      where('artistIds', 'array-contains', decodedId)
     );
     const unsubSingles = onSnapshot(singleQuery, (snap) => {
       setSingles(
@@ -112,9 +118,7 @@ export default function ArtistPage() {
 
     return () => {
       unsubArtist();
-      unsubAlbums();
-      unsubSingles();
-      unsubFeatured();
+      unsubSongs();
       unsubTop();
       unsubFollowers();
     };
