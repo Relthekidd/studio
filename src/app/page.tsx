@@ -21,19 +21,21 @@ export default function Home() {
         const q = query(songsRef, orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
 
-        const tracks: Track[] = snapshot.docs.map((doc) => {
-          const data = doc.data();
+        const tracks: Track[] = snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
 
-          return {
-            id: doc.id,
-            title: data.title,
-            artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
-            audioURL: data.audioURL,
-            coverURL: data.coverURL,
-            duration: data.duration || 0,
-            type: 'track',
-          };
-        });
+            return {
+              id: doc.id,
+              title: data.title,
+              artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
+              audioURL: data.audioURL,
+              coverURL: data.coverURL,
+              duration: data.duration || 0,
+              type: data.type || 'track',
+            };
+          })
+          .filter((t) => t.type !== 'album');
 
         setRecentSongs(tracks.slice(0, 10));
         setTrendingSongs(tracks.slice(0, 5));

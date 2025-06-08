@@ -3,7 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { collection, serverTimestamp, doc, setDoc, query, where, getDocs, arrayUnion } from 'firebase/firestore';
+import {
+  collection,
+  serverTimestamp,
+  doc,
+  setDoc,
+  query,
+  where,
+  getDocs,
+  arrayUnion,
+} from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthProvider';
@@ -71,44 +80,52 @@ export default function AdminUploadPage() {
 
     setUploading(true);
     try {
-      // Parse artist names
-      const mainArtistNames = mainArtistsInput
-        .split(',')
-        .map((n) => n.trim())
-        .filter(Boolean);
-      const featuredArtistNames = featuredArtistsInput
-        .split(',')
-        .map((n) => n.trim())
-        .filter(Boolean);
+      // Helper map to avoid duplicate queries for the same artist name
+      const artistCache = new Map<string, { id: string; name: string }>();
 
-      const allNames = [...mainArtistNames, ...featuredArtistNames];
-      const artistsData: { id: string; name: string }[] = [];
-      const mainArtistIds: string[] = [];
-      const featuredArtistIds: string[] = [];
+      // Parse album level artist names
+      const parseNames = (input: string) =>
+        input
+          .split(',')
+          .map((n) => n.trim())
+          .filter(Boolean);
 
-      // Check for existing artists or create new ones
-      for (const name of allNames) {
-        const artistQuery = await getDocs(
-          query(collection(db, 'artists'), where('name', '==', name))
-        );
-        let artistData;
-        if (artistQuery.empty) {
-          // Create new artist if not found
-          const newArtistRef = doc(collection(db, 'artists'));
-          artistData = { id: newArtistRef.id, name };
-          await setDoc(newArtistRef, { ...artistData, createdAt: serverTimestamp() });
-        } else {
-          // Use existing artist
-          const docData = artistQuery.docs[0];
-          artistData = { id: docData.id, name: docData.data().name };
-        }
-        artistsData.push(artistData);
-        if (mainArtistNames.includes(name)) {
-          mainArtistIds.push(artistData.id);
-        } else {
-          featuredArtistIds.push(artistData.id);
-        }
+      const albumMainNames = parseNames(mainArtistsInput);
+      const albumFeaturedNames = parseNames(featuredArtistsInput);
+
+      // Collect all artist names from the album and individual tracks
+      const collectNames = new Set<string>([...albumMainNames, ...albumFeaturedNames]);
+      for (const song of songs) {
+        parseNames(song.mainArtists).forEach((n) => collectNames.add(n));
+        parseNames(song.featuredArtists).forEach((n) => collectNames.add(n));
       }
+
+      // Ensure all artists exist and store in cache
+      const ensureArtist = async (name: string) => {
+        if (artistCache.has(name)) return artistCache.get(name)!;
+        const q = await getDocs(query(collection(db, 'artists'), where('name', '==', name)));
+        let data;
+        if (q.empty) {
+          const newRef = doc(collection(db, 'artists'));
+          data = { id: newRef.id, name };
+          await setDoc(newRef, { ...data, createdAt: serverTimestamp() });
+        } else {
+          const d = q.docs[0];
+          data = { id: d.id, name: d.data().name };
+        }
+        artistCache.set(name, data);
+        return data;
+      };
+
+      // Preload artists for the entire album
+      for (const name of collectNames) {
+        await ensureArtist(name);
+      }
+
+      const albumArtistIds = new Set<string>();
+      artistCache.forEach((value) => {
+        albumArtistIds.add(value.id);
+      });
 
       // Upload cover file
       const coverRef = ref(storage, `covers/${Date.now()}-${coverFile.name}`);
@@ -127,7 +144,7 @@ export default function AdminUploadPage() {
           await setDoc(newAlbumRef, {
             id: albumId,
             title: albumName.trim(),
-            artistIds: artistsData.map((a) => a.id),
+            artistIds: Array.from(albumArtistIds),
             coverURL,
             genre,
             description: albumDescription.trim(),
@@ -155,13 +172,30 @@ export default function AdminUploadPage() {
 
         const newDocRef = doc(collection(db, 'songs'));
 
+        const songMainNames = song.mainArtists ? parseNames(song.mainArtists) : albumMainNames;
+        const songFeaturedNames = song.featuredArtists
+          ? parseNames(song.featuredArtists)
+          : albumFeaturedNames;
+
+        const songArtists: { id: string; name: string }[] = [];
+        const mainIdsForSong: string[] = [];
+        const featuredIdsForSong: string[] = [];
+        const allSongNames = new Set<string>([...songMainNames, ...songFeaturedNames]);
+        for (const n of allSongNames) {
+          const data = await ensureArtist(n);
+          songArtists.push(data);
+          if (songMainNames.includes(n)) mainIdsForSong.push(data.id);
+          else featuredIdsForSong.push(data.id);
+          albumArtistIds.add(data.id);
+        }
+
         const songData: Record<string, any> = {
           id: newDocRef.id,
           title: song.title,
-          artists: artistsData,
-          artistIds: artistsData.map((a) => a.id),
-          mainArtistIds,
-          featuredArtistIds,
+          artists: songArtists,
+          artistIds: songArtists.map((a) => a.id),
+          mainArtistIds: mainIdsForSong,
+          featuredArtistIds: featuredIdsForSong,
           albumId,
           genre,
           audioURL,
@@ -181,13 +215,9 @@ export default function AdminUploadPage() {
         await setDoc(newDocRef, songData);
 
         // Update artist pages with the new song
-        for (const artistId of mainArtistIds) {
+        for (const artistId of [...mainIdsForSong, ...featuredIdsForSong]) {
           const artistRef = doc(db, 'artists', artistId);
-          await setDoc(
-            artistRef,
-            { songs: arrayUnion(newDocRef.id) },
-            { merge: true }
-          );
+          await setDoc(artistRef, { songs: arrayUnion(newDocRef.id) }, { merge: true });
         }
       }
 
@@ -307,61 +337,61 @@ export default function AdminUploadPage() {
               }
               className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
             />
-          {songs.length > 0 && (
-            <ul className="space-y-4">
-              {songs.map((song, index) => (
-                <li key={index} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span>Track {index + 1}: {song.file.name}</span>
-                    <div className="flex gap-2">
-                      {index > 0 && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleReorder(index, index - 1)}
-                        >
-                          ↑
-                        </Button>
-                      )}
-                      {index < songs.length - 1 && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleReorder(index, index + 1)}
-                        >
-                          ↓
-                        </Button>
-                      )}
+            {songs.length > 0 && (
+              <ul className="space-y-4">
+                {songs.map((song, index) => (
+                  <li key={index} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span>
+                        Track {index + 1}: {song.file.name}
+                      </span>
+                      <div className="flex gap-2">
+                        {index > 0 && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleReorder(index, index - 1)}
+                          >
+                            ↑
+                          </Button>
+                        )}
+                        {index < songs.length - 1 && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleReorder(index, index + 1)}
+                          >
+                            ↓
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <Input
-                    placeholder="Song Title"
-                    value={song.title}
-                    onChange={(e) =>
-                      handleSongMetadataChange(index, 'title', e.target.value)
-                    }
-                    className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-                  />
-                  <Input
-                    placeholder="Main Artists (comma separated)"
-                    value={song.mainArtists}
-                    onChange={(e) =>
-                      handleSongMetadataChange(index, 'mainArtists', e.target.value)
-                    }
-                    className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-                  />
-                  <Input
-                    placeholder="Featured Artists (comma separated)"
-                    value={song.featuredArtists}
-                    onChange={(e) =>
-                      handleSongMetadataChange(index, 'featuredArtists', e.target.value)
-                    }
-                    className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
+                    <Input
+                      placeholder="Song Title"
+                      value={song.title}
+                      onChange={(e) => handleSongMetadataChange(index, 'title', e.target.value)}
+                      className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                    />
+                    <Input
+                      placeholder="Main Artists (comma separated)"
+                      value={song.mainArtists}
+                      onChange={(e) =>
+                        handleSongMetadataChange(index, 'mainArtists', e.target.value)
+                      }
+                      className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                    />
+                    <Input
+                      placeholder="Featured Artists (comma separated)"
+                      value={song.featuredArtists}
+                      onChange={(e) =>
+                        handleSongMetadataChange(index, 'featuredArtists', e.target.value)
+                      }
+                      className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <Button disabled={uploading} onClick={handleUpload} className="w-full">

@@ -24,7 +24,11 @@ export default function GenrePage() {
     const fetchGenreTracks = async () => {
       const q = query(collection(db, 'songs'), where('genre', '==', genre));
       const snap = await getDocs(q);
-      setTracks(snap.docs.map((doc) => doc.data() as Track));
+      setTracks(
+        snap.docs
+          .map((doc) => ({ ...(doc.data() as Track), id: doc.id }))
+          .filter((t) => (t as any).type !== 'album')
+      );
     };
     fetchGenreTracks();
   }, [genre]);

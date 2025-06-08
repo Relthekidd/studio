@@ -46,56 +46,59 @@ export default function ArtistPage() {
       if (!snap.empty) setArtistProfile(snap.docs[0].data());
     });
 
-    const songsQuery = query(collection(db, 'songs'), where('artistIds', 'array-contains', decodedId));
-    const unsubSongs = onSnapshot(songsQuery, async (snap) => {
-      const singleList: Track[] = [];
-      const featureList: Track[] = [];
-      const albumIds = new Set<string>();
+    const albumQuery = query(
+      collection(db, 'albums'),
+      where('artistIds', 'array-contains', decodedId)
+    );
+    const unsubAlbums = onSnapshot(albumQuery, (snap) => {
+      setAlbums(
+        snap.docs.map((doc) => ({
+          id: doc.id,
+          title: doc.data().title || 'Untitled',
+          artists: doc.data().artists || [{ id: '', name: 'Unknown Artist' }],
+          genre: doc.data().genre || '',
+          type: 'album' as const,
+          audioURL: '',
+          coverURL: doc.data().coverURL || '',
+        }))
+      );
+    });
 
-      snap.docs.forEach((docSnap) => {
-        const data = docSnap.data();
-        const track: Track = {
-          id: docSnap.id,
-          title: data.title || 'Untitled',
-          artists: data.artists || [{ id: '', name: data.artist || decodedId }],
-          type: 'track',
-          audioURL: data.audioURL || data.audioSrc || '',
-          coverURL: data.coverURL || data.imageUrl || '',
-        };
+    const singleQuery = query(
+      collection(db, 'songs'),
+      where('artistIds', 'array-contains', decodedId)
+    );
+    const unsubSingles = onSnapshot(singleQuery, (snap) => {
+      setSingles(
+        snap.docs.map((doc) => ({
+          id: doc.id,
+          title: doc.data().title || 'Untitled',
+          artists: doc.data().artists || [{ id: '', name: doc.data().artist || decodedId }],
+          genre: doc.data().genre || '',
+          type: 'track' as const,
+          audioURL: doc.data().audioURL || doc.data().audioSrc || '',
+          coverURL: doc.data().coverURL || doc.data().imageUrl || '',
+        }))
+      );
+    });
 
-        const mainIds: string[] = data.mainArtistIds || [track.artists[0]?.id];
-        const isMain = mainIds.includes(decodedId);
-
-        if (data.albumId) {
-          albumIds.add(data.albumId);
-          if (!isMain) featureList.push(track);
-        } else if (isMain) {
-          singleList.push(track);
-        } else {
-          featureList.push(track);
-        }
-      });
-
-      const albumPromises = Array.from(albumIds).map(async (id) => {
-        const aSnap = await getDoc(doc(db, 'albums', id));
-        if (aSnap.exists()) {
-          const aData = aSnap.data();
+    const featuredQuery = query(collection(db, 'songs'), where('artistIds', 'array-contains', decodedId));
+    const unsubFeatured = onSnapshot(featuredQuery, (snap) => {
+      const filtered = snap.docs
+        .map((doc) => {
+          const data = doc.data();
           return {
-            id: aSnap.id,
-            title: aData.title || 'Untitled',
-            artists: aData.artists || [{ id: '', name: 'Unknown Artist' }],
-            type: 'album' as const,
-            audioURL: '',
-            coverURL: aData.coverURL || '',
-          } as Track;
-        }
-        return null;
-      });
-      const albumResults = (await Promise.all(albumPromises)).filter(Boolean) as Track[];
-
-      setAlbums(albumResults);
-      setSingles(singleList);
-      setFeaturedTracks(featureList);
+            id: doc.id,
+            title: data.title || 'Untitled',
+            artists: data.artists || [{ id: '', name: 'Unknown Artist' }],
+            genre: data.genre || '',
+            type: 'track' as const,
+            audioURL: data.audioURL || data.audioSrc || '',
+            coverURL: data.coverURL || data.imageUrl || '',
+          };
+        })
+        .filter((track) => !(track.artists[0]?.id === decodedId || track.artists[0]?.name === decodedId));
+      setFeaturedTracks(filtered);
     });
 
     const topQuery = query(collection(db, 'songs'), where('artistIds', 'array-contains', decodedId));
