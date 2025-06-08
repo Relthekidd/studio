@@ -39,13 +39,16 @@ export default function ArtistPage() {
       if (!snap.empty) setArtistProfile(snap.docs[0].data());
     });
 
-    const albumQuery = query(collection(db, 'albums'), where('artist', '==', decodedId));
+    const albumQuery = query(
+      collection(db, 'albums'),
+      where('artistIds', 'array-contains', decodedId)
+    );
     const unsubAlbums = onSnapshot(albumQuery, (snap) => {
       setAlbums(
         snap.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title || 'Untitled',
-          artists: doc.data().artists || [{ id: '', name: doc.data().artist || decodedId }],
+          artists: doc.data().artists || [{ id: '', name: 'Unknown Artist' }],
           genre: doc.data().genre || '',
           type: 'album' as const,
           audioURL: '',
@@ -54,7 +57,10 @@ export default function ArtistPage() {
       );
     });
 
-    const singleQuery = query(collection(db, 'tracks'), where('artist', '==', decodedId));
+    const singleQuery = query(
+      collection(db, 'songs'),
+      where('artistIds', 'array-contains', decodedId)
+    );
     const unsubSingles = onSnapshot(singleQuery, (snap) => {
       setSingles(
         snap.docs.map((doc) => ({
@@ -69,7 +75,7 @@ export default function ArtistPage() {
       );
     });
 
-    const featuredQuery = query(collection(db, 'tracks'), where('artists', 'array-contains', decodedId));
+    const featuredQuery = query(collection(db, 'songs'), where('artistIds', 'array-contains', decodedId));
     const unsubFeatured = onSnapshot(featuredQuery, (snap) => {
       const filtered = snap.docs
         .map((doc) => {
@@ -77,7 +83,7 @@ export default function ArtistPage() {
           return {
             id: doc.id,
             title: data.title || 'Untitled',
-            artists: data.artists || [{ id: '', name: data.artist || '' }],
+            artists: data.artists || [{ id: '', name: 'Unknown Artist' }],
             genre: data.genre || '',
             type: 'track' as const,
             audioURL: data.audioURL || data.audioSrc || '',
