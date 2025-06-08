@@ -36,7 +36,9 @@ export async function searchLibrary(term: string): Promise<SearchResults> {
       getDocs(query(collection(db, 'profiles'), where('isProfilePublic', '==', true))),
     ]);
 
-    const songs = songsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Song[];
+    const songs = songsSnap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .filter((s: any) => s.type === 'single' || !s.type) as Song[];
     const albums = albumsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Album[];
     const artists = artistsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Artist[];
     const users = usersSnap.docs

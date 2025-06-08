@@ -17,18 +17,20 @@ export default function DiscoverPage() {
       const q = query(tracksRef, orderBy('createdAt', 'desc'), limit(20));
       const snapshot = await getDocs(q);
 
-      const fetchedTracks: Track[] = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          title: data.title,
-          artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
-          audioURL: data.audioURL,
-          coverURL: data.coverURL,
-          duration: data.duration,
-          type: 'track',
-        };
-      });
+      const fetchedTracks: Track[] = snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title,
+            artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
+            audioURL: data.audioURL,
+            coverURL: data.coverURL,
+            duration: data.duration,
+            type: data.type || 'track',
+          };
+        })
+        .filter((t) => t.type !== 'album');
 
       setTracks(fetchedTracks);
     }
