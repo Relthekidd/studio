@@ -59,7 +59,8 @@ export default function ArtistPage() {
 
     const singleQuery = query(
       collection(db, 'songs'),
-      where('artistIds', 'array-contains', decodedId)
+      where('artistIds', 'array-contains', decodedId),
+      where('type', '==', 'single')
     );
     const unsubSingles = onSnapshot(singleQuery, (snap) => {
       setSingles(
