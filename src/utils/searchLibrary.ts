@@ -45,6 +45,23 @@ export async function searchLibrary(term: string): Promise<SearchResults> {
       .map((d) => ({ id: d.id, ...d.data() }))
       .filter((u: any) => u.isProfilePublic !== false) as UserResult[];
 
+    const artistMap = new Map(artists.map((a) => [a.id, a.name]));
+
+    const attachArtists = (ids: string[] | undefined) =>
+      (ids || []).map((id) => ({ id, name: artistMap.get(id) || 'Unknown Artist' }));
+
+    songs.forEach((s: any) => {
+      if (!s.artists || s.artists.length === 0) {
+        s.artists = attachArtists(s.artistIds);
+      }
+    });
+
+    albums.forEach((a: any) => {
+      if (!a.artists || a.artists.length === 0) {
+        a.artists = attachArtists(a.artistIds);
+      }
+    });
+
     const filteredSongs = songs.filter((s) => {
       const title = (s as any).title || '';
       const artist =
@@ -67,9 +84,7 @@ export async function searchLibrary(term: string): Promise<SearchResults> {
     });
 
     const filteredArtists = artists.filter((a) => (a.name || '').toLowerCase().includes(search));
-    const filteredUsers = users.filter((u) =>
-      (u.displayName || '').toLowerCase().includes(search),
-    );
+    const filteredUsers = users.filter((u) => (u.displayName || '').toLowerCase().includes(search));
     return {
       songs: filteredSongs,
       albums: filteredAlbums,

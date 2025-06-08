@@ -12,10 +12,26 @@ export function normalizeTrack(
     (data.artistIds || []).includes(artist.id)
   );
 
+  // Fallback to artists stored on the document when artistIds are missing
+  let artists = matchingArtists;
+  if (artists.length === 0) {
+    if (Array.isArray(data.artists) && data.artists.length > 0) {
+      artists = data.artists.map((a: any) =>
+        typeof a === 'object' ? { id: a.id || '', name: a.name || '' } : { id: '', name: a }
+      );
+    } else if (data.artist) {
+      artists = [
+        typeof data.artist === 'object'
+          ? { id: data.artist.id || '', name: data.artist.name || '' }
+          : { id: '', name: data.artist },
+      ];
+    }
+  }
+
   return {
-    id: doc.id || '',
+    id: data.id || doc.id || '',
     title: data.title || 'Untitled',
-    artists: matchingArtists.length > 0 ? matchingArtists : [{ id: '', name: 'Unknown Artist' }],
+    artists: artists.length > 0 ? artists : [{ id: '', name: 'Unknown Artist' }],
 
     audioURL: data.audioURL || '',
     coverURL: data.coverURL || DEFAULT_COVER_URL,
