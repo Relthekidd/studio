@@ -30,12 +30,18 @@ export default function MiniPlayer() {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <button
-      type="button"
+    <div
       className="animate-slideInUpMini fixed inset-x-0 z-50 flex h-20 items-center border-t border-border/70 bg-card/80 px-4 shadow-2xl backdrop-blur-lg transition-transform duration-300 ease-in-out md:bottom-4 md:px-6"
       style={{ bottom: `calc(4rem + env(safe-area-inset-bottom))` }}
+      role="button"
+      tabIndex={0}
       aria-label="Mini Music Player"
       onClick={() => toggleExpand()}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          toggleExpand();
+        }
+      }}
     >
       {/* Cover Image */}
       <div
@@ -44,8 +50,9 @@ export default function MiniPlayer() {
         <Image
           src={currentTrack.coverURL || DEFAULT_COVER_URL}
           alt={currentTrack.title || 'Unknown Track'}
-          layout="fill" // Ensure the image fills the container
-          objectFit="cover" // Ensure the image is cropped properly
+          fill // Use `fill` for the image
+          style={{ objectFit: 'cover' }} // Replace `objectFit` with inline style
+          priority // Add priority for LCP optimization
           unoptimized
         />
       </div>
@@ -79,6 +86,6 @@ export default function MiniPlayer() {
           className="h-full [&>div]:bg-gradient-to-r [&>div]:from-accent/70 [&>div]:to-primary/70"
         />
       </div>
-    </button>
+    </div>
   );
 }

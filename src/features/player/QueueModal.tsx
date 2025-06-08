@@ -31,21 +31,34 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onClose(); // Only close the modal without affecting playback
+        }
+      }}
+    >
       <SheetContent
         side="bottom"
         className="max-h-[80vh] overflow-y-auto rounded-t-lg bg-card p-4 shadow-lg"
+        aria-describedby="queue-description"
       >
         <SheetHeader>
           <SheetTitle className="text-lg font-bold">Up Next</SheetTitle>
+          <p id="queue-description" className="text-sm text-muted-foreground">
+            View and manage the tracks in your playback queue.
+          </p>
         </SheetHeader>
         <div className="flex flex-col gap-2">
           {queue.map((track, index) => (
-            <button
-              key={track.id}
-              className={`flex items-center gap-3 rounded-md p-2 text-left ${
+            <div
+              key={`${track.id}-${index}`} // Use a combination of track.id and index for a unique key
+              className={`flex cursor-pointer items-center gap-3 rounded-md p-2 text-left ${
                 index === queueIndex ? 'bg-primary/10 font-semibold text-primary' : ''
               }`}
+              role="button"
+              tabIndex={0}
               onClick={() => handleTrackClick(track, index)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -55,12 +68,12 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
               aria-label={`Play ${track.title}`}
             >
               {/* Thumbnail */}
-              <div className="relative size-12 overflow-hidden rounded-md shadow-md">
+              <div className="relative h-12 w-12 overflow-hidden rounded-md shadow-md">
                 <Image
                   src={track.coverURL || DEFAULT_COVER_URL}
                   alt={track.title || 'Unknown Track'}
                   fill
-                  className="object-cover"
+                  style={{ objectFit: 'cover' }} // Ensure the image fills the container
                   unoptimized
                 />
               </div>
@@ -86,7 +99,7 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
                   <X size={16} />
                 </button>
               )}
-            </button>
+            </div>
           ))}
         </div>
       </SheetContent>
