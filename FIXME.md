@@ -3,11 +3,6 @@
 This file is auto-generated.
 
 ---
-### `src/app/artist/[artistId]/page.tsx`
-- [10:3] 'doc' is defined but never used. – `@typescript-eslint/no-unused-vars`
-- [11:3] 'getDoc' is defined but never used. – `@typescript-eslint/no-unused-vars`
-
----
 ### `src/components/music/QueueModal.tsx`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
