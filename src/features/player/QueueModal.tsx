@@ -68,7 +68,7 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
               aria-label={`Play ${track.title}`}
             >
               {/* Thumbnail */}
-              <div className="relative h-12 w-12 overflow-hidden rounded-md shadow-md">
+              <div className="relative size-12 overflow-hidden rounded-md shadow-md">
                 <Image
                   src={track.coverURL || DEFAULT_COVER_URL}
                   alt={track.title || 'Unknown Track'}

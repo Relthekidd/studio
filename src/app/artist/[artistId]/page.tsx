@@ -130,7 +130,7 @@ export default function ArtistPage() {
       unsubTop();
       unsubFollowers();
     };
-  }, [artistId, decodedId, user]);
+  }, [artistId, artistProfile?.name, decodedId, user]);
 
   const handleFollow = async () => {
     if (!user) return;
