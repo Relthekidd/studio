@@ -1,7 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+} from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Track } from '@/types/music';
 import Section from '@/components/section';
@@ -18,10 +23,14 @@ export default function Home() {
     async function fetchSongs() {
       try {
         const songsRef = collection(db, 'songs');
-        const q = query(songsRef, orderBy('createdAt', 'desc'));
-        const snapshot = await getDocs(q);
+        const albumsRef = collection(db, 'albums');
 
-        const tracks: Track[] = snapshot.docs
+        const [songsSnap, albumsSnap] = await Promise.all([
+          getDocs(query(songsRef, orderBy('createdAt', 'desc'))),
+          getDocs(query(albumsRef, orderBy('createdAt', 'desc'))),
+        ]);
+
+        const singles: Track[] = songsSnap.docs
           .map((doc) => {
             const data = doc.data();
 
@@ -37,8 +46,23 @@ export default function Home() {
           })
           .filter((t) => t.type !== 'album');
 
-        setRecentSongs(tracks.slice(0, 10));
-        setTrendingSongs(tracks.slice(0, 5));
+        const albums: Track[] = albumsSnap.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title,
+            artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
+            audioURL: '',
+            coverURL: data.coverURL,
+            duration: 0,
+            type: 'album',
+          };
+        });
+
+        const combined = [...singles, ...albums];
+
+        setRecentSongs(combined.slice(0, 10));
+        setTrendingSongs(combined.slice(0, 5));
       } catch (error) {
         console.error('[Home] Error fetching songs:', error);
       } finally {

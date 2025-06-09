@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+} from 'firebase/firestore';
 
 import { AlbumCard } from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
@@ -13,11 +19,15 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     async function fetchTracks() {
-      const tracksRef = collection(db, 'songs');
-      const q = query(tracksRef, orderBy('createdAt', 'desc'), limit(20));
-      const snapshot = await getDocs(q);
+      const songsRef = collection(db, 'songs');
+      const albumsRef = collection(db, 'albums');
 
-      const fetchedTracks: Track[] = snapshot.docs
+      const [songsSnap, albumsSnap] = await Promise.all([
+        getDocs(query(songsRef, orderBy('createdAt', 'desc'), limit(20))),
+        getDocs(query(albumsRef, orderBy('createdAt', 'desc'), limit(20))),
+      ]);
+
+      const singles: Track[] = songsSnap.docs
         .map((doc) => {
           const data = doc.data();
           return {
@@ -32,7 +42,20 @@ export default function DiscoverPage() {
         })
         .filter((t) => t.type !== 'album');
 
-      setTracks(fetchedTracks);
+      const albums: Track[] = albumsSnap.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.title,
+          artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
+          audioURL: '',
+          coverURL: data.coverURL,
+          duration: 0,
+          type: 'album',
+        };
+      });
+
+      setTracks([...singles, ...albums]);
     }
 
     fetchTracks();
