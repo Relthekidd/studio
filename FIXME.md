@@ -7,8 +7,9 @@ This file is auto-generated.
 - [10:3] 'doc' is defined but never used. – `@typescript-eslint/no-unused-vars`
 - [11:3] 'getDoc' is defined but never used. – `@typescript-eslint/no-unused-vars`
 - [53:11] 'unsubAlbums' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
-- [71:11] 'unsubSingles' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
-- [86:11] 'unsubFeatured' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+- [79:11] 'unsubSingles' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+- [94:11] 'unsubFeatured' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+- [133:6] React Hook useEffect has a missing dependency: 'artistProfile?.name'. Either include it or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setAlbums' needs the current value of 'artistProfile.name'. – `react-hooks/exhaustive-deps`
 
 ---
 ### `src/components/music/QueueModal.tsx`
