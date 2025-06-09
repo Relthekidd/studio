@@ -53,7 +53,15 @@ export default function ArtistPage() {
         snap.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title || 'Untitled',
-          artists: doc.data().artists || [{ id: '', name: 'Unknown Artist' }],
+          artists:
+            doc.data().artists && doc.data().artists.length > 0
+              ? doc.data().artists
+              : [
+                  {
+                    id: decodedId,
+                    name: artistProfile?.name || 'Unknown Artist',
+                  },
+                ],
           genre: doc.data().genre || '',
           type: 'album' as const,
           audioURL: '',

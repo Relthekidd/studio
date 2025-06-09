@@ -3,6 +3,7 @@
 This file is auto-generated.
 
 ---
+
 ### `src/components/music/QueueModal.tsx`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
