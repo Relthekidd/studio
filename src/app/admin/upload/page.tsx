@@ -170,7 +170,10 @@ export default function AdminUploadPage() {
           });
         });
 
-        const newDocRef = doc(collection(db, 'songs'));
+        const newDocRef =
+          type === 'album'
+            ? doc(collection(db, 'albums', albumId, 'songs'))
+            : doc(collection(db, 'songs'));
 
         const songMainNames = song.mainArtists ? parseNames(song.mainArtists) : albumMainNames;
         const songFeaturedNames = song.featuredArtists
