@@ -111,7 +111,12 @@ export default function SearchPage() {
                     id: album.id,
                     type: 'album',
                     title: (album as any).title || '',
-                    artists: (album as any).artist ? [{ id: '', name: (album as any).artist }] : [],
+                    artists:
+                      (album as any).artists && (album as any).artists.length > 0
+                        ? (album as any).artists
+                        : (album as any).artist
+                          ? [{ id: '', name: (album as any).artist }]
+                          : [],
                     audioURL: '',
                     coverURL: (album as any).coverURL || '',
                     album: (album as any).title || '',
