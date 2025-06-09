@@ -118,7 +118,9 @@ export default function ArtistPage() {
 
     return () => {
       unsubArtist();
-      unsubSongs();
+      unsubAlbums();
+      unsubSingles();
+      unsubFeatured();
       unsubTop();
       unsubFollowers();
     };
