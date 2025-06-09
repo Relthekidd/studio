@@ -11,7 +11,6 @@ import {
   query,
   where,
   getDocs,
-  arrayUnion,
 } from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
@@ -30,17 +29,17 @@ export default function AdminUploadPage() {
   const { user, isAdmin, loading } = useAuth();
   const { toast } = useToast();
 
+  const [type, setType] = useState<'single' | 'album'>('single');
   const [albumName, setAlbumName] = useState('');
-  const [mainArtistsInput, setMainArtistsInput] = useState('');
-  const [featuredArtistsInput, setFeaturedArtistsInput] = useState('');
+  const [mainArtist, setMainArtist] = useState('');
+  const [featuredArtists, setFeaturedArtists] = useState('');
   const [genre, setGenre] = useState('');
-  const [albumDescription, setAlbumDescription] = useState('');
+  const [description, setDescription] = useState('');
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [songs, setSongs] = useState<
-    { file: File; title: string; mainArtists: string; featuredArtists: string }[]
+    { file: File; title: string; mainArtist: string; featuredArtists: string }[]
   >([]);
   const [uploading, setUploading] = useState(false);
-  const [type, setType] = useState<'single' | 'album'>('single');
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -58,7 +57,7 @@ export default function AdminUploadPage() {
 
   const handleSongMetadataChange = (
     index: number,
-    field: 'title' | 'mainArtists' | 'featuredArtists',
+    field: 'title' | 'mainArtist' | 'featuredArtists',
     value: string
   ) => {
     const updatedSongs = [...songs];
@@ -68,10 +67,9 @@ export default function AdminUploadPage() {
 
   const handleUpload = async () => {
     if (
-      !albumName ||
-      !mainArtistsInput ||
+      !mainArtist ||
       !coverFile ||
-      (type === 'album' && songs.length === 0) ||
+      (type === 'album' && (!albumName || songs.length === 0)) ||
       (type === 'single' && songs.length !== 1)
     ) {
       toast({ title: 'Missing Fields', description: 'Please fill all fields.' });
@@ -80,80 +78,33 @@ export default function AdminUploadPage() {
 
     setUploading(true);
     try {
-      // Helper map to avoid duplicate queries for the same artist name
-      const artistCache = new Map<string, { id: string; name: string }>();
-
-      // Parse album level artist names
       const parseNames = (input: string) =>
         input
           .split(',')
           .map((n) => n.trim())
           .filter(Boolean);
 
-      const albumMainNames = parseNames(mainArtistsInput);
-      const albumFeaturedNames = parseNames(featuredArtistsInput);
-
-      // Collect all artist names from the album and individual tracks
-      const collectNames = new Set<string>([...albumMainNames, ...albumFeaturedNames]);
-      for (const song of songs) {
-        parseNames(song.mainArtists).forEach((n) => collectNames.add(n));
-        parseNames(song.featuredArtists).forEach((n) => collectNames.add(n));
-      }
-
-      // Ensure all artists exist and store in cache
-      const ensureArtist = async (name: string) => {
-        if (artistCache.has(name)) return artistCache.get(name)!;
-        const q = await getDocs(query(collection(db, 'artists'), where('name', '==', name)));
-        let data;
-        if (q.empty) {
-          const newRef = doc(collection(db, 'artists'));
-          data = { id: newRef.id, name };
-          await setDoc(newRef, { ...data, createdAt: serverTimestamp() });
-        } else {
-          const d = q.docs[0];
-          data = { id: d.id, name: d.data().name };
-        }
-        artistCache.set(name, data);
-        return data;
-      };
-
-      // Preload artists for the entire album
-      for (const name of collectNames) {
-        await ensureArtist(name);
-      }
-
-      const albumArtistIds = new Set<string>();
-      artistCache.forEach((value) => {
-        albumArtistIds.add(value.id);
-      });
+      const mainArtistName = mainArtist.trim();
+      const featuredArtistNames = parseNames(featuredArtists);
 
       // Upload cover file
       const coverRef = ref(storage, `covers/${Date.now()}-${coverFile.name}`);
       await uploadBytesResumable(coverRef, coverFile);
       const coverURL = await getDownloadURL(coverRef);
 
-      // Determine album
       let albumId = '';
       if (type === 'album') {
-        const albumQuery = await getDocs(
-          query(collection(db, 'albums'), where('title', '==', albumName.trim()))
-        );
-        if (albumQuery.empty) {
-          const newAlbumRef = doc(collection(db, 'albums'));
-          albumId = newAlbumRef.id;
-          await setDoc(newAlbumRef, {
-            id: albumId,
-            title: albumName.trim(),
-            artistIds: Array.from(albumArtistIds),
-            coverURL,
-            genre,
-            description: albumDescription.trim(),
-            createdAt: serverTimestamp(),
-          });
-        } else {
-          const albumDoc = albumQuery.docs[0];
-          albumId = albumDoc.id;
-        }
+        const albumRef = doc(collection(db, 'albums'));
+        albumId = albumRef.id;
+        await setDoc(albumRef, {
+          id: albumId,
+          title: albumName.trim(),
+          mainArtist: mainArtistName,
+          coverURL,
+          genre,
+          description: description.trim(),
+          createdAt: serverTimestamp(),
+        });
       }
 
       // Upload songs
@@ -162,74 +113,32 @@ export default function AdminUploadPage() {
         await uploadBytesResumable(audioRef, song.file);
         const audioURL = await getDownloadURL(audioRef);
 
-        // Calculate audio duration
-        const audioElement = new Audio(audioURL);
-        const duration = await new Promise<number>((resolve) => {
-          audioElement.addEventListener('loadedmetadata', () => {
-            resolve(audioElement.duration);
-          });
-        });
-
-        const newDocRef =
+        const songRef =
           type === 'album'
             ? doc(collection(db, 'albums', albumId, 'songs'))
             : doc(collection(db, 'songs'));
 
-        const songMainNames = song.mainArtists ? parseNames(song.mainArtists) : albumMainNames;
-        const songFeaturedNames = song.featuredArtists
-          ? parseNames(song.featuredArtists)
-          : albumFeaturedNames;
-
-        const songArtists: { id: string; name: string }[] = [];
-        const mainIdsForSong: string[] = [];
-        const featuredIdsForSong: string[] = [];
-        const allSongNames = new Set<string>([...songMainNames, ...songFeaturedNames]);
-        for (const n of allSongNames) {
-          const data = await ensureArtist(n);
-          songArtists.push(data);
-          if (songMainNames.includes(n)) mainIdsForSong.push(data.id);
-          else featuredIdsForSong.push(data.id);
-          albumArtistIds.add(data.id);
-        }
-
-        const songData: Record<string, any> = {
-          id: newDocRef.id,
+        await setDoc(songRef, {
+          id: songRef.id,
           title: song.title,
-          artists: songArtists,
-          artistIds: songArtists.map((a) => a.id),
-          mainArtistIds: mainIdsForSong,
-          featuredArtistIds: featuredIdsForSong,
-          albumId,
+          mainArtist: song.mainArtist || mainArtistName,
+          featuredArtists: parseNames(song.featuredArtists),
+          albumId: type === 'album' ? albumId : null,
           genre,
           audioURL,
           coverURL,
-          duration,
           type,
-          description: '',
-          order: index + 1, // Save the order of the song
+          order: index + 1,
           createdAt: serverTimestamp(),
-        };
-
-        if (type === 'album') {
-          songData.albumName = albumName.trim();
-          songData.albumDescription = albumDescription.trim();
-        }
-
-        await setDoc(newDocRef, songData);
-
-        // Update artist pages with the new song
-        for (const artistId of [...mainIdsForSong, ...featuredIdsForSong]) {
-          const artistRef = doc(db, 'artists', artistId);
-          await setDoc(artistRef, { songs: arrayUnion(newDocRef.id) }, { merge: true });
-        }
+        });
       }
 
       toast({ title: 'Upload successful!' });
       setAlbumName('');
-      setMainArtistsInput('');
-      setFeaturedArtistsInput('');
+      setMainArtist('');
+      setFeaturedArtists('');
       setGenre('');
-      setAlbumDescription('');
+      setDescription('');
       setCoverFile(null);
       setSongs([]);
     } catch (err) {
@@ -254,6 +163,7 @@ export default function AdminUploadPage() {
 
       <Card>
         <CardContent className="space-y-4 p-6">
+          {/* Type Selection */}
           <div className="space-y-2">
             <Label>Type</Label>
             <select
@@ -266,27 +176,129 @@ export default function AdminUploadPage() {
             </select>
           </div>
 
-          {type === 'album' && (
+          {/* Cover Art */}
+          <div className="space-y-2">
+            <Label>Cover Art</Label>
             <Input
-              placeholder="Album Name"
-              value={albumName}
-              onChange={(e) => setAlbumName(e.target.value)}
+              type="file"
+              accept="image/*"
+              onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
               className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
             />
+          </div>
+
+          {/* Main Artist */}
+          <Input
+            placeholder="Main Artist"
+            value={mainArtist}
+            onChange={(e) => setMainArtist(e.target.value)}
+            className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+          />
+
+          {/* Album-Specific Fields */}
+          {type === 'album' && (
+            <>
+              <Input
+                placeholder="Album Name"
+                value={albumName}
+                onChange={(e) => setAlbumName(e.target.value)}
+                className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+              />
+              <textarea
+                className="w-full rounded border border-gray-700 bg-black p-2 text-white"
+                placeholder="Album Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <div className="space-y-2">
+                <Label>Audio Files</Label>
+                <Input
+                  type="file"
+                  accept="audio/*"
+                  multiple
+                  onChange={(e) =>
+                    setSongs((prevSongs) => [
+                      ...prevSongs,
+                      ...Array.from(e.target.files || []).map((file) => ({
+                        file,
+                        title: '',
+                        mainArtist: mainArtist,
+                        featuredArtists: '',
+                      })),
+                    ])
+                  }
+                  className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                />
+              </div>
+              {songs.length > 0 && (
+                <ul className="space-y-4">
+                  {songs.map((song, index) => (
+                    <li key={index} className="space-y-2">
+                      <Input
+                        placeholder="Song Title"
+                        value={song.title}
+                        onChange={(e) =>
+                          handleSongMetadataChange(index, 'title', e.target.value)
+                        }
+                        className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                      />
+                      <Input
+                        placeholder="Main Artist"
+                        value={song.mainArtist}
+                        onChange={(e) =>
+                          handleSongMetadataChange(index, 'mainArtist', e.target.value)
+                        }
+                        className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                      />
+                      <Input
+                        placeholder="Featured Artists (comma separated)"
+                        value={song.featuredArtists}
+                        onChange={(e) =>
+                          handleSongMetadataChange(index, 'featuredArtists', e.target.value)
+                        }
+                        className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
           )}
 
-          <Input
-            placeholder="Main Artists (comma separated)"
-            value={mainArtistsInput}
-            onChange={(e) => setMainArtistsInput(e.target.value)}
-            className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-          />
-          <Input
-            placeholder="Featured Artists (comma separated)"
-            value={featuredArtistsInput}
-            onChange={(e) => setFeaturedArtistsInput(e.target.value)}
-            className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-          />
+          {/* Single-Specific Fields */}
+          {type === 'single' && (
+            <>
+              <Input
+                placeholder="Featured Artists (comma separated)"
+                value={featuredArtists}
+                onChange={(e) => setFeaturedArtists(e.target.value)}
+                className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+              />
+              <div className="space-y-2">
+                <Label>Audio File</Label>
+                <Input
+                  type="file"
+                  accept="audio/*"
+                  onChange={(e) => {
+                    const selectedFile = e.target.files?.[0];
+                    if (selectedFile) {
+                      setSongs([
+                        {
+                          file: selectedFile,
+                          title: '',
+                          mainArtist: mainArtist,
+                          featuredArtists: '',
+                        },
+                      ]);
+                    }
+                  }}
+                  className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Genre */}
           <div className="space-y-2">
             <Label>Genre</Label>
             <select
@@ -302,101 +314,8 @@ export default function AdminUploadPage() {
               <option value="Country">Country</option>
             </select>
           </div>
-          {type === 'album' && (
-            <textarea
-              className="w-full rounded border border-gray-700 bg-black p-2 text-white"
-              placeholder="Album Description"
-              value={albumDescription}
-              onChange={(e) => setAlbumDescription(e.target.value)}
-            />
-          )}
 
-          <div className="space-y-2">
-            <Label>Cover Image</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
-              className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Audio Files</Label>
-            <Input
-              type="file"
-              accept="audio/*"
-              multiple
-              onChange={(e) =>
-                setSongs((prevSongs) => [
-                  ...prevSongs,
-                  ...Array.from(e.target.files || []).map((file) => ({
-                    file,
-                    title: '',
-                    mainArtists: '',
-                    featuredArtists: '',
-                  })),
-                ])
-              }
-              className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-            />
-            {songs.length > 0 && (
-              <ul className="space-y-4">
-                {songs.map((song, index) => (
-                  <li key={index} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span>
-                        Track {index + 1}: {song.file.name}
-                      </span>
-                      <div className="flex gap-2">
-                        {index > 0 && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleReorder(index, index - 1)}
-                          >
-                            ↑
-                          </Button>
-                        )}
-                        {index < songs.length - 1 && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleReorder(index, index + 1)}
-                          >
-                            ↓
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                    <Input
-                      placeholder="Song Title"
-                      value={song.title}
-                      onChange={(e) => handleSongMetadataChange(index, 'title', e.target.value)}
-                      className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-                    />
-                    <Input
-                      placeholder="Main Artists (comma separated)"
-                      value={song.mainArtists}
-                      onChange={(e) =>
-                        handleSongMetadataChange(index, 'mainArtists', e.target.value)
-                      }
-                      className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-                    />
-                    <Input
-                      placeholder="Featured Artists (comma separated)"
-                      value={song.featuredArtists}
-                      onChange={(e) =>
-                        handleSongMetadataChange(index, 'featuredArtists', e.target.value)
-                      }
-                      className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
+          {/* Upload Button */}
           <Button disabled={uploading} onClick={handleUpload} className="w-full">
             {uploading ? 'Uploading...' : 'Upload'}
           </Button>

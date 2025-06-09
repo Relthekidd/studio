@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CalendarDays, ListMusic, Info, PlayCircle } from 'lucide-react';
 import { usePlayerStore } from '@/features/player/store';
-import type { Track } from '@/types/music';
+import type { Track, Artist } from '@/types/music';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import BackButton from '@/components/ui/BackButton';
@@ -28,11 +28,6 @@ import { normalizeTrack } from '@/utils/normalizeTrack';
 import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { useToast } from '@/hooks/use-toast';
 
-type Artist = {
-  id: string;
-  name: string;
-};
-
 type Single = {
   id: string;
   title: string;
@@ -41,6 +36,7 @@ type Single = {
   tracklist: Track[];
   credits?: string;
   artistIds: string[];
+  mainArtistIds: string[];
   tags?: string[];
   genre?: string;
   type: 'single' | 'album';
@@ -54,7 +50,8 @@ export default function SingleDetailPage() {
   const addTracksToQueue = usePlayerStore((s) => s.addTracksToQueue);
   const { toast } = useToast();
   const [single, setSingle] = useState<Single | null>(null);
-  const [artistsDetails, setArtistsDetails] = useState<Artist[]>([]);
+  const [mainArtists, setMainArtists] = useState<Artist[]>([]);
+  const [featuredArtists, setFeaturedArtists] = useState<Artist[]>([]);
 
   const singleId = params.singleId as string;
 
@@ -69,16 +66,35 @@ export default function SingleDetailPage() {
         if (singleDocSnap.exists()) {
           const singleData = singleDocSnap.data();
 
-          // Fetch artist details
-          const artistIds = singleData.artistIds || [];
-          let fetchedArtists: Artist[] = [];
+          const mainArtistIds = singleData.mainArtistIds || [];
+          const allArtistIds = singleData.artistIds || [];
+          const featuredArtistIds = allArtistIds.filter((id: string) => !mainArtistIds.includes(id));
 
-          if (artistIds.length > 0) {
-            const artistQuery = query(collection(db, 'artists'), where('id', 'in', artistIds));
-            const artistSnap = await getDocs(artistQuery);
-            fetchedArtists = artistSnap.docs.map((doc) => ({
+          let fetchedMainArtists: Artist[] = [];
+          let fetchedFeaturedArtists: Artist[] = [];
+
+          // Fetch main artists
+          if (mainArtistIds.length > 0) {
+            const mainArtistQuery = query(collection(db, 'artists'), where('id', 'in', mainArtistIds));
+            const mainArtistSnap = await getDocs(mainArtistQuery);
+            fetchedMainArtists = mainArtistSnap.docs.map((doc) => ({
               id: doc.id,
               name: doc.data().name || 'Unknown Artist',
+              coverURL: doc.data().coverURL || DEFAULT_COVER_URL, // Ensure coverURL is included
+            }));
+          }
+
+          // Fetch featured artists
+          if (featuredArtistIds.length > 0) {
+            const featuredArtistQuery = query(
+              collection(db, 'artists'),
+              where('id', 'in', featuredArtistIds)
+            );
+            const featuredArtistSnap = await getDocs(featuredArtistQuery);
+            fetchedFeaturedArtists = featuredArtistSnap.docs.map((doc) => ({
+              id: doc.id,
+              name: doc.data().name || 'Unknown Artist',
+              coverURL: doc.data().coverURL || DEFAULT_COVER_URL, // Ensure coverURL is included
             }));
           }
 
@@ -88,16 +104,16 @@ export default function SingleDetailPage() {
             Array.isArray(singleData.tracklist) && singleData.tracklist.length > 0
               ? singleData.tracklist
                   .filter((track) => track && typeof track === 'object')
-                  .map((track) => normalizeTrack(track, fetchedArtists))
+                  .map((track) => normalizeTrack(track, [...fetchedMainArtists, ...fetchedFeaturedArtists]))
               : [
                   normalizeTrack(
                     { id: singleDocSnap.id, ...singleData },
-                    fetchedArtists,
+                    [...fetchedMainArtists, ...fetchedFeaturedArtists],
                   ),
                 ];
 
-          // Store fetched artist details in state
-          setArtistsDetails(fetchedArtists);
+          setMainArtists(fetchedMainArtists);
+          setFeaturedArtists(fetchedFeaturedArtists);
 
           setSingle({
             id: singleDocSnap.id,
@@ -107,6 +123,7 @@ export default function SingleDetailPage() {
             tracklist: normalizedTracklist,
             credits: singleData.credits || '',
             artistIds: singleData.artistIds || [],
+            mainArtistIds: singleData.mainArtistIds || [],
             tags: singleData.tags || [],
             genre: singleData.genre || 'Unknown Genre',
             type: singleData.type || 'single',
@@ -166,9 +183,9 @@ export default function SingleDetailPage() {
               {/* Single Title */}
               <h1 className="text-3xl font-bold text-foreground md:text-4xl">{single.title}</h1>
 
-              {/* Artist Names */}
+              {/* Main Artists */}
               <div className="mb-4 mt-2">
-                {artistsDetails.map((artist) => (
+                {mainArtists.map((artist) => (
                   <Link
                     key={artist.id}
                     href={`/artist/${artist.id}`}
@@ -179,6 +196,25 @@ export default function SingleDetailPage() {
                   </Link>
                 ))}
               </div>
+
+              {/* Featured Artists */}
+              {featuredArtists.length > 0 && (
+                <div className="mb-4">
+                  <h2 className="text-sm font-semibold text-muted-foreground">Featuring Artists:</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {featuredArtists.map((artist) => (
+                      <Link
+                        key={artist.id}
+                        href={`/artist/${artist.id}`}
+                        className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                        aria-label={`View artist profile for ${artist.name}`}
+                      >
+                        {artist.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Additional Information */}
               <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
@@ -269,7 +305,6 @@ export default function SingleDetailPage() {
           </div>
         </div>
       </Card>
-
     </div>
   );
 }

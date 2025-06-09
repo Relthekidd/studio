@@ -1,4 +1,5 @@
 export type Artist = {
+  coverURL: string | undefined;
   id: string;
   name: string;
 };
@@ -10,6 +11,9 @@ export type AlbumInfo = {
 };
 
 export type Track = {
+  order: number;
+  
+  createdAt: any;
   id: string;
   title: string;
   artists: Artist[];
@@ -30,6 +34,13 @@ export type Song = Track;
 export type Album = {
   id: string;
   title: string;
+  order: number;
   coverURL?: string;
-  artist?: string;
+  artistIds: string[]; // Array of artist IDs
+  genre?: string; // Genre of the album
+  description?: string; // Description of the album
+  createdAt: any; // Timestamp when the album was created
+  tags?: string[]; // Tags associated with the album
+  type: 'album'; // Type is always 'album'
+  artists?: Artist[]; // Array of artist objects
 };

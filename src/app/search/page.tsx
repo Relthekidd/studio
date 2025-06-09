@@ -45,7 +45,30 @@ export default function SearchPage() {
         songs: results.songs.map((song: Song) =>
           normalizeTrack(song, (song as any).artists || [])
         ),
-        albums: results.albums,
+        albums: results.albums.map((album: Album) => ({
+          id: album.id,
+          title: album.title || '',
+          coverURL: album.coverURL || '',
+          artistIds: album.artistIds || [],
+          genre: album.genre || '',
+          description: album.description || '',
+          createdAt: album.createdAt?.toDate() || new Date(),
+          tags: album.tags || [],
+          type: 'album',
+          order: album.order || 0, // Add order
+          artists:
+            Array.isArray(album.artists) && album.artists.length > 0
+              ? album.artists
+              : typeof album.artists === 'string' && album.artists
+              ? [
+                  {
+                    id: '',
+                    name: album.artists,
+                    coverURL: '',
+                  },
+                ]
+              : [],
+        })),
         artists: results.artists,
         users: results.users,
       });
@@ -94,7 +117,21 @@ export default function SearchPage() {
             <SectionTitle className="text-xl">Songs</SectionTitle>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-5">
               {searchResults.songs.map((song) => (
-                <AlbumCard key={song.id} item={song} className="h-full" />
+                <AlbumCard
+                  key={song.id}
+                  item={{
+                    ...song,
+                    album: song.album
+                      ? {
+                          id: song.albumId || '', // Use the album ID if available
+                          name: typeof song.album === 'string' ? song.album : '', // Use the album title as string
+                          coverURL: song.coverURL || '', // Use the cover URL if available
+                        }
+                      : undefined, // If no album info is available, set it to undefined
+                    order: song.order || 0, // Add order
+                  }}
+                  className="h-full"
+                />
               ))}
             </div>
           </div>
@@ -110,16 +147,17 @@ export default function SearchPage() {
                   item={{
                     id: album.id,
                     type: 'album',
-                    title: (album as any).title || '',
-                    artists:
-                      (album as any).artists && (album as any).artists.length > 0
-                        ? (album as any).artists
-                        : (album as any).artist
-                          ? [{ id: '', name: (album as any).artist }]
-                          : [],
+                    title: album.title || '',
+                    artists: album.artists || [],
                     audioURL: '',
-                    coverURL: (album as any).coverURL || '',
-                    album: (album as any).title || '',
+                    coverURL: album.coverURL || '',
+                    album: {
+                      id: album.id,
+                      name: album.title || '',
+                      coverURL: album.coverURL || '',
+                    }, // Assign a valid AlbumInfo object
+                    createdAt: album.createdAt || new Date(),
+                    order: album.order || 0, // Add order
                   }}
                   className="h-full"
                 />
@@ -133,11 +171,11 @@ export default function SearchPage() {
             <SectionTitle className="text-xl">Artists</SectionTitle>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
               {searchResults.artists.map((artist) => (
-                <Link href={`/artist/${artist.id}`} key={artist.id} legacyBehavior>
+                <Link href={`/artist/${artist.id}`} key={artist.id}>
                   <Card className="h-full cursor-pointer bg-card transition-colors hover:bg-card/80">
                     <CardContent className="flex flex-col items-center gap-3 p-4 text-center">
                       <Avatar className="size-20 border-2 border-primary">
-                        <AvatarImage src={(artist as any).coverURL} alt={artist.name} />
+                        <AvatarImage src={artist.coverURL} alt={artist.name} />
                         <AvatarFallback>{artist.name?.[0]?.toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div>

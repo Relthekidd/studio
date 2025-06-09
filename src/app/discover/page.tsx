@@ -38,6 +38,8 @@ export default function DiscoverPage() {
             coverURL: data.coverURL,
             duration: data.duration,
             type: data.type || 'track',
+            createdAt: data.createdAt?.toDate() || new Date(),
+            order: data.order || 0, // Add order
           };
         })
         .filter((t) => t.type !== 'album');
@@ -52,6 +54,8 @@ export default function DiscoverPage() {
           coverURL: data.coverURL,
           duration: 0,
           type: 'album',
+          createdAt: data.createdAt?.toDate() || new Date(),
+          order: data.order || 0, // Add order
         };
       });
 

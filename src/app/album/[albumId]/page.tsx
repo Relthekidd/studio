@@ -9,13 +9,13 @@ import {
   doc,
   getDoc,
   collection,
+  getDocs,
   query,
   where,
-  getDocs,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { usePlayerStore } from '@/features/player/store';
-import type { Track } from '@/types/music';
+import type { Track, Artist } from '@/types/music';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import BackButton from '@/components/ui/BackButton';
@@ -32,21 +32,17 @@ interface Album {
   releaseDate?: string;
   credits?: string;
   artistIds: string[];
+  mainArtistIds: string[];
   tags?: string[];
   genre?: string;
   type: 'album';
-}
-
-interface Artist {
-  id: string;
-  name: string;
 }
 
 export default function AlbumPage() {
   const { albumId } = useParams();
   const [album, setAlbum] = useState<Album | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [artistsDetails, setArtistsDetails] = useState<Artist[]>([]);
+  const [mainArtists, setMainArtists] = useState<Artist[]>([]);
   const setCurrentTrack = usePlayerStore((s) => s.setCurrentTrack);
   const setIsPlaying = usePlayerStore((s) => s.setIsPlaying);
   const setQueue = usePlayerStore((s) => s.setQueue);
@@ -62,27 +58,31 @@ export default function AlbumPage() {
         if (albumDocSnap.exists()) {
           const albumData = albumDocSnap.data();
 
-          const artistIds = albumData.artistIds || [];
-          let fetchedArtists: Artist[] = [];
+          const mainArtistIds = albumData.mainArtistIds || []; // Main artists
 
-          if (artistIds.length > 0) {
-            const artistQuery = query(collection(db, 'artists'), where('id', 'in', artistIds));
-            const artistSnap = await getDocs(artistQuery);
-            fetchedArtists = artistSnap.docs.map((doc) => ({
+          let fetchedMainArtists: Artist[] = [];
+
+          // Fetch main artists
+          if (mainArtistIds.length > 0) {
+            const mainArtistQuery = query(collection(db, 'artists'), where('id', 'in', mainArtistIds));
+            const mainArtistSnap = await getDocs(mainArtistQuery);
+            fetchedMainArtists = mainArtistSnap.docs.map((doc) => ({
               id: doc.id,
               name: doc.data().name || 'Unknown Artist',
+              coverURL: doc.data().coverURL || DEFAULT_COVER_URL, // Ensure coverURL is included
             }));
           }
 
+          // Fetch tracks
           const trackSnap = await getDocs(
             collection(db, 'albums', String(albumId), 'songs'),
           );
 
           const fetchedTracks: Track[] = trackSnap.docs
-            .map((doc) => normalizeTrack(doc, fetchedArtists))
-            .sort((a, b) => (a.trackNumber || 0) - (b.trackNumber || 0));
+            .map((doc) => normalizeTrack(doc, fetchedMainArtists))
+            .sort((a, b) => (a.order || 0) - (b.order || 0)); // Sort by order
 
-          setArtistsDetails(fetchedArtists);
+          setMainArtists(fetchedMainArtists);
           setTracks(fetchedTracks);
 
           setAlbum({
@@ -93,6 +93,7 @@ export default function AlbumPage() {
             releaseDate: albumData.releaseDate,
             credits: albumData.credits || '',
             artistIds: albumData.artistIds || [],
+            mainArtistIds: albumData.mainArtistIds || [],
             tags: albumData.tags || [],
             genre: albumData.genre || 'Unknown Genre',
             type: 'album',
@@ -118,7 +119,6 @@ export default function AlbumPage() {
     setQueue(tracks);
     setIsPlaying(true);
   };
-
 
   if (!album) return <div className="container mx-auto p-6 text-center">Loading album...</div>;
 
@@ -147,17 +147,24 @@ export default function AlbumPage() {
 
               <h1 className="text-3xl font-bold text-foreground md:text-4xl">{album.title}</h1>
 
+              {/* Main Artists */}
               <div className="mb-4 mt-2">
-                {artistsDetails.map((artist) => (
-                  <Link
-                    key={artist.id}
-                    href={`/artist/${artist.id}`}
-                    className="mr-2 text-lg text-muted-foreground transition-colors hover:text-primary"
-                    aria-label={`View artist profile for ${artist.name}`}
-                  >
-                    {artist.name}
-                  </Link>
-                ))}
+                {mainArtists.length > 0 ? (
+                  mainArtists.map((artist) => (
+                    <Button
+                      key={artist.id}
+                      asChild
+                      variant="link"
+                      className="mr-2 text-lg text-muted-foreground transition-colors hover:text-primary"
+                    >
+                      <Link href={`/artist/${artist.id}`} aria-label={`View artist profile for ${artist.name}`}>
+                        {artist.name}
+                      </Link>
+                    </Button>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground">Unknown Artist</p>
+                )}
               </div>
 
               <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">

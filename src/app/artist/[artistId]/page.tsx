@@ -49,23 +49,24 @@ export default function ArtistPage() {
       where('artistIds', 'array-contains', decodedId)
     );
     const unsubAlbums = onSnapshot(albumQuery, (snap) => {
-      setAlbums(
+      return setAlbums(
         snap.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title || 'Untitled',
-          artists:
-            doc.data().artists && doc.data().artists.length > 0
-              ? doc.data().artists
-              : [
-                  {
-                    id: decodedId,
-                    name: artistProfile?.name || 'Unknown Artist',
-                  },
-                ],
+          artists: doc.data().artists && doc.data().artists.length > 0
+            ? doc.data().artists
+            : [
+              {
+                id: decodedId,
+                name: artistProfile?.name || 'Unknown Artist',
+              },
+            ],
           genre: doc.data().genre || '',
           type: 'album' as const,
           audioURL: '',
           coverURL: doc.data().coverURL || '',
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+          order: doc.data().order || 0, // Add order
         }))
       );
     });
@@ -84,6 +85,8 @@ export default function ArtistPage() {
           type: 'track' as const,
           audioURL: doc.data().audioURL || doc.data().audioSrc || '',
           coverURL: doc.data().coverURL || doc.data().imageUrl || '',
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+          order: doc.data().order || 0, // Add order
         }))
       );
     });
@@ -101,6 +104,8 @@ export default function ArtistPage() {
             type: 'track' as const,
             audioURL: data.audioURL || data.audioSrc || '',
             coverURL: data.coverURL || data.imageUrl || '',
+            createdAt: data.createdAt?.toDate() || new Date(),
+            order: data.order || 0, // Add order
           };
         })
         .filter((track) => !(track.artists[0]?.id === decodedId || track.artists[0]?.name === decodedId));
@@ -110,7 +115,11 @@ export default function ArtistPage() {
     const topQuery = query(collection(db, 'songs'), where('artistIds', 'array-contains', decodedId));
     const unsubTop = onSnapshot(topQuery, (snap) => {
       const songs = snap.docs
-        .map((d) => d.data() as Track)
+        .map((d) => ({
+          ...d.data(),
+          createdAt: d.data().createdAt?.toDate() || new Date(),
+          order: d.data().order || 0, // Add order
+        }) as Track)
         .sort((a, b) => (b as any).streams - (a as any).streams)
         .slice(0, 10);
       setTopSongs(songs);
