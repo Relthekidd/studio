@@ -7,8 +7,6 @@ import {
   query,
   where,
   onSnapshot,
-  doc,
-  getDoc,
 } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
@@ -126,7 +124,9 @@ export default function ArtistPage() {
 
     return () => {
       unsubArtist();
-      unsubSongs();
+      unsubAlbums();
+      unsubSingles();
+      unsubFeatured();
       unsubTop();
       unsubFollowers();
     };
