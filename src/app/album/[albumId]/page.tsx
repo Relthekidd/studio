@@ -74,8 +74,9 @@ export default function AlbumPage() {
             }));
           }
 
-          const trackQuery = query(collection(db, 'songs'), where('albumId', '==', String(albumId)));
-          const trackSnap = await getDocs(trackQuery);
+          const trackSnap = await getDocs(
+            collection(db, 'albums', String(albumId), 'songs'),
+          );
 
           const fetchedTracks: Track[] = trackSnap.docs
             .map((doc) => normalizeTrack(doc, fetchedArtists))
