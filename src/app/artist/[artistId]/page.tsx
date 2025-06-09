@@ -7,8 +7,6 @@ import {
   query,
   where,
   onSnapshot,
-  doc,
-  getDoc,
 } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
@@ -55,15 +53,7 @@ export default function ArtistPage() {
         snap.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title || 'Untitled',
-          artists:
-            doc.data().artists && doc.data().artists.length > 0
-              ? doc.data().artists
-              : [
-                  {
-                    id: decodedId,
-                    name: artistProfile?.name || 'Unknown Artist',
-                  },
-                ],
+          artists: doc.data().artists || [{ id: '', name: 'Unknown Artist' }],
           genre: doc.data().genre || '',
           type: 'album' as const,
           audioURL: '',
@@ -126,7 +116,9 @@ export default function ArtistPage() {
 
     return () => {
       unsubArtist();
-      unsubSongs();
+      unsubAlbums();
+      unsubSingles();
+      unsubFeatured();
       unsubTop();
       unsubFollowers();
     };
