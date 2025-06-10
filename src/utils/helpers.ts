@@ -61,6 +61,11 @@ export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+export function generateCoverFromTitle(title: string): string {
+  const first = title.trim()[0]?.toUpperCase() || 'P';
+  return `https://placehold.co/500x500?text=${encodeURIComponent(first)}`;
+}
+
 export function getTrackRoute(item: { type: string; id: string }): string {
   const type = item.type?.toLowerCase();
   if (type === 'playlist') return `/playlist/${item.id}`;
