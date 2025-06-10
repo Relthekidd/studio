@@ -17,7 +17,7 @@ import {
   UserCog,
   LogIn,
   User as UserIcon,
-  Upload,
+  LayoutDashboard,
 } from 'lucide-react';
 
 interface ProfileMenuProps {
@@ -70,9 +70,9 @@ export default function ProfileMenu({ isAuthenticated, onLogout, userId, role }:
             </DropdownMenuItem>
             {role === 'admin' && (
               <DropdownMenuItem asChild>
-                <Link href="/admin/upload" className="flex cursor-pointer items-center hover:bg-accent/10">
-                  <Upload className="mr-2 size-4 text-primary" />
-                  <span>Upload Music</span>
+                <Link href="/admin" className="flex cursor-pointer items-center hover:bg-accent/10">
+                  <LayoutDashboard className="mr-2 size-4 text-primary" />
+                  <span>Admin Dashboard</span>
                 </Link>
               </DropdownMenuItem>
             )}
