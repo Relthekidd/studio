@@ -24,3 +24,7 @@ This file is auto-generated.
 - [27:23] Classname 'destructive' is not a Tailwind CSS class! – `tailwindcss/no-custom-classname`
 
 ---
+### `src/features/player/QueueModal.tsx`
+- [153:21] Parsing error: ',' expected. – `null`
+
+---
