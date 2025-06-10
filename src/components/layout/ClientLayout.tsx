@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthProvider';
+import { cn } from '@/lib/utils';
 
 import { SonixLogo } from '@/components/icons/SonixLogo';
 import BottomNavigationBar from '@/components/layout/BottomNavigationBar';
@@ -34,7 +35,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const showLayout = user && pathname !== '/login';
 
   return (
-    <div className="relative flex min-h-screen flex-col pb-28">
+    <div className="relative flex flex-col pb-28">
       {showLayout && (
         <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/75 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto flex items-center justify-between p-4">
