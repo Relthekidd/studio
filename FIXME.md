@@ -8,17 +8,6 @@ This file is auto-generated.
 - [33:39] Classnames 'h-full, w-full' could be replaced by the 'size-full' shorthand! – `tailwindcss/enforces-shorthand`
 
 ---
-### `src/app/admin/upload/page.tsx`
-- [11:3] 'query' is defined but never used. – `@typescript-eslint/no-unused-vars`
-- [12:3] 'where' is defined but never used. – `@typescript-eslint/no-unused-vars`
-- [13:3] 'getDocs' is defined but never used. – `@typescript-eslint/no-unused-vars`
-- [51:9] 'handleReorder' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
-
----
-### `src/components/AlbumCard.tsx`
-- [17:22] 'Artist' is defined but never used. – `@typescript-eslint/no-unused-vars`
-
----
 ### `src/components/music/QueueModal.tsx`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
@@ -30,13 +19,5 @@ This file is auto-generated.
 ---
 ### `src/components/ui/toast.tsx`
 - [27:23] Classname 'destructive' is not a Tailwind CSS class! – `tailwindcss/no-custom-classname`
-
----
-### `src/features/player/QueueModal.tsx`
-- [9:13] 'GripVertical' is defined but never used. – `@typescript-eslint/no-unused-vars`
-- [11:10] 'DragDropContext' is defined but never used. – `@typescript-eslint/no-unused-vars`
-- [11:27] 'Droppable' is defined but never used. – `@typescript-eslint/no-unused-vars`
-- [11:38] 'Draggable' is defined but never used. – `@typescript-eslint/no-unused-vars`
-- [150:19] 'updatedQueue' is defined but never used. – `@typescript-eslint/no-unused-vars`
 
 ---

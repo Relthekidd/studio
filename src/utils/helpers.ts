@@ -2,8 +2,7 @@
 import type { Track } from '@/types/music';
 
 // Default image used when a track or album is missing artwork
-export const DEFAULT_COVER_URL =
-  'https://placehold.co/500x500?text=No+Image';
+export const DEFAULT_COVER_URL = 'https://placehold.co/500x500?text=No+Image';
 
 export function formatArtists(input: any): string {
   if (Array.isArray(input)) {
@@ -37,6 +36,8 @@ export function normalizeTrack(raw: any): Track {
     audioURL: raw.audioURL || raw.audioUrl || '',
     coverURL: raw.coverURL || raw.coverUrl || '',
     duration: raw.duration || 0,
+    order: raw.order || 0,
+    createdAt: raw.createdAt || new Date(),
     type: raw.type || 'track',
     albumId: raw.albumId,
     album: raw.album || undefined,
