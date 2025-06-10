@@ -4,8 +4,8 @@ This file is auto-generated.
 
 ---
 ### `src/app/admin/page.tsx`
-- [27:38] Classnames 'h-full, w-full' could be replaced by the 'size-full' shorthand! – `tailwindcss/enforces-shorthand`
-- [33:39] Classnames 'h-full, w-full' could be replaced by the 'size-full' shorthand! – `tailwindcss/enforces-shorthand`
+- [29:13] Classnames 'h-full, w-full' could be replaced by the 'size-full' shorthand! – `tailwindcss/enforces-shorthand`
+- [38:13] Classnames 'h-full, w-full' could be replaced by the 'size-full' shorthand! – `tailwindcss/enforces-shorthand`
 
 ---
 ### `src/components/music/QueueModal.tsx`

@@ -43,12 +43,23 @@ export default function TrackListItem({ track, onPlay, coverURL }: TrackListItem
       aria-label={`Play ${track.title}`}
     >
       <div className="flex min-w-0 items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={handlePlayClick} aria-label={`Play ${track.title}`}>
-          {isCurrent && isPlaying ? <PlayCircle size={20} className="text-primary" /> : <PlayCircle size={20} />}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handlePlayClick}
+          aria-label={`Play ${track.title}`}
+        >
+          {isCurrent && isPlaying ? (
+            <PlayCircle size={20} className="text-primary" />
+          ) : (
+            <PlayCircle size={20} />
+          )}
         </Button>
         <div className="min-w-0">
           <div className="truncate font-medium">{track.title}</div>
-          <div className="truncate text-xs text-muted-foreground">{formatArtists(track.artists)}</div>
+          <div className="truncate text-xs text-muted-foreground">
+            {formatArtists(track.artists)}
+          </div>
         </div>
       </div>
       <TrackActions

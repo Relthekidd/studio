@@ -24,13 +24,19 @@ export default function AdminDashboardPage() {
       <SectionTitle className="text-3xl font-bold">Admin Dashboard</SectionTitle>
       <div className="grid gap-4">
         <Button asChild variant="outline" className="h-32 w-full text-xl">
-          <Link href="/admin/upload" className="flex h-full w-full flex-col items-center justify-center gap-2">
+          <Link
+            href="/admin/upload"
+            className="flex h-full w-full flex-col items-center justify-center gap-2"
+          >
             <Upload size={32} />
             Upload Music
           </Link>
         </Button>
         <Button asChild variant="outline" className="h-32 w-full text-xl">
-          <Link href="/admin/streams" className="flex h-full w-full flex-col items-center justify-center gap-2">
+          <Link
+            href="/admin/streams"
+            className="flex h-full w-full flex-col items-center justify-center gap-2"
+          >
             <BarChart2 size={32} />
             Stream Tracker
           </Link>

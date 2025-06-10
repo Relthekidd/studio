@@ -76,7 +76,12 @@ export default function LibraryPage() {
 
       <section className="space-y-6">
         <SectionTitle className="text-lg">Playlists</SectionTitle>
-        {renderGridSection(createdPlaylists, 'No playlists found.', <ListMusic size={48} />, 'playlist')}
+        {renderGridSection(
+          createdPlaylists,
+          'No playlists found.',
+          <ListMusic size={48} />,
+          'playlist'
+        )}
       </section>
 
       <section className="space-y-6">
@@ -91,7 +96,12 @@ export default function LibraryPage() {
 
       <section className="space-y-6">
         <SectionTitle className="text-lg">Genres</SectionTitle>
-        {renderGridSection(genres, 'No genre playlists found.', <GanttChartSquare size={48} />, 'playlist')}
+        {renderGridSection(
+          genres,
+          'No genre playlists found.',
+          <GanttChartSquare size={48} />,
+          'playlist'
+        )}
       </section>
 
       <section className="space-y-6">

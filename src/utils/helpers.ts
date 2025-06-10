@@ -1,5 +1,7 @@
 // src/utils/helpers.ts
-import type { Track } from '@/types/music';
+import type { Track, Artist } from '@/types/music';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 // Default image used when a track or album is missing artwork
 export const DEFAULT_COVER_URL = 'https://placehold.co/500x500?text=No+Image';
@@ -71,4 +73,15 @@ export function getTrackRoute(item: { type: string; id: string }): string {
   const type = item.type?.toLowerCase();
   if (type === 'playlist') return `/playlist/${item.id}`;
   return type === 'album' ? `/album/${item.id}` : `/single/${item.id}`;
+}
+
+export async function fetchArtistsByIds(ids: string[]): Promise<Artist[]> {
+  if (!ids || ids.length === 0) return [];
+  const q = query(collection(db, 'artists'), where('id', 'in', ids));
+  const snap = await getDocs(q);
+  return snap.docs.map((doc) => ({
+    id: doc.id,
+    name: doc.data().name || 'Unknown Artist',
+    coverURL: doc.data().coverURL || DEFAULT_COVER_URL,
+  }));
 }

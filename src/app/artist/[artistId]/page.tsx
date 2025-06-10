@@ -2,12 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-} from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
 import SectionTitle from '@/components/SectionTitle';
@@ -53,14 +48,15 @@ export default function ArtistPage() {
         snap.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().title || 'Untitled',
-          artists: doc.data().artists && doc.data().artists.length > 0
-            ? doc.data().artists
-            : [
-              {
-                id: decodedId,
-                name: artistProfile?.name || 'Unknown Artist',
-              },
-            ],
+          artists:
+            doc.data().artists && doc.data().artists.length > 0
+              ? doc.data().artists
+              : [
+                  {
+                    id: decodedId,
+                    name: artistProfile?.name || 'Unknown Artist',
+                  },
+                ],
           genre: doc.data().genre || '',
           type: 'album' as const,
           audioURL: '',
@@ -91,7 +87,10 @@ export default function ArtistPage() {
       );
     });
 
-    const featuredQuery = query(collection(db, 'songs'), where('artistIds', 'array-contains', decodedId));
+    const featuredQuery = query(
+      collection(db, 'songs'),
+      where('artistIds', 'array-contains', decodedId)
+    );
     const unsubFeatured = onSnapshot(featuredQuery, (snap) => {
       const filtered = snap.docs
         .map((doc) => {
@@ -108,18 +107,26 @@ export default function ArtistPage() {
             order: data.order || 0, // Add order
           };
         })
-        .filter((track) => !(track.artists[0]?.id === decodedId || track.artists[0]?.name === decodedId));
+        .filter(
+          (track) => !(track.artists[0]?.id === decodedId || track.artists[0]?.name === decodedId)
+        );
       setFeaturedTracks(filtered);
     });
 
-    const topQuery = query(collection(db, 'songs'), where('artistIds', 'array-contains', decodedId));
+    const topQuery = query(
+      collection(db, 'songs'),
+      where('artistIds', 'array-contains', decodedId)
+    );
     const unsubTop = onSnapshot(topQuery, (snap) => {
       const songs = snap.docs
-        .map((d) => ({
-          ...d.data(),
-          createdAt: d.data().createdAt?.toDate() || new Date(),
-          order: d.data().order || 0, // Add order
-        }) as Track)
+        .map(
+          (d) =>
+            ({
+              ...d.data(),
+              createdAt: d.data().createdAt?.toDate() || new Date(),
+              order: d.data().order || 0, // Add order
+            }) as Track
+        )
         .sort((a, b) => (b as any).streams - (a as any).streams)
         .slice(0, 10);
       setTopSongs(songs);
