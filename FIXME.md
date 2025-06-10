@@ -3,11 +3,20 @@
 This file is auto-generated.
 
 ---
+### `src/app/admin/page.tsx`
+- [27:38] Classnames 'h-full, w-full' could be replaced by the 'size-full' shorthand! – `tailwindcss/enforces-shorthand`
+- [33:39] Classnames 'h-full, w-full' could be replaced by the 'size-full' shorthand! – `tailwindcss/enforces-shorthand`
+
+---
 ### `src/app/admin/upload/page.tsx`
 - [11:3] 'query' is defined but never used. – `@typescript-eslint/no-unused-vars`
 - [12:3] 'where' is defined but never used. – `@typescript-eslint/no-unused-vars`
 - [13:3] 'getDocs' is defined but never used. – `@typescript-eslint/no-unused-vars`
 - [51:9] 'handleReorder' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+
+---
+### `src/components/AlbumCard.tsx`
+- [17:22] 'Artist' is defined but never used. – `@typescript-eslint/no-unused-vars`
 
 ---
 ### `src/components/music/QueueModal.tsx`
