@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { usePlayerStore } from './store';
+import { useAuth } from '@/contexts/AuthProvider';
+import { recordStream } from '@/utils/streamTracker';
 
 export function AudioProvider() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -17,6 +19,7 @@ export function AudioProvider() {
     setProgress,
     skipToNext,
   } = usePlayerStore();
+  const { user } = useAuth();
 
   // Load new track
   useEffect(() => {
@@ -90,8 +93,15 @@ export function AudioProvider() {
     });
   }, [setCurrentTime, setProgress]);
 
+  const handleEnded = () => {
+    if (currentTrack) {
+      recordStream(user?.uid ?? null, { id: currentTrack.id, albumId: currentTrack.albumId });
+    }
+    skipToNext();
+  };
+
   return (
     // eslint-disable-next-line jsx-a11y/media-has-caption
-    <audio ref={audioRef} onEnded={skipToNext} style={{ display: 'none' }} />
+    <audio ref={audioRef} onEnded={handleEnded} style={{ display: 'none' }} />
   );
 }

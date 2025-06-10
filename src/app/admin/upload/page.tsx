@@ -7,7 +7,10 @@ import {
   collection,
   serverTimestamp,
   doc,
-  setDoc
+  setDoc,
+  query,
+  where,
+  getDocs,
 } from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
@@ -45,6 +48,12 @@ export default function AdminUploadPage() {
     }
   }, [user, loading, isAdmin, router, toast]);
 
+  const handleReorder = (fromIndex: number, toIndex: number) => {
+    const updatedSongs = [...songs];
+    const [movedSong] = updatedSongs.splice(fromIndex, 1);
+    updatedSongs.splice(toIndex, 0, movedSong);
+    setSongs(updatedSongs);
+  };
 
   const handleSongMetadataChange = (
     index: number,
@@ -227,9 +236,7 @@ export default function AdminUploadPage() {
                       <Input
                         placeholder="Song Title"
                         value={song.title}
-                        onChange={(e) =>
-                          handleSongMetadataChange(index, 'title', e.target.value)
-                        }
+                        onChange={(e) => handleSongMetadataChange(index, 'title', e.target.value)}
                         className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
                       />
                       <Input
