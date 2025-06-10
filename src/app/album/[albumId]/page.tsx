@@ -10,8 +10,6 @@ import {
   getDoc,
   collection,
   getDocs,
-  query,
-  where,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { usePlayerStore } from '@/features/player/store';
@@ -64,13 +62,19 @@ export default function AlbumPage() {
 
           // Fetch main artists
           if (mainArtistIds.length > 0) {
-            const mainArtistQuery = query(collection(db, 'artists'), where('id', 'in', mainArtistIds));
-            const mainArtistSnap = await getDocs(mainArtistQuery);
-            fetchedMainArtists = mainArtistSnap.docs.map((doc) => ({
-              id: doc.id,
-              name: doc.data().name || 'Unknown Artist',
-              coverURL: doc.data().coverURL || DEFAULT_COVER_URL, // Ensure coverURL is included
-            }));
+            const artistPromises = mainArtistIds.map(async (id: string) => {
+              const artistRef = doc(db, 'artists', id);
+              const snap = await getDoc(artistRef);
+              if (snap.exists()) {
+                return {
+                  id: snap.id,
+                  name: snap.data().name || 'Unknown Artist',
+                  coverURL: snap.data().coverURL || DEFAULT_COVER_URL,
+                } as Artist;
+              }
+              return { id, name: 'Unknown Artist', coverURL: DEFAULT_COVER_URL } as Artist;
+            });
+            fetchedMainArtists = await Promise.all(artistPromises);
           }
 
           // Fetch tracks
