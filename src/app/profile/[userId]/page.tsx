@@ -21,9 +21,10 @@ import { followUser, unfollowUser } from '@/utils/follow';
 
 import BackButton from '@/components/ui/BackButton';
 import Link from 'next/link';
-import SectionTitle from '@/components/SectionTitle';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Artist {
   id: string;
@@ -155,28 +156,45 @@ export default function ProfilePage() {
   }, [fetchTopInfo]);
 
   return (
-    <div className="container mx-auto space-y-6 px-4 py-6">
-      <div className="flex items-center justify-between">
-        <SectionTitle>{userProfile?.displayName || 'User'}’s Profile</SectionTitle>
-        <div className="flex gap-2">
-          {user?.uid === userId && (
-            <Link href="/account" className="text-sm text-muted-foreground hover:underline">
-              Edit Profile
-            </Link>
-          )}
-          <BackButton />
-        </div>
-      </div>
+    <div className="container mx-auto space-y-6 px-4 py-6 md:space-y-8 md:py-10">
+      <BackButton />
 
-      <div className="flex items-center gap-4">
-        <span className="text-sm">{followers} Followers</span>
-        <span className="text-sm">{following} Following</span>
-        {user && user.uid !== userId && (
-          <Button size="sm" onClick={handleFollow}>
-            {isFollowing ? 'Unfollow' : 'Follow'}
-          </Button>
-        )}
-      </div>
+      <Card className="overflow-hidden shadow-xl">
+        <div className="relative h-40 bg-gradient-to-r from-primary/20 to-accent/20 md:h-56" />
+        <CardContent className="relative z-10 -mt-20 p-4 md:p-6">
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-end">
+            <Avatar className="size-28 border-4 border-background shadow-lg md:size-36">
+              <AvatarImage src={userProfile?.avatarURL || ''} alt={userProfile?.displayName} />
+              <AvatarFallback>
+                {userProfile?.displayName?.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="text-center sm:text-left">
+              <h1 className="text-3xl font-bold md:text-4xl">
+                {userProfile?.displayName || userId}
+              </h1>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                <span className="text-sm text-muted-foreground">{followers} Followers</span>
+                <span className="text-sm text-muted-foreground">{following} Following</span>
+                {user?.uid === userId && (
+                  <Link href="/account" className="text-sm text-muted-foreground hover:underline">
+                    Edit Profile
+                  </Link>
+                )}
+                {user && user.uid !== userId && (
+                  <Button size="sm" onClick={handleFollow}>
+                    {isFollowing ? 'Unfollow' : 'Follow'}
+                  </Button>
+                )}
+              </div>
+              {userProfile?.bio && (
+                <p className="mt-2 text-sm text-muted-foreground">{userProfile.bio}</p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {user?.uid === userId && (
         <div className="space-y-2">
