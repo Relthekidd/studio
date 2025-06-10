@@ -22,7 +22,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     }
   }, [loading, user, pathname, router]);
 
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -35,7 +34,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const showLayout = user && pathname !== '/login';
 
   return (
-    <div className="relative min-h-screen pb-28">
+    <div className="relative flex min-h-screen flex-col pb-28">
       {showLayout && (
         <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/75 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto flex items-center justify-between p-4">
@@ -57,7 +56,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </header>
       )}
 
-      <main className={showLayout ? 'pt-20' : ''}>
+      <main className={cn(showLayout ? 'pt-20' : '', 'flex-grow overflow-y-auto')}>
         {pathname === '/login' && !user
           ? React.cloneElement(children as React.ReactElement)
           : children}
