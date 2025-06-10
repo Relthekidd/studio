@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, setDoc, query, where, getDocs, addDoc } from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthProvider';
@@ -15,6 +15,18 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, ArrowDown, ArrowUp, GripVertical } from 'lucide-react';
 import Link from 'next/link';
+import SectionTitle from '@/components/SectionTitle';
+
+async function getOrCreateArtistIdByName(name: string) {
+  const q = query(collection(db, 'artists'), where('name', '==', name.trim()));
+  const snap = await getDocs(q);
+  if (!snap.empty) {
+    return snap.docs[0].id;
+  }
+  // Create new artist
+  const newArtistRef = await addDoc(collection(db, 'artists'), { name: name.trim() });
+  return newArtistRef.id;
+}
 
 export default function AdminUploadPage() {
   const router = useRouter();
@@ -105,10 +117,14 @@ export default function AdminUploadPage() {
       if (type === 'album') {
         const albumRef = doc(collection(db, 'albums'));
         albumId = albumRef.id;
+        const mainArtistId = await getOrCreateArtistIdByName(mainArtistName);
+
+        // Save album with mainArtistIds as [mainArtistId]
         await setDoc(albumRef, {
           id: albumId,
           title: albumName.trim(),
-          mainArtist: mainArtistName,
+          mainArtistIds: [mainArtistId],
+          artistIds: [mainArtistId], // or add featured artist IDs as well
           coverURL,
           genre,
           description: description.trim(),
@@ -126,6 +142,8 @@ export default function AdminUploadPage() {
           type === 'album'
             ? doc(collection(db, 'albums', albumId, 'songs'))
             : doc(collection(db, 'songs'));
+
+        const artistId = await getOrCreateArtistIdByName(song.mainArtist || mainArtistName);
 
         await setDoc(songRef, {
           id: songRef.id,
@@ -158,10 +176,12 @@ export default function AdminUploadPage() {
     }
   };
 
+  if (loading || !user) return <div className="p-6">Loading...</div>;
+
   return (
-    <div className="container max-w-xl space-y-6 py-8">
+    <div className="container mx-auto space-y-6 px-4 py-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Upload</h1>
+        <SectionTitle>Upload Music</SectionTitle>
         <Link
           href="/"
           className="flex items-center gap-1 text-sm text-muted-foreground hover:underline"
@@ -171,47 +191,46 @@ export default function AdminUploadPage() {
       </div>
 
       <Card>
-        <CardContent className="space-y-4 p-6">
-          <h2 className="text-xl font-semibold">Basic Info</h2>
-          {/* Type Selection */}
-          <div className="space-y-2">
-            <Label>Type</Label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value as 'single' | 'album')}
-              className="w-full rounded border border-gray-700 bg-black px-3 py-2 text-white"
-            >
-              <option value="single">Single</option>
-              <option value="album">Album</option>
-            </select>
+        <CardContent className="space-y-6 p-6">
+          <div className="space-y-4">
+            <h2 className="font-semibold text-lg">Basic Info</h2>
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value as 'single' | 'album')}
+                className="w-full rounded border border-gray-700 bg-black px-3 py-2 text-white"
+              >
+                <option value="single">Single</option>
+                <option value="album">Album</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>Main Artist</Label>
+              <Input
+                placeholder="Main Artist"
+                value={mainArtist}
+                onChange={(e) => setMainArtist(e.target.value)}
+                className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Cover Art</Label>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+              />
+              {coverFile && (
+                <p className="text-sm text-muted-foreground">{coverFile.name}</p>
+              )}
+            </div>
           </div>
 
-          {/* Cover Art */}
-          <div className="space-y-2">
-            <Label>Cover Art</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
-              className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-            />
-          </div>
-
-          {/* Main Artist */}
-          <div className="space-y-2">
-            <Label>Main Artist</Label>
-            <Input
-              placeholder="Main Artist"
-              value={mainArtist}
-              onChange={(e) => setMainArtist(e.target.value)}
-              className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-            />
-          </div>
-
-          {/* Album-Specific Fields */}
           {type === 'album' && (
-            <>
-              <h2 className="text-xl font-semibold">Album Details</h2>
+            <div className="space-y-4">
+              <h2 className="font-semibold text-lg">Album Details</h2>
               <div className="space-y-2">
                 <Label>Album Name</Label>
                 <Input
@@ -255,7 +274,7 @@ export default function AdminUploadPage() {
               </div>
               {songs.length > 0 && (
                 <>
-                  <h3 className="text-lg font-semibold">Songs</h3>
+                  <h3 className="font-semibold">Songs</h3>
                   <ul className="space-y-4">
                     {songs.map((song, index) => (
                       <li
@@ -321,13 +340,12 @@ export default function AdminUploadPage() {
                   </ul>
                 </>
               )}
-            </>
+            </div>
           )}
 
-          {/* Single-Specific Fields */}
           {type === 'single' && (
-            <>
-              <h2 className="text-xl font-semibold">Single Details</h2>
+            <div className="space-y-4">
+              <h2 className="font-semibold text-lg">Single Details</h2>
               <div className="space-y-2">
                 <Label>Featured Artists</Label>
                 <Input
@@ -362,12 +380,11 @@ export default function AdminUploadPage() {
                 )}
                 {songs[0] && <p className="text-sm text-muted-foreground">{songs[0].file.name}</p>}
               </div>
-            </>
+            </div>
           )}
 
-          {/* Genre */}
-          <h2 className="text-xl font-semibold">Genre</h2>
           <div className="space-y-2">
+            <h2 className="font-semibold text-lg">Genre</h2>
             <Label>Genre</Label>
             <select
               value={genre}
@@ -383,7 +400,17 @@ export default function AdminUploadPage() {
             </select>
           </div>
 
-          {/* Upload Button */}
+          <div className="space-y-2">
+            <h2 className="font-semibold text-lg">Description</h2>
+            <Label>Description</Label>
+            <textarea
+              className="w-full rounded border border-gray-700 bg-black p-2 text-white"
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
           <Button disabled={uploading} onClick={handleUpload} className="w-full">
             {uploading ? 'Uploading...' : 'Upload'}
           </Button>

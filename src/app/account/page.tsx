@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { signOut } from 'firebase/auth';
+import { signOut, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { updateUserProfile } from '@/utils/user';
@@ -91,6 +91,23 @@ export default function AccountPage() {
   const handleLogout = async () => {
     await signOut(auth);
     router.push('/login');
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({ title: 'Enter your email address first.' });
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast({ title: 'Password reset email sent', description: 'Check your inbox.' });
+    } catch (err: any) {
+      toast({
+        title: 'Failed to send reset email',
+        description: err.message,
+        variant: 'destructive',
+      });
+    }
   };
 
   if (loading || !user) return <div className="p-6">Loading...</div>;
@@ -202,9 +219,14 @@ export default function AccountPage() {
               <CardTitle>Security</CardTitle>
               <CardDescription>Manage your password</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Change Password
+            <CardContent className="space-y-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleForgotPassword}
+                type="button"
+              >
+                Forgot Password
               </Button>
             </CardContent>
           </Card>
