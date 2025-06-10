@@ -3,15 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import {
-  collection,
-  serverTimestamp,
-  doc,
-  setDoc,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
+import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthProvider';
@@ -48,13 +40,6 @@ export default function AdminUploadPage() {
     }
   }, [user, loading, isAdmin, router, toast]);
 
-  const handleReorder = (fromIndex: number, toIndex: number) => {
-    const updatedSongs = [...songs];
-    const [movedSong] = updatedSongs.splice(fromIndex, 1);
-    updatedSongs.splice(toIndex, 0, movedSong);
-    setSongs(updatedSongs);
-  };
-
   const handleSongMetadataChange = (
     index: number,
     field: 'title' | 'mainArtist' | 'featuredArtists',
@@ -85,7 +70,6 @@ export default function AdminUploadPage() {
           .filter(Boolean);
 
       const mainArtistName = mainArtist.trim();
-      const featuredArtistNames = parseNames(featuredArtists);
 
       // Upload cover file
       const coverRef = ref(storage, `covers/${Date.now()}-${coverFile.name}`);
@@ -237,9 +221,7 @@ export default function AdminUploadPage() {
                       <Input
                         placeholder="Song Title"
                         value={song.title}
-                        onChange={(e) =>
-                          handleSongMetadataChange(index, 'title', e.target.value)
-                        }
+                        onChange={(e) => handleSongMetadataChange(index, 'title', e.target.value)}
                         className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
                       />
                       <Input

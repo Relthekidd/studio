@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
-import {
-  collection,
-  getDocs,
-  query,
-  orderBy,
-  limit,
-} from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
 import { AlbumCard } from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
@@ -16,15 +10,17 @@ import type { Track } from '@/types/music';
 
 export default function DiscoverPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [trending, setTrending] = useState<Track[]>([]);
 
   useEffect(() => {
     async function fetchTracks() {
       const songsRef = collection(db, 'songs');
       const albumsRef = collection(db, 'albums');
 
-      const [songsSnap, albumsSnap] = await Promise.all([
+      const [songsSnap, albumsSnap, trendingSnap] = await Promise.all([
         getDocs(query(songsRef, orderBy('createdAt', 'desc'), limit(20))),
         getDocs(query(albumsRef, orderBy('createdAt', 'desc'), limit(20))),
+        getDocs(query(songsRef, orderBy('streams', 'desc'), limit(5))),
       ]);
 
       const singles: Track[] = songsSnap.docs
@@ -44,6 +40,21 @@ export default function DiscoverPage() {
         })
         .filter((t) => t.type !== 'album');
 
+      const trendingSingles: Track[] = trendingSnap.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.title,
+          artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
+          audioURL: data.audioURL,
+          coverURL: data.coverURL,
+          duration: data.duration,
+          type: data.type || 'track',
+          createdAt: data.createdAt?.toDate() || new Date(),
+          order: data.order || 0,
+        };
+      });
+
       const albums: Track[] = albumsSnap.docs.map((doc) => {
         const data = doc.data();
         return {
@@ -60,13 +71,13 @@ export default function DiscoverPage() {
       });
 
       setTracks([...singles, ...albums]);
+      setTrending(trendingSingles);
     }
 
     fetchTracks();
   }, []);
 
   const newestReleases = tracks.slice(0, 5);
-  const trending = tracks.slice(5, 10); // Placeholder – real logic later
   const suggestions = tracks.slice(10, 15); // Placeholder – personalized logic later
 
   return (

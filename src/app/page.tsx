@@ -1,13 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  collection,
-  getDocs,
-  query,
-  orderBy,
-  where,
-} from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Track } from '@/types/music';
 import Section from '@/components/section';
@@ -26,9 +20,10 @@ export default function Home() {
         const songsRef = collection(db, 'songs');
         const albumsRef = collection(db, 'albums');
 
-        const [songsSnap, albumsSnap] = await Promise.all([
+        const [songsSnap, albumsSnap, trendingSnap] = await Promise.all([
           getDocs(query(songsRef, orderBy('createdAt', 'desc'))),
           getDocs(query(albumsRef, orderBy('createdAt', 'desc'))),
+          getDocs(query(songsRef, orderBy('streams', 'desc'), limit(5))),
         ]);
 
         const singles: Track[] = songsSnap.docs
@@ -48,6 +43,21 @@ export default function Home() {
             };
           })
           .filter((t) => t.type !== 'album');
+
+        const trendingSingles: Track[] = trendingSnap.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title,
+            artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
+            audioURL: data.audioURL,
+            coverURL: data.coverURL,
+            duration: data.duration || 0,
+            type: data.type || 'track',
+            createdAt: data.createdAt?.toDate() || new Date(),
+            order: data.order || 0,
+          };
+        });
 
         const albums: Track[] = await Promise.all(
           albumsSnap.docs.map(async (doc) => {
@@ -88,7 +98,7 @@ export default function Home() {
         const combined = [...singles, ...albums];
 
         setRecentSongs(combined.slice(0, 10));
-        setTrendingSongs(combined.slice(0, 5));
+        setTrendingSongs(trendingSingles);
       } catch (error) {
         console.error('[Home] Error fetching songs:', error);
       } finally {
