@@ -17,16 +17,11 @@ export default function MiniPlayer() {
     duration,
   } = usePlayerStore();
 
-  // Show MiniPlayer only if currentTrack exists
   if (!currentTrack || !currentTrack.audioURL) {
     console.warn('MiniPlayer: No current track or missing audioURL.');
     return null;
   }
 
-  // Debug log for cover URL
-  console.log('Cover URL:', currentTrack.coverURL);
-
-  // Calculate progress percentage
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
@@ -50,37 +45,37 @@ export default function MiniPlayer() {
         <Image
           src={currentTrack.coverURL || DEFAULT_COVER_URL}
           alt={currentTrack.title || 'Unknown Track'}
-          fill // Use `fill` for the image
-          style={{ objectFit: 'cover' }} // Replace `objectFit` with inline style
-          priority // Add priority for LCP optimization
+          fill
+          style={{ objectFit: 'cover' }}
+          priority
           unoptimized
         />
       </div>
 
       {/* Track Info */}
       <div className="flex-1 truncate">
-        <p className="truncate text-left text-sm font-semibold text-foreground md:text-base">
+        <p className="truncate text-left text-base font-semibold text-foreground md:text-lg">
           {currentTrack.title || 'Unknown Title'}
         </p>
-        <p className="truncate text-left text-xs text-muted-foreground md:text-sm">
+        <p className="truncate text-left text-sm text-muted-foreground md:text-base">
           {formatArtists(currentTrack.artists)}
         </p>
       </div>
 
       {/* Play/Pause */}
       <button
-        className="ml-3 flex items-center justify-center rounded-full bg-primary p-2 text-white shadow-md hover:bg-primary/90"
+        className="ml-4 flex items-center justify-center rounded-full bg-primary p-3 text-white shadow-lg hover:bg-primary/90"
         onClick={(e) => {
           e.stopPropagation();
           togglePlayPause();
         }}
         aria-label={isPlaying ? 'Pause' : 'Play'}
       >
-        {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+        {isPlaying ? <Pause size={28} /> : <Play size={28} />}
       </button>
 
       {/* Progress Bar */}
-      <div className="absolute inset-x-0 bottom-0 h-1 bg-secondary/30">
+      <div className="absolute inset-x-0 bottom-0 h-1.5 bg-secondary/30">
         <Progress
           value={progress}
           className="h-full [&>div]:bg-gradient-to-r [&>div]:from-accent/70 [&>div]:to-primary/70"

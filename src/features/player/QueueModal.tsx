@@ -1,12 +1,14 @@
 'use client';
 
+import React from 'react';
 import { usePlayerStore } from './store';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import Image from 'next/image';
 import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { formatArtists } from '@/utils/formatArtists';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
 import { Track } from '@/types/music';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 interface QueueModalProps {
   isOpen: boolean;
@@ -16,12 +18,47 @@ interface QueueModalProps {
 export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
   const queue = usePlayerStore((state) => state.queue);
   const queueIndex = usePlayerStore((state) => state.queueIndex);
-  const setTrack = usePlayerStore((state) => state.setTrack);
-  const setQueue = usePlayerStore((state) => state.setQueue);
+
+  const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDrop = (index: number) => {
+    if (draggedIndex === null || draggedIndex === index) {
+      setDraggedIndex(null);
+      return;
+    }
+    const updatedQueue = [...queue];
+    const [moved] = updatedQueue.splice(draggedIndex, 1);
+    updatedQueue.splice(index, 0, moved);
+    usePlayerStore.setState({ queue: updatedQueue });
+
+    if (queueIndex === draggedIndex) {
+      usePlayerStore.setState({ queueIndex: index });
+    } else if (queueIndex > draggedIndex && queueIndex <= index) {
+      usePlayerStore.setState({ queueIndex: queueIndex - 1 });
+    } else if (queueIndex < draggedIndex && queueIndex >= index) {
+      usePlayerStore.setState({ queueIndex: queueIndex + 1 });
+    }
+
+    setDraggedIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
 
   const handleTrackClick = (track: Track, index: number) => {
-    setTrack(track);
-    usePlayerStore.setState({ queueIndex: index });
+    usePlayerStore.setState({
+      currentTrack: track,
+      queueIndex: index,
+      isPlaying: true,
+      currentTime: 0,
+      progress: 0,
+      duration: 0,
+    });
   };
 
   const handleRemoveTrack = (index: number) => {
@@ -56,9 +93,13 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
               key={`${track.id}-${index}`} // Use a combination of track.id and index for a unique key
               className={`flex cursor-pointer items-center gap-3 rounded-md p-2 text-left ${
                 index === queueIndex ? 'bg-primary/10 font-semibold text-primary' : ''
-              }`}
+              } ${draggedIndex === index ? 'opacity-50' : ''}`}
               role="button"
               tabIndex={0}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(index)}
               onClick={() => handleTrackClick(track, index)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -78,31 +119,35 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
                 />
               </div>
 
-              {/* Track Info */}
-              <div className="flex min-w-0 flex-col">
-                <p className="truncate text-sm font-semibold">{track.title || 'Untitled'}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {formatArtists(track.artists)}
-                </p>
-              </div>
+                        {/* Track Info */}
+                        <div className="flex min-w-0 flex-col">
+                          <p className="truncate text-sm font-semibold">{track.title || 'Untitled'}</p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {formatArtists(track.artists)}
+                          </p>
+                        </div>
 
-              {/* Remove Button */}
-              {index !== queueIndex && (
-                <button
-                  className="ml-auto text-muted-foreground hover:text-destructive"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering the track click
-                    handleRemoveTrack(index);
-                  }}
-                  aria-label={`Remove ${track.title} from queue`}
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-          ))}
+                        {/* Remove Button */}
+                        {index !== queueIndex && (
+                          <button
+                            className="ml-auto text-muted-foreground hover:text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent triggering the track click
+                              handleRemoveTrack(index);
+                            }}
+                            aria-label={`Remove ${track.title} from queue`}
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
         </div>
       </SheetContent>
     </Sheet>
   );
 }
+function setQueue(updatedQueue: Track[]) {
+  throw new Error('Function not implemented.');
+}
+

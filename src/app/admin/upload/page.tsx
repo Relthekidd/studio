@@ -3,7 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
+import {
+  collection,
+  serverTimestamp,
+  doc,
+  setDoc,
+  query,
+  where,
+  getDocs,
+} from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthProvider';
@@ -39,6 +47,13 @@ export default function AdminUploadPage() {
       router.replace('/');
     }
   }, [user, loading, isAdmin, router, toast]);
+
+  const handleReorder = (fromIndex: number, toIndex: number) => {
+    const updatedSongs = [...songs];
+    const [movedSong] = updatedSongs.splice(fromIndex, 1);
+    updatedSongs.splice(toIndex, 0, movedSong);
+    setSongs(updatedSongs);
+  };
 
   const handleSongMetadataChange = (
     index: number,
