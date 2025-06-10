@@ -3,15 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import {
-  collection,
-  serverTimestamp,
-  doc,
-  setDoc,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
+import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthProvider';
@@ -21,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowDown, ArrowUp, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminUploadPage() {
@@ -40,6 +32,7 @@ export default function AdminUploadPage() {
     { file: File; title: string; mainArtist: string; featuredArtists: string }[]
   >([]);
   const [uploading, setUploading] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -53,6 +46,23 @@ export default function AdminUploadPage() {
     const [movedSong] = updatedSongs.splice(fromIndex, 1);
     updatedSongs.splice(toIndex, 0, movedSong);
     setSongs(updatedSongs);
+  };
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDrop = (index: number) => {
+    if (draggedIndex === null || draggedIndex === index) {
+      setDraggedIndex(null);
+      return;
+    }
+    handleReorder(draggedIndex, index);
+    setDraggedIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLIElement>) => {
+    e.preventDefault();
   };
 
   const handleSongMetadataChange = (
@@ -162,6 +172,7 @@ export default function AdminUploadPage() {
 
       <Card>
         <CardContent className="space-y-4 p-6">
+          <h2 className="text-xl font-semibold">Basic Info</h2>
           {/* Type Selection */}
           <div className="space-y-2">
             <Label>Type</Label>
@@ -187,28 +198,38 @@ export default function AdminUploadPage() {
           </div>
 
           {/* Main Artist */}
-          <Input
-            placeholder="Main Artist"
-            value={mainArtist}
-            onChange={(e) => setMainArtist(e.target.value)}
-            className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-          />
+          <div className="space-y-2">
+            <Label>Main Artist</Label>
+            <Input
+              placeholder="Main Artist"
+              value={mainArtist}
+              onChange={(e) => setMainArtist(e.target.value)}
+              className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+            />
+          </div>
 
           {/* Album-Specific Fields */}
           {type === 'album' && (
             <>
-              <Input
-                placeholder="Album Name"
-                value={albumName}
-                onChange={(e) => setAlbumName(e.target.value)}
-                className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-              />
-              <textarea
-                className="w-full rounded border border-gray-700 bg-black p-2 text-white"
-                placeholder="Album Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
+              <h2 className="text-xl font-semibold">Album Details</h2>
+              <div className="space-y-2">
+                <Label>Album Name</Label>
+                <Input
+                  placeholder="Album Name"
+                  value={albumName}
+                  onChange={(e) => setAlbumName(e.target.value)}
+                  className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Album Description</Label>
+                <textarea
+                  className="w-full rounded border border-gray-700 bg-black p-2 text-white"
+                  placeholder="Album Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
               <div className="space-y-2">
                 <Label>Audio Files</Label>
                 <Input
@@ -228,36 +249,75 @@ export default function AdminUploadPage() {
                   }
                   className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
                 />
+                {songs.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No files selected</p>
+                )}
               </div>
               {songs.length > 0 && (
-                <ul className="space-y-4">
-                  {songs.map((song, index) => (
-                    <li key={index} className="space-y-2">
-                      <Input
-                        placeholder="Song Title"
-                        value={song.title}
-                        onChange={(e) => handleSongMetadataChange(index, 'title', e.target.value)}
-                        className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-                      />
-                      <Input
-                        placeholder="Main Artist"
-                        value={song.mainArtist}
-                        onChange={(e) =>
-                          handleSongMetadataChange(index, 'mainArtist', e.target.value)
-                        }
-                        className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-                      />
-                      <Input
-                        placeholder="Featured Artists (comma separated)"
-                        value={song.featuredArtists}
-                        onChange={(e) =>
-                          handleSongMetadataChange(index, 'featuredArtists', e.target.value)
-                        }
-                        className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-                      />
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <h3 className="text-lg font-semibold">Songs</h3>
+                  <ul className="space-y-4">
+                    {songs.map((song, index) => (
+                      <li
+                        key={index}
+                        className={`space-y-2 rounded border border-gray-700 p-2 ${
+                          draggedIndex === index ? 'opacity-50' : ''
+                        }`}
+                        draggable
+                        onDragStart={() => handleDragStart(index)}
+                        onDragOver={handleDragOver}
+                        onDrop={() => handleDrop(index)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">{song.file.name}</span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              disabled={index === 0}
+                              onClick={() => handleReorder(index, index - 1)}
+                              aria-label="Move up"
+                              className="disabled:opacity-50"
+                            >
+                              <ArrowUp size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={index === songs.length - 1}
+                              onClick={() => handleReorder(index, index + 1)}
+                              aria-label="Move down"
+                              className="disabled:opacity-50"
+                            >
+                              <ArrowDown size={16} />
+                            </button>
+                            <GripVertical size={16} className="cursor-grab" />
+                          </div>
+                        </div>
+                        <Input
+                          placeholder="Song Title"
+                          value={song.title}
+                          onChange={(e) => handleSongMetadataChange(index, 'title', e.target.value)}
+                          className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                        />
+                        <Input
+                          placeholder="Main Artist"
+                          value={song.mainArtist}
+                          onChange={(e) =>
+                            handleSongMetadataChange(index, 'mainArtist', e.target.value)
+                          }
+                          className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                        />
+                        <Input
+                          placeholder="Featured Artists (comma separated)"
+                          value={song.featuredArtists}
+                          onChange={(e) =>
+                            handleSongMetadataChange(index, 'featuredArtists', e.target.value)
+                          }
+                          className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </>
               )}
             </>
           )}
@@ -265,12 +325,16 @@ export default function AdminUploadPage() {
           {/* Single-Specific Fields */}
           {type === 'single' && (
             <>
-              <Input
-                placeholder="Featured Artists (comma separated)"
-                value={featuredArtists}
-                onChange={(e) => setFeaturedArtists(e.target.value)}
-                className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
-              />
+              <h2 className="text-xl font-semibold">Single Details</h2>
+              <div className="space-y-2">
+                <Label>Featured Artists</Label>
+                <Input
+                  placeholder="Featured Artists (comma separated)"
+                  value={featuredArtists}
+                  onChange={(e) => setFeaturedArtists(e.target.value)}
+                  className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
+                />
+              </div>
               <div className="space-y-2">
                 <Label>Audio File</Label>
                 <Input
@@ -291,11 +355,16 @@ export default function AdminUploadPage() {
                   }}
                   className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
                 />
+                {songs.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No file selected</p>
+                )}
+                {songs[0] && <p className="text-sm text-muted-foreground">{songs[0].file.name}</p>}
               </div>
             </>
           )}
 
           {/* Genre */}
+          <h2 className="text-xl font-semibold">Genre</h2>
           <div className="space-y-2">
             <Label>Genre</Label>
             <select

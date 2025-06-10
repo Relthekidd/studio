@@ -12,7 +12,7 @@ import type { Track } from '@/types/music';
 export default function StreamStatsPage() {
   const router = useRouter();
   const { user, isAdmin, loading } = useAuth();
-  const [topTracks, setTopTracks] = useState<Track[]>([]);
+  const [topTracks, setTopTracks] = useState<(Track & { streams: number })[]>([]);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {

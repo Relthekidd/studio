@@ -38,9 +38,7 @@ export function useLibrary() {
     setLoading(true);
     try {
       const likedSongsSnap = await getDocs(collection(db, 'users', user.uid, 'likedSongs'));
-      const savedAlbumsSnap = await getDocs(
-        collection(db, 'users', user.uid, 'savedAlbums')
-      );
+      const savedAlbumsSnap = await getDocs(collection(db, 'users', user.uid, 'savedAlbums'));
       const playlistsSnap = await getDocs(collection(db, 'users', user.uid, 'playlists'));
 
       const transformToTrack = (doc: any): Track => {
@@ -52,6 +50,8 @@ export function useLibrary() {
           audioURL: data.audioURL || '',
           coverURL: data.coverURL || DEFAULT_COVER_URL,
           type: data.type || 'track',
+          order: data.order || 0,
+          createdAt: data.createdAt || new Date(),
           albumId: data.albumId || '',
           album:
             data.album ||
