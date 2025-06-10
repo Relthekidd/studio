@@ -17,7 +17,7 @@ import { PlusCircle } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import { toast } from '@/hooks/use-toast';
 import { savePlaylist } from '@/utils/saveLibraryData';
-import { DEFAULT_COVER_URL } from '@/utils/helpers';
+import { generateCoverFromTitle } from '@/utils/helpers';
 
 interface CreatePlaylistModalProps {
   onPlaylistCreated?: () => void;
@@ -37,7 +37,7 @@ export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylis
     }
 
     try {
-      let imageUrl = DEFAULT_COVER_URL;
+      let imageUrl = generateCoverFromTitle(title);
       if (coverFile) {
         const coverRef = ref(storage, `playlistCovers/${Date.now()}-${coverFile.name}`);
         await uploadBytesResumable(coverRef, coverFile);
