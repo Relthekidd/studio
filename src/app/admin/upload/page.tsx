@@ -269,7 +269,9 @@ export default function AdminUploadPage() {
                         onDrop={() => handleDrop(index)}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">{song.file.name}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {index + 1}. {song.file.name}
+                          </span>
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
