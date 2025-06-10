@@ -6,8 +6,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import Image from 'next/image';
 import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { formatArtists } from '@/utils/formatArtists';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
 import { Track } from '@/types/music';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 interface QueueModalProps {
   isOpen: boolean;
@@ -63,10 +64,7 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
   const handleRemoveTrack = (index: number) => {
     if (index === queueIndex) return; // Prevent removing the currently playing track
     const updatedQueue = queue.filter((_, i) => i !== index);
-    usePlayerStore.setState({ queue: updatedQueue });
-    if (index < queueIndex) {
-      usePlayerStore.setState({ queueIndex: queueIndex - 1 });
-    }
+    setQueue(updatedQueue);
   };
 
   return (
@@ -121,30 +119,36 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
                 />
               </div>
 
-              {/* Track Info */}
-              <div className="flex min-w-0 flex-col">
-                <p className="truncate text-sm font-semibold">{track.title || 'Untitled'}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {formatArtists(track.artists)}
-                </p>
-              </div>
+                        {/* Track Info */}
+                        <div className="flex min-w-0 flex-col">
+                          <p className="truncate text-sm font-semibold">{track.title || 'Untitled'}</p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {formatArtists(track.artists)}
+                          </p>
+                        </div>
 
-              {/* Remove Button */}
-              {index !== queueIndex && (
-                <button
-                  className="ml-auto text-muted-foreground hover:text-destructive"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering the track click
-                    handleRemoveTrack(index);
-                  }}
-                  aria-label={`Remove ${track.title} from queue`}
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
+                        {/* Remove Button */}
+                        {index !== queueIndex && (
+                          <button
+                            className="ml-auto text-muted-foreground hover:text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent triggering the track click
+                              handleRemoveTrack(index);
+                            }}
+                            aria-label={`Remove ${track.title} from queue`}
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </SheetContent>
     </Sheet>
   );

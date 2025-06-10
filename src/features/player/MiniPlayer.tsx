@@ -17,21 +17,16 @@ export default function MiniPlayer() {
     duration,
   } = usePlayerStore();
 
-  // Show MiniPlayer only if currentTrack exists
   if (!currentTrack || !currentTrack.audioURL) {
     console.warn('MiniPlayer: No current track or missing audioURL.');
     return null;
   }
 
-  // Debug log for cover URL
-  console.log('Cover URL:', currentTrack.coverURL);
-
-  // Calculate progress percentage
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <div
-      className="animate-slideInUpMini fixed inset-x-0 z-50 flex h-20 items-center border-t border-border/70 bg-card/80 px-4 shadow-2xl backdrop-blur-lg transition-transform duration-300 ease-in-out md:bottom-4 md:px-6"
+      className="animate-slideInUpMini fixed inset-x-0 z-50 flex h-24 items-center border-t border-border/70 bg-gradient-to-r from-card/80 to-secondary/80 px-6 shadow-2xl backdrop-blur-lg transition-transform duration-300 ease-in-out md:bottom-4 md:px-8"
       style={{ bottom: `calc(4rem + env(safe-area-inset-bottom))` }}
       role="button"
       tabIndex={0}
@@ -45,14 +40,16 @@ export default function MiniPlayer() {
     >
       {/* Cover Image */}
       <div
-        className={`relative mr-3 size-12 overflow-hidden rounded-md shadow-md transition-shadow group-hover:shadow-primary/30 md:mr-4 md:size-14 ${isPlaying ? 'animate-pulse' : ''}`}
+        className={`relative mr-4 size-16 overflow-hidden rounded-lg shadow-lg transition-shadow group-hover:shadow-primary/30 md:mr-6 md:size-20 ${
+          isPlaying ? 'animate-pulse' : ''
+        }`}
       >
         <Image
           src={currentTrack.coverURL || DEFAULT_COVER_URL}
           alt={currentTrack.title || 'Unknown Track'}
-          fill // Use `fill` for the image
-          style={{ objectFit: 'cover' }} // Replace `objectFit` with inline style
-          priority // Add priority for LCP optimization
+          fill
+          style={{ objectFit: 'cover' }}
+          priority
           unoptimized
         />
       </div>
