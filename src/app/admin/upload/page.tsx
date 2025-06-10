@@ -7,10 +7,7 @@ import {
   collection,
   serverTimestamp,
   doc,
-  setDoc,
-  query,
-  where,
-  getDocs,
+  setDoc
 } from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
@@ -48,12 +45,6 @@ export default function AdminUploadPage() {
     }
   }, [user, loading, isAdmin, router, toast]);
 
-  const handleReorder = (fromIndex: number, toIndex: number) => {
-    const updatedSongs = [...songs];
-    const [movedSong] = updatedSongs.splice(fromIndex, 1);
-    updatedSongs.splice(toIndex, 0, movedSong);
-    setSongs(updatedSongs);
-  };
 
   const handleSongMetadataChange = (
     index: number,
@@ -85,7 +76,6 @@ export default function AdminUploadPage() {
           .filter(Boolean);
 
       const mainArtistName = mainArtist.trim();
-      const featuredArtistNames = parseNames(featuredArtists);
 
       // Upload cover file
       const coverRef = ref(storage, `covers/${Date.now()}-${coverFile.name}`);
