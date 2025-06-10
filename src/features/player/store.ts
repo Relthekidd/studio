@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { Track } from '@/types/music';
 
 type RepeatMode = 'off' | 'one' | 'all';
@@ -39,9 +38,7 @@ type PlayerStore = {
   skipToPrev: () => void;
 };
 
-export const usePlayerStore = create<PlayerStore>()(
-  persist(
-    (set, get) => ({
+export const usePlayerStore = create<PlayerStore>()((set, get) => ({
       currentTrack: null,
       isPlaying: false,
       isExpanded: false,
@@ -142,21 +139,4 @@ export const usePlayerStore = create<PlayerStore>()(
           });
         }
       },
-    }),
-    {
-      name: 'player-store',
-      partialize: (state) => ({
-        currentTrack: state.currentTrack,
-        isPlaying: state.isPlaying,
-        currentTime: state.currentTime,
-        duration: state.duration,
-        volume: state.volume,
-        isMuted: state.isMuted,
-        repeatMode: state.repeatMode,
-        shuffleMode: state.shuffleMode,
-        queue: state.queue,
-        queueIndex: state.queueIndex,
-      }),
-    }
-  )
-);
+    }));
