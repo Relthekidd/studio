@@ -3,6 +3,13 @@
 This file is auto-generated.
 
 ---
+### `src/app/admin/upload/page.tsx`
+- [11:3] 'query' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [12:3] 'where' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [13:3] 'getDocs' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [51:9] 'handleReorder' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
+
+---
 ### `src/components/music/QueueModal.tsx`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
