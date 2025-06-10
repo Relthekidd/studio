@@ -5,8 +5,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import Image from 'next/image';
 import { DEFAULT_COVER_URL } from '@/utils/helpers';
 import { formatArtists } from '@/utils/formatArtists';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
 import { Track } from '@/types/music';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 interface QueueModalProps {
   isOpen: boolean;
@@ -30,6 +31,16 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
     setQueue(updatedQueue);
   };
 
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return;
+
+    const updatedQueue = Array.from(queue);
+    const [movedTrack] = updatedQueue.splice(result.source.index, 1);
+    updatedQueue.splice(result.destination.index, 0, movedTrack);
+
+    setQueue(updatedQueue);
+  };
+
   return (
     <Sheet
       open={isOpen}
@@ -50,58 +61,79 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
             View and manage the tracks in your playback queue.
           </p>
         </SheetHeader>
-        <div className="flex flex-col gap-2">
-          {queue.map((track, index) => (
-            <div
-              key={`${track.id}-${index}`} // Use a combination of track.id and index for a unique key
-              className={`flex cursor-pointer items-center gap-3 rounded-md p-2 text-left ${
-                index === queueIndex ? 'bg-primary/10 font-semibold text-primary' : ''
-              }`}
-              role="button"
-              tabIndex={0}
-              onClick={() => handleTrackClick(track, index)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  handleTrackClick(track, index);
-                }
-              }}
-              aria-label={`Play ${track.title}`}
-            >
-              {/* Thumbnail */}
-              <div className="relative size-12 overflow-hidden rounded-md shadow-md">
-                <Image
-                  src={track.coverURL || DEFAULT_COVER_URL}
-                  alt={track.title || 'Unknown Track'}
-                  fill
-                  style={{ objectFit: 'cover' }} // Ensure the image fills the container
-                  unoptimized
-                />
-              </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="queue">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="flex flex-col gap-2"
+              >
+                {queue.map((track, index) => (
+                  <Draggable key={track.id} draggableId={track.id} index={index}>
+                    {(provided) => (
+                      <div
+                        {...provided.draggableProps}
+                        ref={provided.innerRef}
+                        className={`flex cursor-pointer items-center gap-3 rounded-md p-2 text-left ${
+                          index === queueIndex ? 'bg-primary/10 font-semibold text-primary' : ''
+                        }`}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handleTrackClick(track, index)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            handleTrackClick(track, index);
+                          }
+                        }}
+                        aria-label={`Play ${track.title}`}
+                      >
+                        {/* Drag Handle */}
+                        <div {...provided.dragHandleProps} className="cursor-grab">
+                          <GripVertical size={16} className="text-muted-foreground" />
+                        </div>
 
-              {/* Track Info */}
-              <div className="flex min-w-0 flex-col">
-                <p className="truncate text-sm font-semibold">{track.title || 'Untitled'}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {formatArtists(track.artists)}
-                </p>
-              </div>
+                        {/* Thumbnail */}
+                        <div className="relative size-12 overflow-hidden rounded-md shadow-md">
+                          <Image
+                            src={track.coverURL || DEFAULT_COVER_URL}
+                            alt={track.title || 'Unknown Track'}
+                            fill
+                            style={{ objectFit: 'cover' }}
+                            unoptimized
+                          />
+                        </div>
 
-              {/* Remove Button */}
-              {index !== queueIndex && (
-                <button
-                  className="ml-auto text-muted-foreground hover:text-destructive"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering the track click
-                    handleRemoveTrack(index);
-                  }}
-                  aria-label={`Remove ${track.title} from queue`}
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
+                        {/* Track Info */}
+                        <div className="flex min-w-0 flex-col">
+                          <p className="truncate text-sm font-semibold">{track.title || 'Untitled'}</p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {formatArtists(track.artists)}
+                          </p>
+                        </div>
+
+                        {/* Remove Button */}
+                        {index !== queueIndex && (
+                          <button
+                            className="ml-auto text-muted-foreground hover:text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent triggering the track click
+                              handleRemoveTrack(index);
+                            }}
+                            aria-label={`Remove ${track.title} from queue`}
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </SheetContent>
     </Sheet>
   );
