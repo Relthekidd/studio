@@ -18,7 +18,7 @@ import type { Track, Artist } from '@/types/music';
 import { useState, useEffect } from 'react';
 import { saveLikedSong, isSongLiked } from '@/utils/saveLibraryData';
 import { useUser } from '@/hooks/useUser';
-import { getTrackRoute, safeImageSrc } from '@/utils/helpers';
+import { getTrackRoute, safeImageSrc, formatArtists } from '@/utils/helpers';
 
 export function AlbumCard({ item, className }: { item: Track; className?: string }) {
   const router = useRouter();
@@ -28,7 +28,7 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
   const [isFavorited, setIsFavorited] = useState(false);
 
   // Determine type dynamically, falling back to album/single detection
-  const type = item.type || (item.albumId ? 'album' : 'single');
+  const type = item.type === 'album' || item.albumId ? 'album' : 'single';
   const id = item.id;
 
   // Generate the href dynamically based on type and id
@@ -73,15 +73,12 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
     }
   };
 
-  // Determine the artist display logic
-  const artistNames =
-    type === 'album'
-      ? item.artists.slice(0, 1).map((artist: Artist) => artist.name).join(', ') // Show only the main artist for albums
-      : item.artists
-          .map((artist: Artist, index: number) =>
-            index === 0 ? artist.name : `feat. ${artist.name}`
-          )
-          .join(', '); // Show main artist first, then featured artists for singles
+  // Determine the artist display logic with fallbacks for newly uploaded items
+  const artistNames = formatArtists(
+    item.artists?.length
+      ? item.artists
+      : (item as any).mainArtist || (item as any).artist || (item as any).artists
+  );
 
   return (
     <div
@@ -143,9 +140,7 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
       </div>
       <div className="p-3">
         <h3 className="truncate text-sm font-semibold">{item.title || (item as any).name}</h3>
-        {item.artists && (
-          <p className="truncate text-xs text-muted-foreground">{artistNames}</p>
-        )}
+        {artistNames && <p className="truncate text-xs text-muted-foreground">{artistNames}</p>}
       </div>
     </div>
   );
