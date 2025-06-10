@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { usePlayerStore } from './store';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import Image from 'next/image';
@@ -16,18 +17,56 @@ interface QueueModalProps {
 export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
   const queue = usePlayerStore((state) => state.queue);
   const queueIndex = usePlayerStore((state) => state.queueIndex);
-  const setTrack = usePlayerStore((state) => state.setTrack);
-  const setQueue = usePlayerStore((state) => state.setQueue);
+
+  const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDrop = (index: number) => {
+    if (draggedIndex === null || draggedIndex === index) {
+      setDraggedIndex(null);
+      return;
+    }
+    const updatedQueue = [...queue];
+    const [moved] = updatedQueue.splice(draggedIndex, 1);
+    updatedQueue.splice(index, 0, moved);
+    usePlayerStore.setState({ queue: updatedQueue });
+
+    if (queueIndex === draggedIndex) {
+      usePlayerStore.setState({ queueIndex: index });
+    } else if (queueIndex > draggedIndex && queueIndex <= index) {
+      usePlayerStore.setState({ queueIndex: queueIndex - 1 });
+    } else if (queueIndex < draggedIndex && queueIndex >= index) {
+      usePlayerStore.setState({ queueIndex: queueIndex + 1 });
+    }
+
+    setDraggedIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
 
   const handleTrackClick = (track: Track, index: number) => {
-    setTrack(track);
-    usePlayerStore.setState({ queueIndex: index });
+    usePlayerStore.setState({
+      currentTrack: track,
+      queueIndex: index,
+      isPlaying: true,
+      currentTime: 0,
+      progress: 0,
+      duration: 0,
+    });
   };
 
   const handleRemoveTrack = (index: number) => {
     if (index === queueIndex) return; // Prevent removing the currently playing track
     const updatedQueue = queue.filter((_, i) => i !== index);
-    setQueue(updatedQueue);
+    usePlayerStore.setState({ queue: updatedQueue });
+    if (index < queueIndex) {
+      usePlayerStore.setState({ queueIndex: queueIndex - 1 });
+    }
   };
 
   return (
@@ -56,9 +95,13 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
               key={`${track.id}-${index}`} // Use a combination of track.id and index for a unique key
               className={`flex cursor-pointer items-center gap-3 rounded-md p-2 text-left ${
                 index === queueIndex ? 'bg-primary/10 font-semibold text-primary' : ''
-              }`}
+              } ${draggedIndex === index ? 'opacity-50' : ''}`}
               role="button"
               tabIndex={0}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(index)}
               onClick={() => handleTrackClick(track, index)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
