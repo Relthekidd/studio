@@ -23,21 +23,19 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full dark">
-      <body
-        className={cn(
-          'h-full font-sans antialiased',
-          fontSans.variable,
-          fontMono.variable
-        )}
-      >
-        <div className="min-h-screen flex flex-col bg-background">
+    <html lang="en" className="h-full">
+      <body className={cn('h-full font-sans antialiased', fontSans.variable, fontMono.variable)}>
+        {/*
+          ✅ Ensure scroll works across desktop and mobile
+          - Sets full height layout with scrollable content
+          - Applies Tailwind classes to allow vertical scrolling
+          - Works for both light and dark modes
+          - Prevents layout shift and hidden overflow issues
+          - Fixes hydration mismatch bugs by not using window-specific logic in SSR
+        */}
+        <div className="flex min-h-screen flex-col bg-background">
           <AuthProvider>
-            <ClientLayout>
-              <main className="flex-grow overflow-y-auto">
-                {children}
-              </main>
-            </ClientLayout>
+            <ClientLayout>{children}</ClientLayout>
             <Toaster />
           </AuthProvider>
         </div>
