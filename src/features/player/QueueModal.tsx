@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { usePlayerStore } from './store';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import Image from 'next/image';
@@ -17,18 +18,56 @@ interface QueueModalProps {
 export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
   const queue = usePlayerStore((state) => state.queue);
   const queueIndex = usePlayerStore((state) => state.queueIndex);
-  const setTrack = usePlayerStore((state) => state.setTrack);
-  const setQueue = usePlayerStore((state) => state.setQueue);
+
+  const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDrop = (index: number) => {
+    if (draggedIndex === null || draggedIndex === index) {
+      setDraggedIndex(null);
+      return;
+    }
+    const updatedQueue = [...queue];
+    const [moved] = updatedQueue.splice(draggedIndex, 1);
+    updatedQueue.splice(index, 0, moved);
+    usePlayerStore.setState({ queue: updatedQueue });
+
+    if (queueIndex === draggedIndex) {
+      usePlayerStore.setState({ queueIndex: index });
+    } else if (queueIndex > draggedIndex && queueIndex <= index) {
+      usePlayerStore.setState({ queueIndex: queueIndex - 1 });
+    } else if (queueIndex < draggedIndex && queueIndex >= index) {
+      usePlayerStore.setState({ queueIndex: queueIndex + 1 });
+    }
+
+    setDraggedIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
 
   const handleTrackClick = (track: Track, index: number) => {
-    setTrack(track);
-    usePlayerStore.setState({ queueIndex: index });
+    usePlayerStore.setState({
+      currentTrack: track,
+      queueIndex: index,
+      isPlaying: true,
+      currentTime: 0,
+      progress: 0,
+      duration: 0,
+    });
   };
 
   const handleRemoveTrack = (index: number) => {
     if (index === queueIndex) return; // Prevent removing the currently playing track
     const updatedQueue = queue.filter((_, i) => i !== index);
-    setQueue(updatedQueue);
+    usePlayerStore.setState({ queue: updatedQueue });
+    if (index < queueIndex) {
+      usePlayerStore.setState({ queueIndex: queueIndex - 1 });
+    }
   };
 
   const handleDragEnd = (result: any) => {
@@ -61,48 +100,33 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
             View and manage the tracks in your playback queue.
           </p>
         </SheetHeader>
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="queue">
-            {(provided) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className="flex flex-col gap-2"
-              >
-                {queue.map((track, index) => (
-                  <Draggable key={track.id} draggableId={track.id} index={index}>
-                    {(provided) => (
-                      <div
-                        {...provided.draggableProps}
-                        ref={provided.innerRef}
-                        className={`flex cursor-pointer items-center gap-3 rounded-md p-2 text-left ${
-                          index === queueIndex ? 'bg-primary/10 font-semibold text-primary' : ''
-                        }`}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => handleTrackClick(track, index)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            handleTrackClick(track, index);
-                          }
-                        }}
-                        aria-label={`Play ${track.title}`}
-                      >
-                        {/* Drag Handle */}
-                        <div {...provided.dragHandleProps} className="cursor-grab">
-                          <GripVertical size={16} className="text-muted-foreground" />
-                        </div>
-
-                        {/* Thumbnail */}
-                        <div className="relative size-12 overflow-hidden rounded-md shadow-md">
-                          <Image
-                            src={track.coverURL || DEFAULT_COVER_URL}
-                            alt={track.title || 'Unknown Track'}
-                            fill
-                            style={{ objectFit: 'cover' }}
-                            unoptimized
-                          />
-                        </div>
+        <div className="flex flex-col gap-2">
+          {queue.map((track, index) => (
+            <div
+              key={`${track.id}-${index}`} // Use a combination of track.id and index for a unique key
+              className={`flex cursor-pointer items-center gap-3 rounded-md p-2 text-left ${
+                index === queueIndex ? 'bg-primary/10 font-semibold text-primary' : ''
+              }`}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleTrackClick(track, index)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handleTrackClick(track, index);
+                }
+              }}
+              aria-label={`Play ${track.title}`}
+            >
+              {/* Thumbnail */}
+              <div className="relative size-12 overflow-hidden rounded-md shadow-md">
+                <Image
+                  src={track.coverURL || DEFAULT_COVER_URL}
+                  alt={track.title || 'Unknown Track'}
+                  fill
+                  style={{ objectFit: 'cover' }} // Ensure the image fills the container
+                  unoptimized
+                />
+              </div>
 
                         {/* Track Info */}
                         <div className="flex min-w-0 flex-col">
