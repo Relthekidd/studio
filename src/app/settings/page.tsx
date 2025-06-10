@@ -1,110 +1,75 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { doc, getDoc } from 'firebase/firestore';
-import { changeUserEmail, changeUserPassword } from '@/utils/user';
-import { db } from '@/lib/firebase';
 import BackButton from '@/components/ui/BackButton';
 import SectionTitle from '@/components/SectionTitle';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 export default function SettingsPage() {
   const { user, loading } = useAuth();
   const { toast } = useToast();
 
-  const [email, setEmail] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+  const [showExplicit, setShowExplicit] = useState(true);
+  const [compactMode, setCompactMode] = useState(false);
 
-  const fetchProfile = useCallback(async () => {
-    if (!user) return;
-    const snap = await getDoc(doc(db, 'profiles', user.uid));
-    if (snap.exists()) {
-      setEmail(snap.data().email || user.email || '');
-    }
-  }, [user]);
-
+  // Sync dark mode with <html> class
   useEffect(() => {
-    if (user) fetchProfile();
-    const handle = () => fetchProfile();
-    window.addEventListener('settingsChange', handle);
-    return () => window.removeEventListener('settingsChange', handle);
-  }, [user, fetchProfile]);
-
-  const handleEmailChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await changeUserEmail(currentPassword, email);
-      toast({ title: 'Email updated' });
-    } catch (err: any) {
-      toast({
-        title: 'Failed to update email',
-        description: err.message,
-        variant: 'destructive',
-      });
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
-  };
-
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await changeUserPassword(currentPassword, newPassword);
-      toast({ title: 'Password updated' });
-      setNewPassword('');
-    } catch (err: any) {
-      toast({
-        title: 'Failed to change password',
-        description: err.message,
-        variant: 'destructive',
-      });
-    }
-  };
+  }, [darkMode]);
 
   if (loading || !user) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="container mx-auto space-y-6 px-4 py-6">
+    <div className="container mx-auto space-y-6 px-4 py-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <SectionTitle>Settings</SectionTitle>
+        <SectionTitle>App Settings</SectionTitle>
         <BackButton />
       </div>
 
-      <form onSubmit={handleEmailChange} className="space-y-4">
-        <h2 className="font-semibold">Change Email</h2>
-        <Input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="New email"
-        />
-        <Input
-          type="password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          placeholder="Current password"
-        />
-        <Button type="submit">Update Email</Button>
-      </form>
+      <Card>
+        <CardContent className="space-y-6 p-6">
+          <div className="space-y-4">
+            <h2 className="font-semibold text-lg">Appearance</h2>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="darkMode">Dark Mode</Label>
+              <Switch
+                id="darkMode"
+                checked={darkMode}
+                onCheckedChange={setDarkMode}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="compactMode">Compact Mode</Label>
+              <Switch
+                id="compactMode"
+                checked={compactMode}
+                onCheckedChange={setCompactMode}
+              />
+            </div>
+          </div>
 
-      <form onSubmit={handlePasswordChange} className="space-y-4">
-        <h2 className="font-semibold">Change Password</h2>
-        <Input
-          type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          placeholder="New password"
-        />
-        <Input
-          type="password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          placeholder="Current password"
-        />
-        <Button type="submit">Update Password</Button>
-      </form>
+          <div className="space-y-4">
+            <h2 className="font-semibold text-lg">Content</h2>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="showExplicit">Show Explicit Content</Label>
+              <Switch
+                id="showExplicit"
+                checked={showExplicit}
+                onCheckedChange={setShowExplicit}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

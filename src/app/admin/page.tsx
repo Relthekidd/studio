@@ -19,22 +19,36 @@ export default function AdminDashboardPage() {
     }
   }, [user, isAdmin, loading, router]);
 
+  if (loading) return <div className="p-6">Loading...</div>;
+
   return (
-    <div className="container mx-auto max-w-xl space-y-6 py-8">
-      <SectionTitle className="text-3xl font-bold">Admin Dashboard</SectionTitle>
-      <div className="grid gap-4">
-        <Button asChild variant="outline" className="h-32 w-full text-xl">
-          <Link href="/admin/upload" className="flex h-full w-full flex-col items-center justify-center gap-2">
-            <Upload size={32} />
-            Upload Music
-          </Link>
-        </Button>
-        <Button asChild variant="outline" className="h-32 w-full text-xl">
-          <Link href="/admin/streams" className="flex h-full w-full flex-col items-center justify-center gap-2">
-            <BarChart2 size={32} />
-            Stream Tracker
-          </Link>
-        </Button>
+    <div className="container mx-auto space-y-6 px-4 py-6">
+      <div className="flex items-center justify-between">
+        <SectionTitle>Admin Dashboard</SectionTitle>
+        {/* Optionally add a BackButton or user info here */}
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Link href="/admin/upload" className="group">
+          <Button
+            variant="outline"
+            className="w-full h-40 flex flex-col items-center justify-center gap-4 transition-all group-hover:border-primary group-hover:shadow-lg"
+          >
+            <Upload size={40} className="text-primary group-hover:scale-110 transition-transform" />
+            <span className="text-lg font-semibold">Upload Music</span>
+            <span className="text-muted-foreground text-sm">Add new albums, singles, or tracks</span>
+          </Button>
+        </Link>
+        <Link href="/admin/streams" className="group">
+          <Button
+            variant="outline"
+            className="w-full h-40 flex flex-col items-center justify-center gap-4 transition-all group-hover:border-primary group-hover:shadow-lg"
+          >
+            <BarChart2 size={40} className="text-primary group-hover:scale-110 transition-transform" />
+            <span className="text-lg font-semibold">Stream Tracker</span>
+            <span className="text-muted-foreground text-sm">View analytics and streaming data</span>
+          </Button>
+        </Link>
       </div>
     </div>
   );
