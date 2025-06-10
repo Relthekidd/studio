@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { PlusCircle } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import { toast } from '@/hooks/use-toast';
@@ -26,7 +28,7 @@ export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylis
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [coverImage, setCoverImage] = useState('');
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const handleCreate = async () => {
     if (!title.trim() || !user?.uid) {
@@ -35,13 +37,19 @@ export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylis
     }
 
     try {
-      // Call savePlaylist utility to save the playlist in Firestore
+      let imageUrl = DEFAULT_COVER_URL;
+      if (coverFile) {
+        const coverRef = ref(storage, `playlistCovers/${Date.now()}-${coverFile.name}`);
+        await uploadBytesResumable(coverRef, coverFile);
+        imageUrl = await getDownloadURL(coverRef);
+      }
+
       await savePlaylist({
         userId: user.uid, // Pass the current user's ID
         playlistData: {
           title,
           description,
-          imageUrl: coverImage || DEFAULT_COVER_URL,
+          imageUrl,
           songs: [], // Initialize with an empty songs array
           createdAt: new Date().toISOString(),
           ownerId: '',
@@ -51,7 +59,7 @@ export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylis
       toast({ title: 'Playlist created!' });
       setTitle('');
       setDescription('');
-      setCoverImage('');
+      setCoverFile(null);
       setOpen(false);
 
       // Call the onPlaylistCreated callback
@@ -89,9 +97,9 @@ export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylis
             onChange={(e) => setDescription(e.target.value)}
           />
           <Input
-            placeholder="Cover image URL (optional)"
-            value={coverImage}
-            onChange={(e) => setCoverImage(e.target.value)}
+            type="file"
+            accept="image/*"
+            onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
           />
           <Button onClick={handleCreate} className="w-full">
             Create
