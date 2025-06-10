@@ -24,22 +24,44 @@ export function normalizeTrack(
     } else if (data.artist) {
       artists = [
         typeof data.artist === 'object'
-          ? { id: data.artist.id || '', name: data.artist.name || '', coverURL: data.artist.coverURL || DEFAULT_COVER_URL }
+          ? {
+              id: data.artist.id || '',
+              name: data.artist.name || '',
+              coverURL: data.artist.coverURL || DEFAULT_COVER_URL,
+            }
           : { id: '', name: data.artist, coverURL: DEFAULT_COVER_URL },
       ];
+    } else if (data.mainArtist) {
+      const main =
+        typeof data.mainArtist === 'object'
+          ? {
+              id: data.mainArtist.id || '',
+              name: data.mainArtist.name || '',
+              coverURL: data.mainArtist.coverURL || DEFAULT_COVER_URL,
+            }
+          : { id: '', name: data.mainArtist, coverURL: DEFAULT_COVER_URL };
+      const featured = Array.isArray(data.featuredArtists)
+        ? data.featuredArtists.map((fa: any) =>
+            typeof fa === 'object'
+              ? { id: fa.id || '', name: fa.name || '', coverURL: fa.coverURL || DEFAULT_COVER_URL }
+              : { id: '', name: fa, coverURL: DEFAULT_COVER_URL }
+          )
+        : [];
+      artists = [main, ...featured];
     }
   }
 
   return {
     id: data.id || doc.id || '',
     title: data.title || 'Untitled',
-    artists: artists.length > 0
-      ? artists.map((a) => ({
-          coverURL: a.coverURL ?? DEFAULT_COVER_URL,
-          id: a.id,
-          name: a.name,
-        }))
-      : [{ id: '', name: 'Unknown Artist', coverURL: DEFAULT_COVER_URL }],
+    artists:
+      artists.length > 0
+        ? artists.map((a) => ({
+            coverURL: a.coverURL ?? DEFAULT_COVER_URL,
+            id: a.id,
+            name: a.name,
+          }))
+        : [{ id: '', name: 'Unknown Artist', coverURL: DEFAULT_COVER_URL }],
 
     audioURL: data.audioURL || '',
     coverURL: data.coverURL || DEFAULT_COVER_URL,
