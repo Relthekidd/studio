@@ -62,7 +62,7 @@ export default function ProfilePage() {
 
   const handleToggle = async (
     key: 'showTopSongs' | 'showTopArtists' | 'showSpotlightPlaylists',
-    value: boolean,
+    value: boolean
   ) => {
     if (typeof userId !== 'string' || user?.uid !== userId) return;
     const newSettings = { ...settings, [key]: value };
@@ -75,53 +75,49 @@ export default function ProfilePage() {
   const fetchTopInfo = useCallback(async () => {
     if (typeof userId !== 'string') return;
 
-      // Fetch top 5 tracks
-      const top5TracksQuery = query(
-        collection(db, 'users', userId, 'history'),
-        orderBy('playCount', 'desc'),
-        limit(5)
-      );
-      const snapshot = await getDocs(top5TracksQuery);
-      const tracks = snapshot.docs.map((doc) => doc.data() as Track);
-      setTopTracks(tracks);
+    // Fetch top 5 tracks
+    const top5TracksQuery = query(
+      collection(db, 'users', userId, 'history'),
+      orderBy('playCount', 'desc'),
+      limit(5)
+    );
+    const snapshot = await getDocs(top5TracksQuery);
+    const tracks = snapshot.docs.map((doc) => doc.data() as Track);
+    setTopTracks(tracks);
 
-      const recentQuery = query(
-        collection(db, 'users', userId, 'history'),
-        orderBy('lastPlayed', 'desc'),
-        limit(5)
-      );
-      const recentSnap = await getDocs(recentQuery);
-      setRecentTracks(recentSnap.docs.map((d) => d.data() as Track));
+    const recentQuery = query(
+      collection(db, 'users', userId, 'history'),
+      orderBy('lastPlayed', 'desc'),
+      limit(5)
+    );
+    const recentSnap = await getDocs(recentQuery);
+    setRecentTracks(recentSnap.docs.map((d) => d.data() as Track));
 
-      // Generate top 5 artists from tracks
-      const artistsMap = new Map<string, number>();
-      tracks.forEach((t: any) => {
-        const trackArtists = t.artists ?? t.artist;
-        if (Array.isArray(trackArtists)) {
-          trackArtists.forEach((artistObj: any) => {
-            const artistName =
-              typeof artistObj === 'string' ? artistObj : artistObj.name;
-            artistsMap.set(artistName, (artistsMap.get(artistName) || 0) + 1);
-          });
-        } else if (typeof trackArtists === 'string') {
-          artistsMap.set(
-            trackArtists,
-            (artistsMap.get(trackArtists) || 0) + 1
-          );
-        }
-      });
+    // Generate top 5 artists from tracks
+    const artistsMap = new Map<string, number>();
+    tracks.forEach((t: any) => {
+      const trackArtists = t.artists ?? t.artist;
+      if (Array.isArray(trackArtists)) {
+        trackArtists.forEach((artistObj: any) => {
+          const artistName = typeof artistObj === 'string' ? artistObj : artistObj.name;
+          artistsMap.set(artistName, (artistsMap.get(artistName) || 0) + 1);
+        });
+      } else if (typeof trackArtists === 'string') {
+        artistsMap.set(trackArtists, (artistsMap.get(trackArtists) || 0) + 1);
+      }
+    });
 
-      const top5Artists = Array.from(artistsMap.entries())
-        .sort((a, b) => b[1] - a[1]) // Sort by play count
-        .slice(0, 5) // Take top 5
-        .map(([artistName], index) => ({
-          id: `artist-${index}`,
-          title: artistName,
-          imageUrl: `https://placehold.co/300x300/333/fff?text=${encodeURIComponent(artistName)}`,
-          type: 'artist' as const,
-        }));
+    const top5Artists = Array.from(artistsMap.entries())
+      .sort((a, b) => b[1] - a[1]) // Sort by play count
+      .slice(0, 5) // Take top 5
+      .map(([artistName], index) => ({
+        id: `artist-${index}`,
+        title: artistName,
+        imageUrl: `https://placehold.co/300x300/333/fff?text=${encodeURIComponent(artistName)}`,
+        type: 'artist' as const,
+      }));
 
-      setTopArtists(top5Artists);
+    setTopArtists(top5Artists);
   }, [userId]);
 
   useEffect(() => {

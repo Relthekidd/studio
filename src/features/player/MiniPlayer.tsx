@@ -8,14 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { formatArtists } from '@/utils/formatArtists';
 
 export default function MiniPlayer() {
-  const {
-    currentTrack,
-    isPlaying,
-    togglePlayPause,
-    toggleExpand,
-    currentTime,
-    duration,
-  } = usePlayerStore();
+  const { currentTrack, isPlaying, togglePlayPause, toggleExpand, currentTime, duration } =
+    usePlayerStore();
 
   if (!currentTrack || !currentTrack.audioURL) {
     console.warn('MiniPlayer: No current track or missing audioURL.');

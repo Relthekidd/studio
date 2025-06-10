@@ -29,7 +29,6 @@ export default function TrackActions({ track }: Props) {
     // TODO: implement favorite functionality
   };
 
-  
   const handleAddToQueue = () => {
     addToQueue(track);
   };

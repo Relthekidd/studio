@@ -93,5 +93,3 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
     </button>
   );
 }
-
-

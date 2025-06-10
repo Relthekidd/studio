@@ -10,6 +10,8 @@ import {
   getDoc,
   collection,
   getDocs,
+  query,
+  where,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { usePlayerStore } from '@/features/player/store';
@@ -62,25 +64,17 @@ export default function AlbumPage() {
 
           // Fetch main artists
           if (mainArtistIds.length > 0) {
-            const artistPromises = mainArtistIds.map(async (id: string) => {
-              const artistRef = doc(db, 'artists', id);
-              const snap = await getDoc(artistRef);
-              if (snap.exists()) {
-                return {
-                  id: snap.id,
-                  name: snap.data().name || 'Unknown Artist',
-                  coverURL: snap.data().coverURL || DEFAULT_COVER_URL,
-                } as Artist;
-              }
-              return { id, name: 'Unknown Artist', coverURL: DEFAULT_COVER_URL } as Artist;
-            });
-            fetchedMainArtists = await Promise.all(artistPromises);
+            const mainArtistQuery = query(collection(db, 'artists'), where('id', 'in', mainArtistIds));
+            const mainArtistSnap = await getDocs(mainArtistQuery);
+            fetchedMainArtists = mainArtistSnap.docs.map((doc) => ({
+              id: doc.id,
+              name: doc.data().name || 'Unknown Artist',
+              coverURL: doc.data().coverURL || DEFAULT_COVER_URL, // Ensure coverURL is included
+            }));
           }
 
           // Fetch tracks
-          const trackSnap = await getDocs(
-            collection(db, 'albums', String(albumId), 'songs'),
-          );
+          const trackSnap = await getDocs(collection(db, 'albums', String(albumId), 'songs'));
 
           const fetchedTracks: Track[] = trackSnap.docs
             .map((doc) => normalizeTrack(doc, fetchedMainArtists))
@@ -161,7 +155,10 @@ export default function AlbumPage() {
                       variant="link"
                       className="mr-2 text-lg text-muted-foreground transition-colors hover:text-primary"
                     >
-                      <Link href={`/artist/${artist.id}`} aria-label={`View artist profile for ${artist.name}`}>
+                      <Link
+                        href={`/artist/${artist.id}`}
+                        aria-label={`View artist profile for ${artist.name}`}
+                      >
                         {artist.name}
                       </Link>
                     </Button>

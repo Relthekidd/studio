@@ -42,9 +42,7 @@ export default function SearchPage() {
       const results = await searchLibrary(searchTerm);
 
       setSearchResults({
-        songs: results.songs.map((song: Song) =>
-          normalizeTrack(song, (song as any).artists || [])
-        ),
+        songs: results.songs.map((song: Song) => normalizeTrack(song, (song as any).artists || [])),
         albums: results.albums.map((album: Album) => ({
           id: album.id,
           title: album.title || '',
@@ -60,14 +58,14 @@ export default function SearchPage() {
             Array.isArray(album.artists) && album.artists.length > 0
               ? album.artists
               : typeof album.artists === 'string' && album.artists
-              ? [
-                  {
-                    id: '',
-                    name: album.artists,
-                    coverURL: '',
-                  },
-                ]
-              : [],
+                ? [
+                    {
+                      id: '',
+                      name: album.artists,
+                      coverURL: '',
+                    },
+                  ]
+                : [],
         })),
         artists: results.artists,
         users: results.users,

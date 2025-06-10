@@ -12,7 +12,7 @@ export type AlbumInfo = {
 
 export type Track = {
   order: number;
-  
+
   createdAt: any;
   id: string;
   title: string;

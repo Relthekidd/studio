@@ -68,14 +68,19 @@ export default function SingleDetailPage() {
 
           const mainArtistIds = singleData.mainArtistIds || [];
           const allArtistIds = singleData.artistIds || [];
-          const featuredArtistIds = allArtistIds.filter((id: string) => !mainArtistIds.includes(id));
+          const featuredArtistIds = allArtistIds.filter(
+            (id: string) => !mainArtistIds.includes(id)
+          );
 
           let fetchedMainArtists: Artist[] = [];
           let fetchedFeaturedArtists: Artist[] = [];
 
           // Fetch main artists
           if (mainArtistIds.length > 0) {
-            const mainArtistQuery = query(collection(db, 'artists'), where('id', 'in', mainArtistIds));
+            const mainArtistQuery = query(
+              collection(db, 'artists'),
+              where('id', 'in', mainArtistIds)
+            );
             const mainArtistSnap = await getDocs(mainArtistQuery);
             fetchedMainArtists = mainArtistSnap.docs.map((doc) => ({
               id: doc.id,
@@ -104,12 +109,14 @@ export default function SingleDetailPage() {
             Array.isArray(singleData.tracklist) && singleData.tracklist.length > 0
               ? singleData.tracklist
                   .filter((track) => track && typeof track === 'object')
-                  .map((track) => normalizeTrack(track, [...fetchedMainArtists, ...fetchedFeaturedArtists]))
+                  .map((track) =>
+                    normalizeTrack(track, [...fetchedMainArtists, ...fetchedFeaturedArtists])
+                  )
               : [
-                  normalizeTrack(
-                    { id: singleDocSnap.id, ...singleData },
-                    [...fetchedMainArtists, ...fetchedFeaturedArtists],
-                  ),
+                  normalizeTrack({ id: singleDocSnap.id, ...singleData }, [
+                    ...fetchedMainArtists,
+                    ...fetchedFeaturedArtists,
+                  ]),
                 ];
 
           setMainArtists(fetchedMainArtists);
@@ -200,7 +207,9 @@ export default function SingleDetailPage() {
               {/* Featured Artists */}
               {featuredArtists.length > 0 && (
                 <div className="mb-4">
-                  <h2 className="text-sm font-semibold text-muted-foreground">Featuring Artists:</h2>
+                  <h2 className="text-sm font-semibold text-muted-foreground">
+                    Featuring Artists:
+                  </h2>
                   <div className="flex flex-wrap gap-2">
                     {featuredArtists.map((artist) => (
                       <Link
@@ -298,7 +307,11 @@ export default function SingleDetailPage() {
               {single.tracklist && single.tracklist[0] && (
                 <AddToPlaylistModal
                   track={single.tracklist[0]}
-                  trigger={<Button size="sm" variant="outline">Add to Playlist</Button>}
+                  trigger={
+                    <Button size="sm" variant="outline">
+                      Add to Playlist
+                    </Button>
+                  }
                 />
               )}
             </div>
@@ -308,4 +321,3 @@ export default function SingleDetailPage() {
     </div>
   );
 }
-

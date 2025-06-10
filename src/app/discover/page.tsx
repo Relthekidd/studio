@@ -7,6 +7,7 @@ import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { AlbumCard } from '@/components/AlbumCard';
 import SectionTitle from '@/components/SectionTitle';
 import type { Track } from '@/types/music';
+import { fetchArtistsByIds } from '@/utils/helpers';
 
 export default function DiscoverPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -23,52 +24,100 @@ export default function DiscoverPage() {
         getDocs(query(songsRef, orderBy('streams', 'desc'), limit(5))),
       ]);
 
-      const singles: Track[] = songsSnap.docs
-        .map((doc) => {
+      const singles: Track[] = await Promise.all(
+        songsSnap.docs
+          .filter((d) => (d.data().type || 'track') !== 'album')
+          .map(async (doc) => {
+            const data = doc.data();
+            let artists = data.artists || [];
+
+            if (
+              (!artists || artists.length === 0) &&
+              Array.isArray(data.artistIds) &&
+              data.artistIds.length > 0
+            ) {
+              artists = await fetchArtistsByIds(data.artistIds);
+            }
+
+            if (artists.length === 0 && data.artist) {
+              artists = [{ id: '', name: data.artist }];
+            }
+
+            return {
+              id: doc.id,
+              title: data.title,
+              artists: artists.length > 0 ? artists : [{ id: '', name: 'Unknown Artist' }],
+              audioURL: data.audioURL,
+              coverURL: data.coverURL,
+              duration: data.duration,
+              type: data.type || 'track',
+              createdAt: data.createdAt?.toDate() || new Date(),
+              order: data.order || 0, // Add order
+            };
+          })
+      );
+
+      const trendingSingles: Track[] = await Promise.all(
+        trendingSnap.docs.map(async (doc) => {
           const data = doc.data();
+          let artists = data.artists || [];
+
+          if (
+            (!artists || artists.length === 0) &&
+            Array.isArray(data.artistIds) &&
+            data.artistIds.length > 0
+          ) {
+            artists = await fetchArtistsByIds(data.artistIds);
+          }
+
+          if (artists.length === 0 && data.artist) {
+            artists = [{ id: '', name: data.artist }];
+          }
+
           return {
             id: doc.id,
             title: data.title,
-            artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
+            artists: artists.length > 0 ? artists : [{ id: '', name: 'Unknown Artist' }],
             audioURL: data.audioURL,
             coverURL: data.coverURL,
             duration: data.duration,
             type: data.type || 'track',
             createdAt: data.createdAt?.toDate() || new Date(),
+            order: data.order || 0,
+          };
+        })
+      );
+
+      const albums: Track[] = await Promise.all(
+        albumsSnap.docs.map(async (doc) => {
+          const data = doc.data();
+          let artists = data.artists || [];
+
+          if (
+            (!artists || artists.length === 0) &&
+            Array.isArray(data.artistIds) &&
+            data.artistIds.length > 0
+          ) {
+            artists = await fetchArtistsByIds(data.artistIds);
+          }
+
+          if (artists.length === 0 && data.artist) {
+            artists = [{ id: '', name: data.artist }];
+          }
+
+          return {
+            id: doc.id,
+            title: data.title,
+            artists: artists.length > 0 ? artists : [{ id: '', name: 'Unknown Artist' }],
+            audioURL: '',
+            coverURL: data.coverURL,
+            duration: 0,
+            type: 'album',
+            createdAt: data.createdAt?.toDate() || new Date(),
             order: data.order || 0, // Add order
           };
         })
-        .filter((t) => t.type !== 'album');
-
-      const trendingSingles: Track[] = trendingSnap.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          title: data.title,
-          artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
-          audioURL: data.audioURL,
-          coverURL: data.coverURL,
-          duration: data.duration,
-          type: data.type || 'track',
-          createdAt: data.createdAt?.toDate() || new Date(),
-          order: data.order || 0,
-        };
-      });
-
-      const albums: Track[] = albumsSnap.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          title: data.title,
-          artists: data.artists || [{ id: '', name: data.artist || 'Unknown Artist' }],
-          audioURL: '',
-          coverURL: data.coverURL,
-          duration: 0,
-          type: 'album',
-          createdAt: data.createdAt?.toDate() || new Date(),
-          order: data.order || 0, // Add order
-        };
-      });
+      );
 
       setTracks([...singles, ...albums]);
       setTrending(trendingSingles);

@@ -37,9 +37,9 @@ const BottomNavigationBar = () => {
           </Link>
         </Button>
       ))}
-        {user && null /* upload tab removed */}
-      </nav>
-    );
-  };
+      {user && null /* upload tab removed */}
+    </nav>
+  );
+};
 
 export default BottomNavigationBar;

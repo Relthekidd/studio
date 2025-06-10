@@ -4,12 +4,8 @@ This file is auto-generated.
 
 ---
 ### `src/app/admin/page.tsx`
-- [35:13] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [37:31] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [39:19] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [45:13] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [47:34] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [49:19] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [29:38] Classnames 'h-full, w-full' could be replaced by the 'size-full' shorthand! – `tailwindcss/enforces-shorthand`
+- [35:39] Classnames 'h-full, w-full' could be replaced by the 'size-full' shorthand! – `tailwindcss/enforces-shorthand`
 
 ---
 ### `src/app/admin/upload/page.tsx`
