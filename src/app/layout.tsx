@@ -23,18 +23,24 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="h-full dark">
       <body
         className={cn(
-          'min-h-screen bg-background font-sans antialiased overflow-y-auto',
+          'h-full font-sans antialiased',
           fontSans.variable,
           fontMono.variable
         )}
       >
-        <AuthProvider>
-          <ClientLayout>{children}</ClientLayout>
-          <Toaster />
-        </AuthProvider>
+        <div className="min-h-screen flex flex-col bg-background">
+          <AuthProvider>
+            <ClientLayout>
+              <main className="flex-grow overflow-y-auto">
+                {children}
+              </main>
+            </ClientLayout>
+            <Toaster />
+          </AuthProvider>
+        </div>
       </body>
     </html>
   );
