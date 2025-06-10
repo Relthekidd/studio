@@ -12,9 +12,11 @@ export type TrackListItemProps = {
   track: Track;
   onPlay: (track: Track) => void;
   coverURL?: string;
+  id?: string;
+  highlight?: boolean;
 };
 
-export default function TrackListItem({ track, onPlay, coverURL }: TrackListItemProps) {
+export default function TrackListItem({ track, onPlay, coverURL, id, highlight }: TrackListItemProps) {
   const currentTrack = usePlayerStore((s) => s.currentTrack);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const togglePlayPause = usePlayerStore((s) => s.togglePlayPause);
@@ -31,7 +33,8 @@ export default function TrackListItem({ track, onPlay, coverURL }: TrackListItem
 
   return (
     <div
-      className="group flex cursor-pointer items-center justify-between rounded px-2 py-1 transition hover:bg-muted"
+      id={id}
+      className={`group flex cursor-pointer items-center justify-between rounded px-2 py-1 transition hover:bg-muted ${highlight ? 'bg-muted' : ''}`}
       role="button"
       tabIndex={0}
       onClick={() => onPlay(track)}

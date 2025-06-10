@@ -1,6 +1,12 @@
 // src/utils/searchLibrary.ts
 import { db } from '@/lib/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import {
+  collection,
+  collectionGroup,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore';
 import type { Song, Album, Artist } from '@/types/music';
 
 interface UserResult {
@@ -30,15 +36,13 @@ export async function searchLibrary(term: string): Promise<SearchResults> {
 
   try {
     const [songsSnap, albumsSnap, artistsSnap, usersSnap] = await Promise.all([
-      getDocs(collection(db, 'songs')),
+      getDocs(collectionGroup(db, 'songs')),
       getDocs(collection(db, 'albums')),
       getDocs(collection(db, 'artists')),
       getDocs(query(collection(db, 'profiles'), where('isProfilePublic', '==', true))),
     ]);
 
-    const songs = songsSnap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((s: any) => s.type === 'single' || !s.type) as Song[];
+    const songs = songsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Song[];
     const albums = albumsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Album[];
     const artists = artistsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Artist[];
     const users = usersSnap.docs
@@ -46,6 +50,9 @@ export async function searchLibrary(term: string): Promise<SearchResults> {
       .filter((u: any) => u.isProfilePublic !== false) as UserResult[];
 
     const artistMap = new Map(artists.map((a) => [a.id, a.name]));
+    const albumMap = new Map(
+      albums.map((a) => [a.id, { title: (a as any).title, coverURL: (a as any).coverURL }]),
+    );
 
     const attachArtists = (ids: string[] | undefined) =>
       (ids || []).map((id) => ({ id, name: artistMap.get(id) || 'Unknown Artist' }));
@@ -53,6 +60,10 @@ export async function searchLibrary(term: string): Promise<SearchResults> {
     songs.forEach((s: any) => {
       if (!s.artists || s.artists.length === 0) {
         s.artists = attachArtists(s.artistIds);
+      }
+      if (!s.album && s.albumId && albumMap.has(s.albumId)) {
+        const a = albumMap.get(s.albumId) as any;
+        s.album = { id: s.albumId, name: a.title || '', coverURL: a.coverURL || '' };
       }
     });
 
