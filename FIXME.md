@@ -24,3 +24,11 @@ This file is auto-generated.
 - [27:23] Classname 'destructive' is not a Tailwind CSS class! – `tailwindcss/no-custom-classname`
 
 ---
+### `src/features/player/QueueModal.tsx`
+- [9:13] 'GripVertical' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [11:10] 'DragDropContext' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [11:27] 'Droppable' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [11:38] 'Draggable' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [150:19] 'updatedQueue' is defined but never used. – `@typescript-eslint/no-unused-vars`
+
+---
