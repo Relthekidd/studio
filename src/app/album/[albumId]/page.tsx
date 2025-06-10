@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CalendarDays, ListMusic, Info, PlayCircle } from 'lucide-react';
@@ -40,6 +40,8 @@ interface Album {
 
 export default function AlbumPage() {
   const { albumId } = useParams();
+  const searchParams = useSearchParams();
+  const highlightedTrackId = searchParams.get('track');
   const [album, setAlbum] = useState<Album | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [mainArtists, setMainArtists] = useState<Artist[]>([]);
@@ -119,6 +121,14 @@ export default function AlbumPage() {
     setQueue(tracks);
     setIsPlaying(true);
   };
+
+  useEffect(() => {
+    if (!highlightedTrackId) return;
+    const el = document.getElementById(`track-${highlightedTrackId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [highlightedTrackId, tracks]);
 
   if (!album) return <div className="container mx-auto p-6 text-center">Loading album...</div>;
 
@@ -217,6 +227,8 @@ export default function AlbumPage() {
           {tracks.map((track) => (
             <TrackListItem
               key={track.id}
+              id={`track-${track.id}`}
+              highlight={track.id === highlightedTrackId}
               track={track}
               onPlay={handlePlayTrack}
               coverURL={album.coverURL}

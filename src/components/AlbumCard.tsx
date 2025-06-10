@@ -31,8 +31,9 @@ export function AlbumCard({ item, className }: { item: Track; className?: string
   const type = item.type === 'album' || item.albumId ? 'album' : 'single';
   const id = item.id;
 
-  // Generate the href dynamically based on type and id
-  const href = getTrackRoute({ type, id });
+  const href = item.albumId
+    ? `/album/${item.albumId}?track=${item.id}`
+    : getTrackRoute({ type, id });
 
   // Fetch whether the song is liked
   useEffect(() => {
