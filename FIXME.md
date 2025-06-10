@@ -25,6 +25,10 @@ This file is auto-generated.
 
 ---
 ### `src/features/player/QueueModal.tsx`
-- [153:21] Parsing error: ',' expected. – `null`
+- [9:13] 'GripVertical' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [11:10] 'DragDropContext' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [11:27] 'Droppable' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [11:38] 'Draggable' is defined but never used. – `@typescript-eslint/no-unused-vars`
+- [150:19] 'updatedQueue' is defined but never used. – `@typescript-eslint/no-unused-vars`
 
 ---

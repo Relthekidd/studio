@@ -141,15 +141,13 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
                           </button>
                         )}
                       </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+                    ))}
+        </div>
       </SheetContent>
     </Sheet>
   );
 }
+function setQueue(updatedQueue: Track[]) {
+  throw new Error('Function not implemented.');
+}
+
