@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -86,21 +87,33 @@ export default function CreatePlaylistModal({ onPlaylistCreated }: CreatePlaylis
         </DialogHeader>
 
         <div className="space-y-4">
-          <Input
-            placeholder="Playlist name"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <Textarea
-            placeholder="Description (optional)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="playlist-title">Playlist Title</Label>
+            <Input
+              id="playlist-title"
+              placeholder="Playlist name"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="playlist-description">Description</Label>
+            <Textarea
+              id="playlist-description"
+              placeholder="Description (optional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="playlist-cover">Cover Image</Label>
+            <Input
+              id="playlist-cover"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+            />
+          </div>
           <Button onClick={handleCreate} className="w-full">
             Create
           </Button>
