@@ -64,19 +64,6 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
   const handleRemoveTrack = (index: number) => {
     if (index === queueIndex) return; // Prevent removing the currently playing track
     const updatedQueue = queue.filter((_, i) => i !== index);
-    usePlayerStore.setState({ queue: updatedQueue });
-    if (index < queueIndex) {
-      usePlayerStore.setState({ queueIndex: queueIndex - 1 });
-    }
-  };
-
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const updatedQueue = Array.from(queue);
-    const [movedTrack] = updatedQueue.splice(result.source.index, 1);
-    updatedQueue.splice(result.destination.index, 0, movedTrack);
-
     setQueue(updatedQueue);
   };
 
@@ -106,9 +93,13 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
               key={`${track.id}-${index}`} // Use a combination of track.id and index for a unique key
               className={`flex cursor-pointer items-center gap-3 rounded-md p-2 text-left ${
                 index === queueIndex ? 'bg-primary/10 font-semibold text-primary' : ''
-              }`}
+              } ${draggedIndex === index ? 'opacity-50' : ''}`}
               role="button"
               tabIndex={0}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(index)}
               onClick={() => handleTrackClick(track, index)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -150,15 +141,13 @@ export default function QueueModal({ isOpen, onClose }: QueueModalProps) {
                           </button>
                         )}
                       </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+                    ))}
+        </div>
       </SheetContent>
     </Sheet>
   );
 }
+function setQueue(updatedQueue: Track[]) {
+  throw new Error('Function not implemented.');
+}
+
