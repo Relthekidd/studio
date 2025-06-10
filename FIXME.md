@@ -8,12 +8,6 @@ This file is auto-generated.
 - [33:39] Classnames 'h-full, w-full' could be replaced by the 'size-full' shorthand! – `tailwindcss/enforces-shorthand`
 
 ---
-### `src/app/layout.tsx`
-- [26:21] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [34:14] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [37:21] Classname 'flex-grow' should be updated to 'grow' in Tailwind CSS v3! – `tailwindcss/migration-from-tailwind-2`
-
----
 ### `src/components/music/QueueModal.tsx`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 - [26:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
