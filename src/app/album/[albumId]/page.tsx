@@ -5,14 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CalendarDays, ListMusic, Info, PlayCircle } from 'lucide-react';
-import {
-  doc,
-  getDoc,
-  collection,
-  getDocs,
-  query,
-  where,
-} from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { usePlayerStore } from '@/features/player/store';
 import type { Track, Artist } from '@/types/music';
@@ -66,7 +59,10 @@ export default function AlbumPage() {
 
           // Fetch main artists
           if (mainArtistIds.length > 0) {
-            const mainArtistQuery = query(collection(db, 'artists'), where('id', 'in', mainArtistIds));
+            const mainArtistQuery = query(
+              collection(db, 'artists'),
+              where('id', 'in', mainArtistIds)
+            );
             const mainArtistSnap = await getDocs(mainArtistQuery);
             fetchedMainArtists = mainArtistSnap.docs.map((doc) => ({
               id: doc.id,
@@ -110,6 +106,9 @@ export default function AlbumPage() {
   }, [albumId]);
 
   const handlePlayTrack = (track: Track) => {
+    if (tracks.length > 0) {
+      setQueue(tracks);
+    }
     setCurrentTrack(track);
     setIsPlaying(true);
   };

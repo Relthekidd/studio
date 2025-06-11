@@ -117,26 +117,72 @@ export const usePlayerStore = create<PlayerStore>()((set, get) => ({
   toggleShuffle: () => set((s) => ({ shuffleMode: !s.shuffleMode })), // Added implementation
 
   skipToNext: () => {
-    const { queue, queueIndex } = get();
-    const nextIndex = queueIndex + 1;
-    if (nextIndex < queue.length) {
-      set({
-        queueIndex: nextIndex,
-        currentTrack: queue[nextIndex],
-        isPlaying: true,
-      });
+    const { queue, queueIndex, shuffleMode, repeatMode } = get();
+
+    if (queue.length === 0) return;
+
+    let nextIndex = queueIndex + 1;
+
+    if (shuffleMode) {
+      // pick a random track different from the current
+      if (queue.length === 1) {
+        nextIndex = 0;
+      } else {
+        do {
+          nextIndex = Math.floor(Math.random() * queue.length);
+        } while (nextIndex === queueIndex);
+      }
+    } else if (nextIndex >= queue.length) {
+      if (repeatMode === 'all') {
+        nextIndex = 0;
+      } else {
+        // no more tracks and repeat is off
+        set({ isPlaying: false });
+        return;
+      }
     }
+
+    set({
+      queueIndex: nextIndex,
+      currentTrack: queue[nextIndex],
+      isPlaying: true,
+      currentTime: 0,
+      progress: 0,
+      duration: 0,
+    });
   },
 
   skipToPrev: () => {
-    const { queue, queueIndex } = get();
-    const prevIndex = queueIndex - 1;
-    if (prevIndex >= 0) {
-      set({
-        queueIndex: prevIndex,
-        currentTrack: queue[prevIndex],
-        isPlaying: true,
-      });
+    const { queue, queueIndex, shuffleMode, repeatMode } = get();
+
+    if (queue.length === 0) return;
+
+    let prevIndex = queueIndex - 1;
+
+    if (shuffleMode) {
+      if (queue.length === 1) {
+        prevIndex = 0;
+      } else {
+        do {
+          prevIndex = Math.floor(Math.random() * queue.length);
+        } while (prevIndex === queueIndex);
+      }
+    } else if (prevIndex < 0) {
+      if (repeatMode === 'all') {
+        prevIndex = queue.length - 1;
+      } else {
+        set({ isPlaying: false });
+        return;
+      }
     }
+
+    set({
+      queueIndex: prevIndex,
+      currentTrack: queue[prevIndex],
+      isPlaying: true,
+      currentTime: 0,
+      progress: 0,
+      duration: 0,
+    });
   },
 }));

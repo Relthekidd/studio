@@ -18,6 +18,7 @@ export function AudioProvider() {
     setDuration,
     setProgress,
     skipToNext,
+    repeatMode,
   } = usePlayerStore();
   const { user } = useAuth();
 
@@ -97,7 +98,13 @@ export function AudioProvider() {
     if (currentTrack) {
       recordStream(user?.uid ?? null, { id: currentTrack.id, albumId: currentTrack.albumId });
     }
-    skipToNext();
+    if (repeatMode === 'one') {
+      // restart the current track
+      usePlayerStore.getState().seek(0);
+      usePlayerStore.setState({ isPlaying: true });
+    } else {
+      skipToNext();
+    }
   };
 
   return (
