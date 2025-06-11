@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function FullScreenPlayer() {
-  const [showQueue, setShowQueue] = useState(false); // State to toggle queue modal
+  const [showQueue, setShowQueue] = useState(false); // queue modal open state
   const {
     currentTrack,
     isPlaying,
@@ -101,7 +101,7 @@ export default function FullScreenPlayer() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setShowQueue(!showQueue)} // Toggle queue modal
+          onClick={() => setShowQueue(true)}
           aria-label="View Queue"
         >
           <ListMusic size={20} />
