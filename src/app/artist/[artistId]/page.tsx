@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, collectionGroup } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
 import SectionTitle from '@/components/SectionTitle';
@@ -147,6 +147,43 @@ export default function ArtistPage() {
       unsubFollowers();
     };
   }, [artistId, artistProfile?.name, decodedId, user]);
+
+  useEffect(() => {
+    if (!artistProfile?.name) return;
+
+    // Query all songs in all 'songs' subcollections
+    const q = query(collectionGroup(db, 'songs'));
+    const unsub = onSnapshot(q, (snap) => {
+      const featured = snap.docs
+        .map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title || 'Untitled',
+            artists: data.artists || [{ id: '', name: 'Unknown Artist' }],
+            genre: data.genre || '',
+            type: 'track' as const,
+            audioURL: data.audioURL || data.audioSrc || '',
+            coverURL: data.coverURL || data.imageUrl || '',
+            createdAt: data.createdAt?.toDate() || new Date(),
+            order: data.order || 0,
+            featuredArtists: data.featuredArtists || '',
+          };
+        })
+        .filter((track) => {
+          // featuredArtists is a comma-separated string
+          if (!track.featuredArtists) return false;
+          return track.featuredArtists
+            .split(',')
+            .map((n) => n.trim())
+            .includes(artistProfile.name);
+        });
+
+      setFeaturedTracks(featured);
+    });
+
+    return () => unsub();
+  }, [artistProfile?.name]);
 
   const handleFollow = async () => {
     if (!user) return;
