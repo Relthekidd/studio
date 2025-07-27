@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { auth, googleProvider, db } from '@/lib/firebase';
 import {
@@ -16,9 +19,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthProvider';
 import { ADMIN_EMAIL_DOMAIN, ADMIN_EMAILS } from '@/lib/config';
 
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+type FormData = z.infer<typeof schema>;
+
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [loading, setLoading] = useState(false);
 
@@ -54,8 +61,13 @@ export default function LoginPage() {
     }
   }, [user, authLoading, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const onSubmit = async ({ email, password }: FormData) => {
     setLoading(true);
 
     try {
@@ -102,7 +114,7 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-sm space-y-4">
         <h1 className="text-center text-2xl font-bold">
           {mode === 'login' ? 'Login' : 'Create Account'}
         </h1>
@@ -110,17 +122,19 @@ export default function LoginPage() {
         <Input
           type="email"
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          {...register('email')}
         />
+        {errors.email && (
+          <p className="text-sm text-red-500">{errors.email.message}</p>
+        )}
         <Input
           type="password"
           placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          {...register('password')}
         />
+        {errors.password && (
+          <p className="text-sm text-red-500">{errors.password.message}</p>
+        )}
 
         <Button type="submit" disabled={loading} className="w-full">
           {mode === 'login' ? 'Login' : 'Sign Up'}
