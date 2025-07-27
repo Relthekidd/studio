@@ -19,6 +19,7 @@ import { followArtist, unfollowArtist } from '@/utils/followArtist';
 import { Button } from '@/components/ui/button';
 
 export default function ArtistPage() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { artistId } = useParams();
   const [albums, setAlbums] = useState<Track[]>([]);
   const [singles, setSingles] = useState<Track[]>([]);
@@ -175,7 +176,7 @@ export default function ArtistPage() {
           if (!track.featuredArtists) return false;
           return track.featuredArtists
             .split(',')
-            .map((n) => n.trim())
+            .map((n: string) => n.trim())
             .includes(artistProfile.name);
         });
 

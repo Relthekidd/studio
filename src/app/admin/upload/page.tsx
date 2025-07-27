@@ -3,7 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { collection, serverTimestamp, doc, setDoc, query, where, getDocs, addDoc } from 'firebase/firestore';
+import {
+  collection,
+  serverTimestamp,
+  doc,
+  setDoc,
+  query,
+  where,
+  getDocs,
+  addDoc,
+} from 'firebase/firestore';
 
 import { db, storage } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthProvider';
@@ -143,8 +152,6 @@ export default function AdminUploadPage() {
             ? doc(collection(db, 'albums', albumId, 'songs'))
             : doc(collection(db, 'songs'));
 
-        const artistId = await getOrCreateArtistIdByName(song.mainArtist || mainArtistName);
-
         await setDoc(songRef, {
           id: songRef.id,
           title: song.title,
@@ -222,9 +229,7 @@ export default function AdminUploadPage() {
                 onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
                 className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
               />
-              {coverFile && (
-                <p className="text-sm text-muted-foreground">{coverFile.name}</p>
-              )}
+              {coverFile && <p className="text-sm text-muted-foreground">{coverFile.name}</p>}
             </div>
           </div>
 

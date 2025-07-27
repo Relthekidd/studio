@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
-import { useToast } from '@/hooks/use-toast';
 import BackButton from '@/components/ui/BackButton';
 import SectionTitle from '@/components/SectionTitle';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +10,7 @@ import { Label } from '@/components/ui/label';
 
 export default function SettingsPage() {
   const { user, loading } = useAuth();
-  const { toast } = useToast();
+  // const { toast } = useToast();
 
   const [darkMode, setDarkMode] = useState(false);
   const [showExplicit, setShowExplicit] = useState(true);
@@ -41,19 +40,11 @@ export default function SettingsPage() {
             <h2 className="font-semibold text-lg">Appearance</h2>
             <div className="flex items-center justify-between">
               <Label htmlFor="darkMode">Dark Mode</Label>
-              <Switch
-                id="darkMode"
-                checked={darkMode}
-                onCheckedChange={setDarkMode}
-              />
+              <Switch id="darkMode" checked={darkMode} onCheckedChange={setDarkMode} />
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="compactMode">Compact Mode</Label>
-              <Switch
-                id="compactMode"
-                checked={compactMode}
-                onCheckedChange={setCompactMode}
-              />
+              <Switch id="compactMode" checked={compactMode} onCheckedChange={setCompactMode} />
             </div>
           </div>
 
@@ -61,11 +52,7 @@ export default function SettingsPage() {
             <h2 className="font-semibold text-lg">Content</h2>
             <div className="flex items-center justify-between">
               <Label htmlFor="showExplicit">Show Explicit Content</Label>
-              <Switch
-                id="showExplicit"
-                checked={showExplicit}
-                onCheckedChange={setShowExplicit}
-              />
+              <Switch id="showExplicit" checked={showExplicit} onCheckedChange={setShowExplicit} />
             </div>
           </div>
         </CardContent>
