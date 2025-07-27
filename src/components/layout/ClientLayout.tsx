@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthProvider';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthProvider';
 import { cn } from '@/lib/utils';
 
 import { SonixLogo } from '@/components/icons/SonixLogo';
@@ -15,7 +15,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const router = useRouter();
 
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout } = useSupabaseAuth();
 
   useEffect(() => {
     if (!loading && !user && pathname !== '/login') {
