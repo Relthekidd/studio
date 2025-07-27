@@ -1,6 +1,8 @@
 // next.config.js or next.config.cjs (depending on your module type)
 
-import withPWA from 'next-pwa';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 const nextConfig = {
   // ✅ This is Next.js native config
@@ -33,4 +35,14 @@ const pwaConfig = {
   skipWaiting: true,
 };
 
-export default withPWA(pwaConfig)(nextConfig);
+let applyPWA = (config) => config;
+try {
+  const plugin = require('next-pwa');
+  applyPWA = plugin(pwaConfig);
+} catch {
+  console.warn(
+    'next-pwa not found, continuing without PWA support. Install it with "npm install next-pwa" to enable.'
+  );
+}
+
+export default applyPWA(nextConfig);
