@@ -341,9 +341,9 @@ export default function AdminUploadPage() {
                             <GripVertical size={16} className="cursor-grab" />
                           </div>
                         </div>
-                        {song.duration > 0 && (
+                        {(song.duration ?? 0) > 0 && (
                           <p className="text-xs text-muted-foreground">
-                            Duration: {Math.round(song.duration)}s
+                            Duration: {Math.round(song.duration ?? 0)}s
                           </p>
                         )}
                         <audio controls src={URL.createObjectURL(song.file)} className="w-full" />
@@ -421,9 +421,9 @@ export default function AdminUploadPage() {
                 {songs[0] && (
                   <>
                     <p className="text-sm text-muted-foreground">{songs[0].file.name}</p>
-                    {songs[0].duration && (
+                    {(songs[0].duration ?? 0) > 0 && (
                       <p className="text-xs text-muted-foreground">
-                        Duration: {Math.round(songs[0].duration)}s
+                        Duration: {Math.round(songs[0].duration ?? 0)}s
                       </p>
                     )}
                     <audio controls src={URL.createObjectURL(songs[0].file)} className="w-full" />
