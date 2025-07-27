@@ -22,7 +22,7 @@ try {
 let results = [];
 try {
   results = JSON.parse(output);
-} catch (err) {
+} catch {
   console.error('❌ Could not parse ESLint output.');
   process.exit(1);
 }

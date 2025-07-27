@@ -11,20 +11,11 @@
   },
   "scripts": {
     "dev": "next dev",
-    "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
-    "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
     "start": "next start",
-    "lint:fix": "eslint --ext .ts,.tsx src --fix",
-    "lint:fixme": "node scripts/generate-fixme.js",
-    "format": "prettier --write .",
-    "prepare": "husky install",
-    "test": "echo \"No tests yet\" && exit 0",
-    "check:all": "npm run lint && npm run typecheck && npm run format:check",
     "lint": "eslint . --ext .ts,.tsx",
-    "typecheck": "tsc --noEmit",
-    "format:check": "prettier . --check",
-    "ci": "npm run lint && npm run typecheck && npm run test && npm run build"
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.15.5",
@@ -70,7 +61,6 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
-    "@types/node": "^24.1.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/tailwindcss": "^3.1.0",
@@ -83,7 +73,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-tailwindcss": "^3.18.2",
     "genkit-cli": "^1.15.5",
-    "husky": "^9.1.7",
     "postcss": "^8",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.17",
