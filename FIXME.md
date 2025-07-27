@@ -4,29 +4,27 @@ This file is auto-generated.
 
 ---
 ### `src/app/admin/page.tsx`
-- [35:13] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [37:31] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [39:19] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [45:13] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [47:34] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [49:19] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [64:13] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [66:31] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [68:19] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [76:13] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [80:15] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [83:19] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 
 ---
 ### `src/app/admin/upload/page.tsx`
-- [146:15] 'artistId' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
-- [182:10] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [196:17] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [233:19] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [348:19] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [387:17] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [404:17] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [192:10] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [206:17] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [253:19] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [382:19] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [437:17] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [454:17] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 
 ---
 ### `src/app/settings/page.tsx`
-- [14:11] 'toast' is assigned a value but never used. – `@typescript-eslint/no-unused-vars`
-- [32:10] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [41:17] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
-- [61:17] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [31:10] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [40:17] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
+- [52:17] Invalid Tailwind CSS classnames order – `tailwindcss/classnames-order`
 
 ---
 ### `src/components/music/QueueModal.tsx`

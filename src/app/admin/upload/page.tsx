@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable jsx-a11y/media-has-caption */
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -21,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, ArrowDown, ArrowUp, GripVertical } from 'lucide-react';
 import Link from 'next/link';
@@ -49,8 +51,9 @@ export default function AdminUploadPage() {
   const [genre, setGenre] = useState('');
   const [description, setDescription] = useState('');
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [songs, setSongs] = useState<
-    { file: File; title: string; mainArtist: string; featuredArtists: string }[]
+    { file: File; title: string; mainArtist: string; featuredArtists: string; duration?: number }[]
   >([]);
   const [uploading, setUploading] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -226,10 +229,22 @@ export default function AdminUploadPage() {
               <Input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setCoverFile(file);
+                  setCoverPreview(file ? URL.createObjectURL(file) : null);
+                }}
                 className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
               />
-              {coverFile && <p className="text-sm text-muted-foreground">{coverFile.name}</p>}
+              {coverPreview && (
+                <Image
+                  src={coverPreview}
+                  alt="Cover preview"
+                  width={128}
+                  height={128}
+                  className="mt-2 rounded object-cover"
+                />
+              )}
             </div>
           </div>
 
@@ -260,17 +275,25 @@ export default function AdminUploadPage() {
                   type="file"
                   accept="audio/*"
                   multiple
-                  onChange={(e) =>
-                    setSongs((prevSongs) => [
-                      ...prevSongs,
-                      ...Array.from(e.target.files || []).map((file) => ({
-                        file,
-                        title: '',
-                        mainArtist: mainArtist,
-                        featuredArtists: '',
-                      })),
-                    ])
-                  }
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    const newSongs = files.map((file) => ({
+                      file,
+                      title: '',
+                      mainArtist: mainArtist,
+                      featuredArtists: '',
+                      duration: 0,
+                    }));
+                    newSongs.forEach((song) => {
+                      const audio = document.createElement('audio');
+                      audio.src = URL.createObjectURL(song.file);
+                      audio.addEventListener('loadedmetadata', () => {
+                        song.duration = audio.duration;
+                        setSongs((prev) => [...prev]);
+                      });
+                    });
+                    setSongs((prevSongs) => [...prevSongs, ...newSongs]);
+                  }}
                   className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
                 />
                 {songs.length === 0 && (
@@ -318,6 +341,12 @@ export default function AdminUploadPage() {
                             <GripVertical size={16} className="cursor-grab" />
                           </div>
                         </div>
+                        {song.duration > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            Duration: {Math.round(song.duration)}s
+                          </p>
+                        )}
+                        <audio controls src={URL.createObjectURL(song.file)} className="w-full" />
                         <Input
                           placeholder="Song Title"
                           value={song.title}
@@ -368,14 +397,20 @@ export default function AdminUploadPage() {
                   onChange={(e) => {
                     const selectedFile = e.target.files?.[0];
                     if (selectedFile) {
-                      setSongs([
-                        {
-                          file: selectedFile,
-                          title: '',
-                          mainArtist: mainArtist,
-                          featuredArtists: '',
-                        },
-                      ]);
+                      const song = {
+                        file: selectedFile,
+                        title: '',
+                        mainArtist: mainArtist,
+                        featuredArtists: '',
+                        duration: 0,
+                      };
+                      const audio = document.createElement('audio');
+                      audio.src = URL.createObjectURL(selectedFile);
+                      audio.addEventListener('loadedmetadata', () => {
+                        song.duration = audio.duration;
+                        setSongs((prev) => [...prev]);
+                      });
+                      setSongs([song]);
                     }
                   }}
                   className="rounded border border-gray-700 bg-black px-3 py-2 text-white"
@@ -383,7 +418,17 @@ export default function AdminUploadPage() {
                 {songs.length === 0 && (
                   <p className="text-sm text-muted-foreground">No file selected</p>
                 )}
-                {songs[0] && <p className="text-sm text-muted-foreground">{songs[0].file.name}</p>}
+                {songs[0] && (
+                  <>
+                    <p className="text-sm text-muted-foreground">{songs[0].file.name}</p>
+                    {songs[0].duration && (
+                      <p className="text-xs text-muted-foreground">
+                        Duration: {Math.round(songs[0].duration)}s
+                      </p>
+                    )}
+                    <audio controls src={URL.createObjectURL(songs[0].file)} className="w-full" />
+                  </>
+                )}
               </div>
             </div>
           )}

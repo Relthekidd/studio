@@ -6,10 +6,12 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthProvider';
 import { cn } from '@/lib/utils';
 
 import { SonixLogo } from '@/components/icons/SonixLogo';
+import Link from 'next/link';
 import BottomNavigationBar from '@/components/layout/BottomNavigationBar';
 import PlayerManager from '@/features/player/PlayerManager';
 import { AudioProvider } from '@/features/player/AudioProvider';
 import ProfileMenu from '@/components/layout/ProfileMenu';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -40,12 +42,24 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/75 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto flex items-center justify-between p-4">
             <SonixLogo className="h-8 w-auto" />
+            <nav className="hidden items-center gap-6 md:flex">
+              <Link href="/" className="transition hover:text-primary">
+                Home
+              </Link>
+              <Link href="/discover" className="transition hover:text-primary">
+                Discover
+              </Link>
+              <Link href="/library" className="transition hover:text-primary">
+                Library
+              </Link>
+            </nav>
             <div className="flex items-center gap-4">
               {isAdmin && (
                 <span className="rounded bg-yellow-200 px-2 py-1 text-xs font-semibold text-yellow-900">
                   Admin
                 </span>
               )}
+              <ThemeToggle />
               <ProfileMenu
                 isAuthenticated={!!user}
                 userId={user?.uid}

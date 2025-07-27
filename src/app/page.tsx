@@ -5,7 +5,8 @@ import { collection, getDocs, query, orderBy, where, limit } from 'firebase/fire
 import { db } from '@/lib/firebase';
 import type { Track } from '@/types/music';
 import Section from '@/components/section';
-import Loader from '@/components/loader';
+import Hero from '@/components/Hero';
+import TrackCardSkeleton from '@/components/TrackCardSkeleton';
 import Link from 'next/link';
 import { AlbumCard } from '@/components/AlbumCard';
 import { fetchArtistsByIds } from '@/utils/helpers';
@@ -141,23 +142,36 @@ export default function Home() {
     fetchSongs();
   }, []);
 
-  if (loading) return <Loader />;
+  if (loading)
+    return (
+      <div className="space-y-12">
+        <Hero />
+        <div className="grid grid-cols-2 gap-4 p-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <TrackCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
 
   return (
-    <div className="space-y-12 p-6">
-      <h1 className="text-3xl font-bold text-white">Welcome back</h1>
+    <div className="space-y-12">
+      <Hero />
+      <div id="recent" className="space-y-12 p-6">
+        <h1 className="text-3xl font-bold">Welcome back</h1>
 
-      <Section title="Recently Added" items={recentSongs} />
+        <Section title="Recently Added" items={recentSongs} />
 
-      <Section title="Trending" items={trendingSongs} />
-      {trendingSongs.map((track) => (
-        <Link
-          href={track.type === 'album' ? `/album/${track.id}` : `/single/${track.id}`}
-          key={track.id}
-        >
-          <AlbumCard item={track} />
-        </Link>
-      ))}
+        <Section title="Trending" items={trendingSongs} />
+        {trendingSongs.map((track) => (
+          <Link
+            href={track.type === 'album' ? `/album/${track.id}` : `/single/${track.id}`}
+            key={track.id}
+          >
+            <AlbumCard item={track} />
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
