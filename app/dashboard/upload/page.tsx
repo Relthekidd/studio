@@ -1,11 +1,13 @@
 import Layout from '@/components/Layout'
-import UploadForm from '@/components/UploadForm'
+import UploadTabs from '@/components/upload/UploadTabs'
 
 export default function UploadPage() {
   return (
     <Layout>
-      <h1 className="mb-4 text-xl font-bold">Upload Song</h1>
-      <UploadForm />
+      <div className="mx-auto max-w-3xl space-y-6">
+        <h1 className="text-2xl font-semibold tracking-tight">Upload Music</h1>
+        <UploadTabs />
+      </div>
     </Layout>
   )
 }
