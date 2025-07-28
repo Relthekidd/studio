@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useTransition } from 'react'
+import { motion } from 'framer-motion'
 import { supabaseBrowser } from '@/lib/supabase'
 import { uploadAlbumAction } from '@/app/actions/upload'
 import { Image as ImageIcon, FileAudio, CalendarDays } from 'lucide-react'
@@ -16,6 +17,8 @@ export default function UploadAlbumForm() {
   const [genre, setGenre] = useState('')
   const [description, setDescription] = useState('')
   const [albumId, setAlbumId] = useState('')
+  const [published, setPublished] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
   const [tracks, setTracks] = useState<Track[]>([{ title: '', file: null, lyrics: '' }])
   const [pending, startTransition] = useTransition()
 
@@ -44,16 +47,42 @@ export default function UploadAlbumForm() {
     formData.append('description', description)
     formData.append('albumId', albumId)
     formData.append('releaseDate', releaseDate)
+    formData.append('published', published ? 'on' : '')
     formData.append('cover', cover)
     formData.append('tracks', JSON.stringify(tracks.map(({ title, lyrics }) => ({ title, lyrics }))))
     tracks.forEach((t, i) => {
       if (t.file) formData.append(`file_${i}`, t.file)
     })
-    startTransition(() => uploadAlbumAction(formData))
+    startTransition(async () => {
+      const res = await uploadAlbumAction(formData)
+      if (res?.success) {
+        setMessage('Album uploaded')
+        setTitle('')
+        setArtist('')
+        setGenre('')
+        setDescription('')
+        setAlbumId('')
+        setReleaseDate('')
+        setCover(null)
+        setTracks([{ title: '', file: null, lyrics: '' }])
+        setPublished(false)
+      } else {
+        setMessage('Upload failed')
+      }
+    })
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} className="relative space-y-5">
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-md bg-muted p-2 text-sm"
+        >
+          {message}
+        </motion.div>
+      )}
       <div className="relative">
         <input
           id="title"
@@ -143,6 +172,18 @@ export default function UploadAlbumForm() {
           </label>
         </div>
       </div>
+      <div className="flex items-center gap-2">
+        <input
+          id="published"
+          type="checkbox"
+          checked={published}
+          onChange={(e) => setPublished(e.target.checked)}
+          className="h-4 w-4 rounded border"
+        />
+        <label htmlFor="published" className="text-sm">
+          Published
+        </label>
+      </div>
       <div className="relative">
         <textarea
           id="description"
@@ -175,7 +216,8 @@ export default function UploadAlbumForm() {
       </div>
       <div className="space-y-2">
         {tracks.map((track, i) => (
-          <div key={i} className="rounded-md bg-muted/50 p-3">
+          <div key={i} className="rounded-md bg-muted/50 p-3 space-y-2">
+            <div className="font-semibold">Track {i + 1}</div>
             <div className="relative mb-2">
               <input
                 id={`title_${i}`}
@@ -217,12 +259,21 @@ export default function UploadAlbumForm() {
           + Add Another Song
         </button>
       </div>
-      <button
-        disabled={pending}
-        className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground transition-all hover:opacity-90 disabled:opacity-50"
-      >
-        {pending ? 'Uploading…' : 'Upload Album'}
-      </button>
+      <div className="fixed bottom-4 right-4 flex gap-2">
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          className="rounded-md bg-muted px-4 py-2 text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          disabled={pending}
+          className="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-all hover:opacity-90 disabled:opacity-50"
+        >
+          {pending ? 'Uploading…' : 'Upload Album'}
+        </button>
+      </div>
     </form>
   )
 }

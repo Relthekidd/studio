@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useTransition } from 'react'
+import { motion } from 'framer-motion'
 import { supabaseBrowser } from '@/lib/supabase'
 import { uploadSingleAction } from '@/app/actions/upload'
 import { Image as ImageIcon, FileAudio, CalendarDays } from 'lucide-react'
@@ -19,6 +20,8 @@ export default function UploadSingleForm() {
   const [lyrics, setLyrics] = useState('')
   const [releaseDate, setReleaseDate] = useState('')
   const [albumId, setAlbumId] = useState('')
+  const [published, setPublished] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
   useEffect(() => {
@@ -42,13 +45,42 @@ export default function UploadSingleForm() {
     formData.append('lyrics', lyrics)
     formData.append('releaseDate', releaseDate)
     formData.append('albumId', albumId)
+    formData.append('published', published ? 'on' : '')
     formData.append('audio', audio)
     formData.append('cover', cover)
-    startTransition(() => uploadSingleAction(formData))
+    startTransition(async () => {
+      const res = await uploadSingleAction(formData)
+      if (res?.success) {
+        setMessage('Upload successful')
+        setTitle('')
+        setArtist('')
+        setGenre('')
+        setMood('')
+        setDescription('')
+        setLyrics('')
+        setReleaseDate('')
+        setAlbumId('')
+        setAudio(null)
+        setCover(null)
+        setCoverUrl(null)
+        setPublished(false)
+      } else {
+        setMessage('Upload failed')
+      }
+    })
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} className="relative space-y-5">
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-md bg-muted p-2 text-sm"
+        >
+          {message}
+        </motion.div>
+      )}
       <div className="relative">
         <input
           id="title"
@@ -63,6 +95,18 @@ export default function UploadSingleForm() {
           className="absolute left-2 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs"
         >
           Song Title
+        </label>
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          id="published"
+          type="checkbox"
+          checked={published}
+          onChange={(e) => setPublished(e.target.checked)}
+          className="h-4 w-4 rounded border"
+        />
+        <label htmlFor="published" className="text-sm">
+          Published
         </label>
       </div>
       <div className="relative">
@@ -217,12 +261,21 @@ export default function UploadSingleForm() {
           Album ID (optional)
         </label>
       </div>
-      <button
-        disabled={pending}
-        className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground transition-all hover:opacity-90 disabled:opacity-50"
-      >
-        {pending ? 'Uploading…' : 'Upload'}
-      </button>
+      <div className="fixed bottom-4 right-4 flex gap-2">
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          className="rounded-md bg-muted px-4 py-2 text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          disabled={pending}
+          className="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-all hover:opacity-90 disabled:opacity-50"
+        >
+          {pending ? 'Uploading…' : 'Upload'}
+        </button>
+      </div>
     </form>
   )
 }

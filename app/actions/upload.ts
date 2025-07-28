@@ -12,6 +12,7 @@ export async function uploadSingleAction(formData: FormData) {
   const lyrics = formData.get('lyrics') as string
   const releaseDate = formData.get('releaseDate') as string
   const albumId = formData.get('albumId') as string | null
+  const published = formData.get('published') === 'on'
   const audio = formData.get('audio') as File | null
   const cover = formData.get('cover') as File | null
   if (!audio || !cover) return
@@ -31,7 +32,9 @@ export async function uploadSingleAction(formData: FormData) {
     audio_path: audioPath,
     cover_path: coverPath,
     album_id: albumId || null,
+    is_published: published,
   })
+  return { success: true }
 }
 
 export async function uploadAlbumAction(formData: FormData) {
@@ -41,6 +44,7 @@ export async function uploadAlbumAction(formData: FormData) {
   const genre = formData.get('genre') as string
   const releaseDate = formData.get('releaseDate') as string
   const description = formData.get('description') as string
+  const published = formData.get('published') === 'on'
   const cover = formData.get('cover') as File | null
   const tracksMeta = JSON.parse(formData.get('tracks') as string) as {
     title: string
@@ -61,6 +65,7 @@ export async function uploadAlbumAction(formData: FormData) {
       description,
       release_date: releaseDate || null,
       cover_path: coverPath,
+      is_published: published,
     })
     .select()
     .single()
@@ -76,6 +81,8 @@ export async function uploadAlbumAction(formData: FormData) {
       audio_path: audioPath,
       album_id: album.id,
       artist_name: artist,
+      is_published: published,
     })
   }
+  return { success: true }
 }
