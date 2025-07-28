@@ -23,6 +23,12 @@ const cards = [
     icon: ArtistIcon,
   },
   {
+    href: '/dashboard/verify-artists',
+    title: 'Verify Artists',
+    description: 'Approve new artist accounts',
+    icon: ArtistIcon,
+  },
+  {
     href: '/dashboard/users',
     title: 'Manage Users',
     description: 'Manage application users',

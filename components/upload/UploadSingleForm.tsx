@@ -20,6 +20,9 @@ export default function UploadSingleForm() {
   const [lyrics, setLyrics] = useState('')
   const [releaseDate, setReleaseDate] = useState('')
   const [albumId, setAlbumId] = useState('')
+  const [featuredArtists, setFeaturedArtists] = useState('')
+  const [language, setLanguage] = useState('')
+  const [duration, setDuration] = useState('')
   const [published, setPublished] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
@@ -43,8 +46,11 @@ export default function UploadSingleForm() {
     formData.append('mood', mood)
     formData.append('description', description)
     formData.append('lyrics', lyrics)
+    formData.append('duration', duration)
     formData.append('releaseDate', releaseDate)
     formData.append('albumId', albumId)
+    formData.append('featured', featuredArtists)
+    formData.append('language', language)
     formData.append('published', published ? 'on' : '')
     formData.append('audio', audio)
     formData.append('cover', cover)
@@ -60,6 +66,9 @@ export default function UploadSingleForm() {
         setLyrics('')
         setReleaseDate('')
         setAlbumId('')
+        setFeaturedArtists('')
+        setLanguage('')
+        setDuration('')
         setAudio(null)
         setCover(null)
         setCoverUrl(null)
@@ -130,6 +139,21 @@ export default function UploadSingleForm() {
           ))}
         </datalist>
       </div>
+      <div className="relative">
+        <input
+          id="featured"
+          placeholder=" "
+          value={featuredArtists}
+          onChange={(e) => setFeaturedArtists(e.target.value)}
+          className="peer w-full rounded-md border bg-background/60 p-2 pt-6 backdrop-blur"
+        />
+        <label
+          htmlFor="featured"
+          className="absolute left-2 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs"
+        >
+          Featured Artists
+        </label>
+      </div>
       <div>
         <input
           id="cover"
@@ -157,15 +181,40 @@ export default function UploadSingleForm() {
         <input
           id="audio"
           type="file"
-          accept="audio/*"
+          accept="audio/mpeg"
           hidden
-          onChange={(e) => setAudio(e.target.files?.[0] || null)}
+          onChange={(e) => {
+            const file = e.target.files?.[0] || null
+            setAudio(file)
+            if (file) {
+              const audioEl = document.createElement('audio')
+              audioEl.src = URL.createObjectURL(file)
+              audioEl.addEventListener('loadedmetadata', () => {
+                setDuration(Math.round(audioEl.duration).toString())
+              })
+            }
+          }}
         />
         <label
           htmlFor="audio"
           className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed p-4 text-sm text-muted-foreground"
         >
           <FileAudio className="h-5 w-5" /> {audio ? audio.name : 'Upload audio file'}
+        </label>
+      </div>
+      <div className="relative">
+        <input
+          id="duration"
+          placeholder=" "
+          value={duration}
+          readOnly
+          className="peer w-full rounded-md border bg-background/60 p-2 pt-6 backdrop-blur"
+        />
+        <label
+          htmlFor="duration"
+          className="absolute left-2 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs"
+        >
+          Duration (sec)
         </label>
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -197,6 +246,21 @@ export default function UploadSingleForm() {
             className="absolute left-2 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs"
           >
             Mood
+          </label>
+        </div>
+        <div className="relative">
+          <input
+            id="language"
+            placeholder=" "
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="peer w-full rounded-md border bg-background/60 p-2 pt-6 backdrop-blur"
+          />
+          <label
+            htmlFor="language"
+            className="absolute left-2 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs"
+          >
+            Language
           </label>
         </div>
       </div>

@@ -7,6 +7,7 @@ const links = [
   { href: '/dashboard/upload', label: 'Upload' },
   { href: '/dashboard/users', label: 'Users' },
   { href: '/dashboard/artists', label: 'Artists' },
+  { href: '/dashboard/verify-artists', label: 'Verify Artists' },
   { href: '/dashboard/playlists', label: 'Playlists' },
   { href: '/dashboard/analytics', label: 'Analytics' },
 ];
