@@ -1,5 +1,18 @@
-# Firebase Studio
+# Music Admin Dashboard
 
-This is a NextJS starter in Firebase Studio.
+This project is a minimal admin dashboard built with **Next.js 15** and **Supabase**.
+It allows uploading songs and managing artists, users and playlists.
 
-To get started, take a look at src/app/page.tsx.
+## Development
+
+1. Copy `.env.example` to `.env` and fill in your Supabase keys.
+2. Install dependencies with `npm install`.
+3. Run the development server:
+
+```bash
+npm run dev
+```
+
+## Deployment
+
+The project is ready to deploy on any platform that supports Next.js.
