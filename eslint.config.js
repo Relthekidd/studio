@@ -39,5 +39,5 @@ export default [
       react: { version: 'detect' },
     },
   }),
-  { ignores: ['node_modules/**', 'public/**'] },
+  { ignores: ['node_modules/**', 'public/**', '.next/**'] },
 ];
