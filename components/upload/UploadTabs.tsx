@@ -3,6 +3,7 @@ import * as Tabs from '@radix-ui/react-tabs'
 import { motion } from 'framer-motion'
 import UploadSingleForm from './UploadSingleForm'
 import UploadAlbumForm from './UploadAlbumForm'
+import { Music, Album } from 'lucide-react'
 
 export default function UploadTabs() {
   return (
@@ -10,15 +11,15 @@ export default function UploadTabs() {
       <Tabs.List className="flex w-fit rounded-md bg-muted p-1 text-muted-foreground">
         <Tabs.Trigger
           value="single"
-          className="rounded-sm px-3 py-1 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground"
+          className="flex items-center gap-1 rounded-sm px-3 py-1 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground"
         >
-          Upload Single
+          <Music className="h-4 w-4" /> Single
         </Tabs.Trigger>
         <Tabs.Trigger
           value="album"
-          className="rounded-sm px-3 py-1 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground"
+          className="flex items-center gap-1 rounded-sm px-3 py-1 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground"
         >
-          Upload Album
+          <Album className="h-4 w-4" /> Album
         </Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="single">
