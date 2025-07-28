@@ -1,19 +1,20 @@
-'use client'
-import Link from 'next/link'
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthProvider'
-import { usePathname } from 'next/navigation'
+'use client';
+import Link from 'next/link';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthProvider';
+import { usePathname } from 'next/navigation';
 
 const links = [
   { href: '/dashboard/upload', label: 'Upload' },
   { href: '/dashboard/users', label: 'Users' },
   { href: '/dashboard/artists', label: 'Artists' },
   { href: '/dashboard/playlists', label: 'Playlists' },
-]
+  { href: '/dashboard/analytics', label: 'Analytics' },
+];
 
 export default function Sidebar() {
-  const { isAdmin } = useSupabaseAuth()
-  const pathname = usePathname()
-  if (!isAdmin) return null
+  const { isAdmin } = useSupabaseAuth();
+  const pathname = usePathname();
+  if (!isAdmin) return null;
   return (
     <aside className="w-48 border-r border-border p-4 space-y-2">
       {links.map(({ href, label }) => (
@@ -29,5 +30,5 @@ export default function Sidebar() {
         </Link>
       ))}
     </aside>
-  )
+  );
 }
