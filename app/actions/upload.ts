@@ -1,8 +1,9 @@
+'use server'
+
 import slugify from 'slugify'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function uploadSingleAction(formData: FormData) {
-  'use server'
   const supabase = supabaseAdmin()
   const title = formData.get('title') as string
   const artist = formData.get('artist') as string
@@ -10,6 +11,7 @@ export async function uploadSingleAction(formData: FormData) {
   const mood = formData.get('mood') as string
   const lyrics = formData.get('lyrics') as string
   const releaseDate = formData.get('releaseDate') as string
+  const albumId = formData.get('albumId') as string | null
   const audio = formData.get('audio') as File | null
   const cover = formData.get('cover') as File | null
   if (!audio || !cover) return
@@ -28,18 +30,22 @@ export async function uploadSingleAction(formData: FormData) {
     release_date: releaseDate || null,
     audio_path: audioPath,
     cover_path: coverPath,
+    album_id: albumId || null,
   })
 }
 
 export async function uploadAlbumAction(formData: FormData) {
-  'use server'
   const supabase = supabaseAdmin()
   const title = formData.get('title') as string
   const artist = formData.get('artist') as string
   const genre = formData.get('genre') as string
   const releaseDate = formData.get('releaseDate') as string
+  const description = formData.get('description') as string
   const cover = formData.get('cover') as File | null
-  const tracksMeta = JSON.parse(formData.get('tracks') as string) as { title: string; lyrics: string }[]
+  const tracksMeta = JSON.parse(formData.get('tracks') as string) as {
+    title: string
+    lyrics: string
+  }[]
   const files: File[] = tracksMeta.map((_, i) => formData.get(`file_${i}`) as File)
   if (!cover || files.some((f) => !f)) return
   const slug = slugify(title, { lower: true })
@@ -52,6 +58,7 @@ export async function uploadAlbumAction(formData: FormData) {
       slug,
       artist_name: artist,
       genre,
+      description,
       release_date: releaseDate || null,
       cover_path: coverPath,
     })
